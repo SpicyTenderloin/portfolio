@@ -175,18 +175,37 @@ footer.site-footer {
   margin-bottom: 0.25rem;
 }
 
+.about {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
 .about h2 {
   margin-top: 0;
 }
 
+.about-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .headshot {
-  width: 140px;
-  height: 140px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
   display: block;
-  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .about {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }
 
 .resume-section {
