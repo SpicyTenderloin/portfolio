@@ -1,6 +1,6 @@
 # Project Portfolio
 
-Source for my GitHub Pages portfolio site, published at https://spicytenderloin.github.io/projects/
+Source for my GitHub Pages portfolio site, published at https://spicytenderloin.github.io/portfolio/
 
 Built with Jekyll, GitHub Pages builds it automatically on push — no local build step needed.
 

@@ -1,6 +1,6 @@
 title: Project Portfolio
 description: A collection of things I've built and flown.
-baseurl: "/projects"
+baseurl: "/portfolio"
 url: "https://spicytenderloin.github.io"
 
 collections:
