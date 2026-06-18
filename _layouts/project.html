@@ -1,35 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page.title }} — {{ site.title }}</title>
-  <link rel="stylesheet" href="{{ "/assets/css/style.css" | relative_url }}">
-</head>
-<body>
-  <header class="site-header">
-    <div class="inner">
-      <h1>{{ site.title }}</h1>
-    </div>
-  </header>
+---
+layout: default
+---
+<div class="project-detail">
+  <a class="back-link" href="{{ "/projects/" | relative_url }}">&larr; Back to all projects</a>
+  <h1>{{ page.title }}</h1>
 
-  <main class="project-detail">
-    <a class="back-link" href="{{ "/" | relative_url }}">&larr; Back to all projects</a>
-    <h1>{{ page.title }}</h1>
+  {% if page.gallery %}
+  <div class="gallery">
+    {% for img in page.gallery %}
+    <img src="{{ img | relative_url }}" alt="{{ page.title }}">
+    {% endfor %}
+  </div>
+  {% endif %}
 
-    {% if page.gallery %}
-    <div class="gallery">
-      {% for img in page.gallery %}
-      <img src="{{ img | relative_url }}" alt="{{ page.title }}">
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {{ content }}
-  </main>
-
-  <footer class="site-footer">
-    <p>&copy; 2026</p>
-  </footer>
-</body>
-</html>
+  {{ content }}
+</div>

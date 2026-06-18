@@ -138,3 +138,87 @@ footer.site-footer {
   color: var(--text-dim);
   font-size: 0.85rem;
 }
+
+.site-nav {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.site-nav a {
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 2px solid transparent;
+}
+
+.site-nav a:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.site-nav a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+.project-section {
+  margin-bottom: 2.5rem;
+}
+
+.project-section h2 {
+  margin-bottom: 0.25rem;
+}
+
+.about h2 {
+  margin-top: 0;
+}
+
+.resume-section {
+  margin-bottom: 2.5rem;
+}
+
+.resume-entry {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.resume-entry:last-child {
+  border-bottom: none;
+}
+
+.resume-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.resume-entry-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.resume-org {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.resume-dates {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.resume-entry ul {
+  margin: 0.6rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+}

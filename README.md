@@ -12,7 +12,8 @@ Built with Jekyll, GitHub Pages builds it automatically on push — no local bui
    ```yaml
    ---
    title: My Project Name
-   description: One-line summary shown on the homepage card.
+   description: One-line summary shown on the projects page card.
+   category: university   # or: extracurricular
    thumbnail: /assets/img/<project-slug>/cover.jpg
    gallery:
      - /assets/img/<project-slug>/cover.jpg
@@ -23,5 +24,5 @@ Built with Jekyll, GitHub Pages builds it automatically on push — no local bui
    links, whatever. This becomes the body of the project page.
    ```
 
-3. Commit and push. The homepage card and project page are generated
-   automatically — no HTML editing required.
+3. Commit and push. The card on `/projects/` and the project's detail page
+   are generated automatically — no HTML editing required.

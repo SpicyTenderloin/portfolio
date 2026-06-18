@@ -1,0 +1,61 @@
+- title: "Undergraduate Avionics Engineer"
+  organization: "Praxis Aerospace"
+  start: "2026"
+  end: "Present"
+  bullets:
+    - "Working on UAV systems and embedded technologies, including long-range RF telemetry and flight computer firmware."
+    - "Hands-on exposure to embedded Linux platforms, UAV communications infrastructure, systems integration, and flight testing in a professional aerospace environment."
+
+- title: "UAS Program Lead"
+  organization: "QUT Aerospace Society (QUTAS)"
+  start: "2025"
+  end: "Present"
+  bullets:
+    - "Lead development and integration of student unmanned aerial system projects, coordinating avionics, telemetry, embedded systems, and flight operations across the team."
+    - "Mentor members in PX4, RF communications, and UAV integration, run technical workshops, and help build fixed-wing and multirotor platforms."
+
+- title: "Executive & Project Lead"
+  organization: "Electrical Engineering Student Society (EESS), QUT"
+  start: "2024"
+  end: "Present"
+  bullets:
+    - "Organise workshops and industry-focused initiatives for the student society."
+    - "Launched and lead the Audio Signal Visualiser project, giving members hands-on exposure to analog circuit design and embedded systems."
+
+- title: "Battery Repair Technician"
+  organization: "Second Life Battery Sales, Brisbane CBD"
+  start: "2022"
+  end: "2026"
+  bullets:
+    - "Manufactured and repaired custom lithium battery packs — dismantling, reassembly, fault diagnosis, precision soldering, and nickel-strip spot-welding."
+    - "Built strong attention to detail and safe-handling discipline working with lithium chemistry."
+
+- title: "High School Mathematics Tutor"
+  organization: "Private tutoring, Brisbane Inner West"
+  start: "2024"
+  end: "2025"
+  bullets:
+    - "Tutored Years 8–12 students in Mathematical Methods and Specialist Mathematics."
+    - "Built strong technical communication skills by breaking complex concepts into clear explanations for different learners."
+
+- title: "Motorcycle Mechanic"
+  organization: "Tavener Motorsports, Newstead"
+  start: "2022"
+  end: "2022"
+  bullets:
+    - "Restored vintage motorcycles, with a focus on fabricating custom wiring harnesses and electrical repairs."
+
+- title: "Apprentice Motorcycle Mechanic"
+  organization: "Teammoto Northside, Enoggera"
+  start: "2018"
+  end: "2021"
+  bullets:
+    - "Completed a four-year apprenticeship diagnosing and repairing electrical-mechanical systems."
+    - "Developed systematic fault-finding skills and experience collaborating in a busy commercial workshop."
+
+- title: "Retail Assistant"
+  organization: "Bunnings Warehouse, Albion"
+  start: "2014"
+  end: "2018"
+  bullets:
+    - "Customer-facing retail role through high school that built a strong work ethic, communication, and teamwork."
