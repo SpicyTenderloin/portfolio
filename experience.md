@@ -1,6 +1,8 @@
 ---
 layout: default
 title: Experience
+heading: Experience
+tagline: Where I've worked, led, and learned on the job.
 permalink: /experience/
 ---
 

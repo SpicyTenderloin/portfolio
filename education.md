@@ -1,6 +1,8 @@
 ---
 layout: default
 title: Education
+heading: Education
+tagline: What I've studied and achieved along the way.
 permalink: /education/
 ---
 

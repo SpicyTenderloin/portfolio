@@ -1,6 +1,8 @@
 ---
 layout: default
 title: Projects
+heading: Projects Portfolio
+tagline: Things I have designed, built, programmed, fixed, and flown.
 permalink: /projects/
 ---
 
