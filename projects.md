@@ -13,7 +13,7 @@ permalink: /projects/
   {% if personal_projects.size > 0 %}
     {% include project-grid.html projects=personal_projects %}
   {% else %}
-    <p class="text-dim">Nothing here yet — check back soon.</p>
+    <p class="text-dim">Nothing here yet, check back soon.</p>
   {% endif %}
 </section>
 
@@ -22,7 +22,7 @@ permalink: /projects/
   {% if club_projects.size > 0 %}
     {% include project-grid.html projects=club_projects %}
   {% else %}
-    <p class="text-dim">Nothing here yet — check back soon.</p>
+    <p class="text-dim">Nothing here yet, check back soon.</p>
   {% endif %}
 </section>
 
@@ -31,6 +31,6 @@ permalink: /projects/
   {% if university_projects.size > 0 %}
     {% include project-grid.html projects=university_projects %}
   {% else %}
-    <p class="text-dim">Nothing here yet — check back soon.</p>
+    <p class="text-dim">Nothing here yet, check back soon.</p>
   {% endif %}
 </section>

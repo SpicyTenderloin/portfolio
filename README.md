@@ -2,7 +2,7 @@
 
 Source for my GitHub Pages portfolio site, published at https://spicytenderloin.github.io/portfolio/
 
-Built with Jekyll, GitHub Pages builds it automatically on push — no local build step needed.
+Built with Jekyll, GitHub Pages builds it automatically on push, no local build step needed.
 
 ## Adding a new project
 
@@ -20,9 +20,9 @@ Built with Jekyll, GitHub Pages builds it automatically on push — no local bui
      - /assets/img/<project-slug>/another.jpg
    ---
 
-   Write your notes here in normal Markdown — headings, lists,
+   Write your notes here in normal Markdown: headings, lists,
    links, whatever. This becomes the body of the project page.
    ```
 
 3. Commit and push. The card on `/projects/` and the project's detail page
-   are generated automatically — no HTML editing required.
+   are generated automatically, no HTML editing required.

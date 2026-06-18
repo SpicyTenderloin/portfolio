@@ -15,7 +15,7 @@ permalink: /experience/
     {% endif %}
     <div class="resume-entry-content">
       <div class="resume-entry-header">
-        <h3>{{ job.title }}<span class="resume-org"> — {{ job.organization }}</span></h3>
+        <h3>{{ job.title }}<span class="resume-org"> · {{ job.organization }}</span></h3>
         <p class="resume-dates">{% if job.start and job.start != job.end %}{{ job.start }} – {% endif %}{{ job.end }}</p>
       </div>
       {% if job.bullets %}

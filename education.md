@@ -9,7 +9,7 @@ permalink: /education/
   {% for school in site.data.education %}
   <div class="resume-entry">
     <div class="resume-entry-header">
-      <h3>{{ school.degree }}<span class="resume-org"> — {{ school.institution }}</span></h3>
+      <h3>{{ school.degree }}<span class="resume-org"> · {{ school.institution }}</span></h3>
       <p class="resume-dates">{% if school.start and school.start != school.end %}{{ school.start }} – {% endif %}{{ school.end }}</p>
     </div>
     {% if school.details %}

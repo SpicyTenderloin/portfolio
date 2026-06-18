@@ -9,7 +9,7 @@ layout: default
     <p>
       I'm an undergraduate Electrical &amp; Aerospace Engineering student at
       Queensland University of Technology, based in Brisbane. Before
-      engineering, I trained and worked as a motorcycle mechanic — that
+      engineering, I trained and worked as a motorcycle mechanic. That
       hands-on background in fault-finding, wiring, and tool work still
       shapes how I approach problems today.
     </p>
@@ -19,7 +19,7 @@ layout: default
       lot of my recent work has centred on improving RF link performance and
       reliability. I currently work on UAV systems and embedded technologies
       through an avionics engineering internship at Praxis Aerospace, and I
-      lead UAS projects with the QUT Aerospace Society — including a
+      lead UAS projects with the QUT Aerospace Society, including a
       fixed-wing platform for long-range observation and the society's new
       FPV drone racing program.
     </p>
