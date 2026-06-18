@@ -14,9 +14,13 @@ layout: default
       shapes how I approach problems today.
     </p>
     <p>
-      My focus is RF engineering, telecommunications, embedded systems, and
-      UAV avionics. I fly both fixed-wing and FPV multirotor platforms, and a
-      lot of my recent work has centred on improving RF link performance and
+      My interests span UAVs, RF engineering, telecommunications, control
+      systems, mathematics, physics, and AI. I'm always seeking to
+      understand how things work and how they can be improved.
+    </p>
+    <p>
+      I fly both fixed-wing and FPV multirotor platforms, and a lot of my
+      recent work has centred on improving RF link performance and
       reliability. I currently work on UAV systems and embedded technologies
       through an avionics engineering internship at Praxis Aerospace, and I
       lead UAS projects with the QUT Aerospace Society, including a
