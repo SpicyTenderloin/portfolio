@@ -13,7 +13,7 @@ Built with Jekyll, GitHub Pages builds it automatically on push — no local bui
    ---
    title: My Project Name
    description: One-line summary shown on the projects page card.
-   category: university   # or: extracurricular
+   category: personal   # or: club, university
    thumbnail: /assets/img/<project-slug>/cover.jpg
    gallery:
      - /assets/img/<project-slug>/cover.jpg
