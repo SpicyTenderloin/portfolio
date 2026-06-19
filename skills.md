@@ -2,7 +2,7 @@
 layout: default
 title: Skills
 heading: Skills
-tagline: Tools, techniques, and concepts across my projects.
+tagline: Click a skill to see the projects that use it.
 permalink: /skills/
 ---
 
@@ -15,19 +15,15 @@ permalink: /skills/
 {% assign unique_skills = all_skills | uniq | sort_natural %}
 
 {% if unique_skills.size > 0 %}
-<ul class="skills-index">
+<div class="skills-list">
   {% for skill in unique_skills %}
-  <li><a class="skill-tag" href="#{{ skill | slugify }}">{{ skill }}</a></li>
+  {% assign matching = site.projects | where_exp: "p", "p.skills contains skill" %}
+  <details id="{{ skill | slugify }}" class="skill-accordion">
+    <summary>{{ skill }}<span class="skill-count">{{ matching.size }} project{% if matching.size != 1 %}s{% endif %}</span></summary>
+    {% include project-grid.html projects=matching %}
+  </details>
   {% endfor %}
-</ul>
-
-{% for skill in unique_skills %}
-{% assign matching = site.projects | where_exp: "p", "p.skills contains skill" %}
-<section class="skill-section" id="{{ skill | slugify }}">
-  <h2>{{ skill }}</h2>
-  {% include project-grid.html projects=matching %}
-</section>
-{% endfor %}
+</div>
 {% else %}
 <p class="text-dim">Nothing here yet, check back soon.</p>
 {% endif %}

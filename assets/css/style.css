@@ -334,17 +334,57 @@ footer.site-footer {
   text-decoration: none;
 }
 
-.skills-index {
+.skills-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.6rem;
-  margin: 1.5rem 0 2.5rem;
-  padding: 0;
-  list-style: none;
+  margin: 1.5rem 0;
 }
 
-.skill-section {
-  margin-bottom: 2.5rem;
+.skill-accordion {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.skill-accordion summary {
+  cursor: pointer;
+  padding: 0.9rem 1.25rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skill-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.skill-accordion summary::after {
+  content: "+";
+  color: var(--accent);
+  font-size: 1.3rem;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.skill-accordion[open] summary::after {
+  content: "\2212";
+}
+
+.skill-count {
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.skill-accordion .project-grid {
+  margin-top: 0;
+  padding: 0 1.25rem 1.25rem;
 }
 
 a.lightbox-trigger {

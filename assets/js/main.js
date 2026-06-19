@@ -26,3 +26,20 @@ document.addEventListener("keydown", function (e) {
     if (open) open.remove();
   }
 });
+
+function openTargetDetails() {
+  if (!location.hash) return;
+  var el;
+  try {
+    el = document.querySelector(location.hash);
+  } catch (err) {
+    return;
+  }
+  if (el && el.tagName === "DETAILS") {
+    el.open = true;
+    el.scrollIntoView();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", openTargetDetails);
+window.addEventListener("hashchange", openTargetDetails);
