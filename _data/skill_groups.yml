@@ -28,6 +28,7 @@
 - name: Control Systems
   skills:
     - Control Systems
+    - PID Control
     - State-Space Modelling
     - Kalman Filtering
     - Simulink
