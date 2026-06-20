@@ -5,6 +5,7 @@ category: university
 thumbnail: /assets/img/simon-says-microcontroller-game/quty-board-photo.webp
 skills:
   - Embedded C
+  - Embedded Systems
   - Microcontrollers
   - PlatformIO
   - State Machines
