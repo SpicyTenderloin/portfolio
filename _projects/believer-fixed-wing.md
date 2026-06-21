@@ -61,11 +61,51 @@ Navigation runs off two GPS receivers: a u-blox NEO-M8N as the primary fix, and 
 
 Getting the RC link working cleanly took more than just pairing a transmitter and receiver. ExpressLRS Hybrid mode only carries the first 12 RC channels, and the flight-mode selector switch was originally wired to channel 13, so PX4 never saw it move. The fix was a full remap: arm onto its own dedicated channel, kill onto another, the six-position flight-mode switch onto a channel that's actually transmitted, and a separate channel repurposed as a direct override into Hold, so there's a fast backup path into a safe holding pattern independent of whatever mode the main selector is in.
 
-The power module took a few iterations too. An earlier candidate looked right on paper but turned out to report battery telemetry in a format the Pixhawk doesn't accept, so it got swapped out before it ever flew. The Holybro PM03D fitted now, partly sourced out of pocket once that gap turned up, gives the flight controller the voltage and current readings it needs and keeps the servo rail electrically isolated from the main supply.
+The power module took a few iterations too. An earlier candidate looked right on paper but turned out to report battery telemetry in a format the Pixhawk doesn't accept, so it got swapped out before it ever flew. The symptoms were hard to miss once it was wired up: a battery setup left uncalibrated because the reported values didn't make sense to calibrate against, a battery percentage reading shown as -100%, and a status panel confidently reporting "Charge State: Ok" right next to a voltage field that was simply blank.
+
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-setup-uncalibrated.png" | relative_url }}">
+      <img src="{{ "/assets/img/believer-fixed-wing/battery-setup-uncalibrated.png" | relative_url }}" alt="QGroundControl battery setup screen with the cell count at 0 and the voltage divider and amps-per-volt calibration both left at -1, uncalibrated">
+    </a>
+    <figcaption>Left uncalibrated: there was no sensible reading yet to calibrate against</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-negative-100-percent.png" | relative_url }}">
+      <img src="{{ "/assets/img/believer-fixed-wing/battery-negative-100-percent.png" | relative_url }}" alt="Battery indicator reading negative 100 percent">
+    </a>
+    <figcaption>A battery reading of -100%</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-voltage-blank.png" | relative_url }}">
+      <img src="{{ "/assets/img/believer-fixed-wing/battery-voltage-blank.png" | relative_url }}" alt="QGroundControl status panel showing Charge State Ok next to a blank voltage field">
+    </a>
+    <figcaption>"Charge State: Ok," voltage blank, the contradiction that gave the mismatch away</figcaption>
+  </figure>
+</div>
+
+The Holybro PM03D fitted now, partly sourced out of pocket once that gap turned up, gives the flight controller the voltage and current readings it needs and keeps the servo rail electrically isolated from the main supply.
 
 The RFD900x telemetry link connected fine straight out of the box, but getting the highest practical bitrate out of it meant learning how the modems actually work and tuning several parameters directly on them rather than trusting the defaults. AIR_SPEED (the over-the-air data rate) and SERIAL_SPEED (the baud rate between the radio and the flight controller) set the achievable throughput between them, and SERIAL_SPEED has to stay sensible relative to what AIR_SPEED can actually sustain, or the link bottlenecks. Encryption, channel hopping range, and transmit power are separate tradeoffs again, each trading some mix of range, robustness, and regulatory headroom for security or bandwidth, rather than there being one setting that's simply better.
 
-Both modems expose these settings two ways: through RFDesign's own configuration software, or directly over the same serial link using AT commands, the same simple text command language (the name comes from "ATtention") that's configured modems since the 1980s, where a command like `ATI` reports the modem's status and numbered `ATS`-prefixed commands read or set individual parameters. On the RFD900, sending a `+++` sequence over the link drops it into command mode, changes get written with `AT&W`, and a reboot (`ATZ`) applies them. On Linux that's done through a serial terminal program like Minicom; on Windows it's a dedicated serial terminal rather than PowerShell directly, though because it's just plain text over a serial connection, a short script opening the same port could send identical commands. That's the real takeaway: tuning the radio is nothing more than text down a serial line, which means a companion computer, or the flight controller itself, could eventually retune the link automatically in flight rather than needing someone at a laptop with the GUI tool open. Photo evidence of this process is still to come.
+Both modems expose these settings two ways: through RFDesign's own configuration software, or directly over the same serial link using AT commands, the same simple text command language (the name comes from "ATtention") that's configured modems since the 1980s, where a command like `ATI` reports the modem's status and numbered `ATS`-prefixed commands read or set individual parameters. On the RFD900, sending a `+++` sequence over the link drops it into command mode, changes get written with `AT&W`, and a reboot (`ATZ`) applies them.
+
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/rfd900-gui-tool.png" | relative_url }}">
+      <img src="{{ "/assets/img/believer-fixed-wing/rfd900-gui-tool.png" | relative_url }}" alt="RFDesign's RFD SiK configuration tool, showing the RFD900P's settings: baud, air speed, frequency range, channel count, transmit power, and more">
+    </a>
+    <figcaption>RFDesign's own configuration tool, every parameter in one form</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/rfd900-at-commands-terminal.png" | relative_url }}">
+      <img src="{{ "/assets/img/believer-fixed-wing/rfd900-at-commands-terminal.png" | relative_url }}" alt="A PuTTY serial terminal session sending AT commands to the modem, listing its current parameters via ATI5">
+    </a>
+    <figcaption>The same settings, read directly over a serial terminal with AT commands</figcaption>
+  </figure>
+</div>
+
+On Linux that's done through a serial terminal program like Minicom; on Windows it's a dedicated serial terminal rather than PowerShell directly, though because it's just plain text over a serial connection, a short script opening the same port could send identical commands. That's the real takeaway: tuning the radio is nothing more than text down a serial line, which means a companion computer, or the flight controller itself, could eventually retune the link automatically in flight rather than needing someone at a laptop with the GUI tool open.
 
 ## A modular, glue-free avionics bay
 
