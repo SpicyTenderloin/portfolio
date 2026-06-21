@@ -8,7 +8,6 @@ skills:
   - Image Processing
   - Computer Vision
   - Machine Learning
-  - AI-Assisted Development
   - Python
   - Teamwork
   - Project Management

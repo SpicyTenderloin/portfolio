@@ -14,7 +14,6 @@ skills:
   - Project Management
   - Remote Sensing
   - Technical Documentation
-  - AI-Assisted Development
   - RF Design
   - 3D Printing
 ---
