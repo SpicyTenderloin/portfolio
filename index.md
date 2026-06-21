@@ -34,6 +34,8 @@ layout: default
       <a href="https://linkedin.com/in/jpw444">linkedin.com/in/jpw444</a>
       ·
       <a href="https://github.com/SpicyTenderloin">github.com/SpicyTenderloin</a>
+      ·
+      <a href="{{ "/experience/" | relative_url }}">View CV</a>
     </p>
   </div>
 </section>

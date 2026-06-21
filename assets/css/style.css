@@ -221,20 +221,6 @@ footer.site-footer {
   border-bottom-color: var(--accent);
 }
 
-.site-nav a.nav-cv {
-  color: var(--bg);
-  background: var(--accent);
-  font-weight: 700;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  border-bottom: none;
-}
-
-.site-nav a.nav-cv:hover {
-  color: var(--bg);
-  opacity: 0.85;
-}
-
 @media (max-width: 480px) {
   .site-nav {
     gap: 0.75rem;
