@@ -17,4 +17,6 @@ skills:
   <figcaption>A generic illustrative editor screenshot, not my own project's code</figcaption>
 </figure>
 
-More to come.
+This page will document personal software and firmware projects in Python, Embedded C, and MATLAB that don't have a dedicated project page of their own, smaller tools and scripts rather than the larger projects already covered elsewhere on this site (Battery Monitor, the FilterDesign tool on Audio Signal Visualiser, the path planner on Search and Rescue UAS).
+
+<p class="text-dim">Last updated: 2026-06-22</p>

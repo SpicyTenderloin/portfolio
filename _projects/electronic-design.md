@@ -17,4 +17,6 @@ skills:
   <figcaption>A generic illustrative photo of PCB prototypes, not my own boards. Photo: Mister rf, Wikimedia Commons, CC BY-SA 4.0</figcaption>
 </figure>
 
-More to come.
+This page will document personal circuit design and PCB work outside of university coursework and club projects: schematic capture, simulation, and board layout, with real boards and test results as they're built.
+
+<p class="text-dim">Last updated: 2026-06-22</p>

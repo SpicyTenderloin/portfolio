@@ -17,4 +17,6 @@ skills:
   <figcaption>One of my own bikes</figcaption>
 </figure>
 
-More to come.
+This page will document personal motorcycle builds, repairs, and modifications: fault-finding, wiring, and the hands-on mechanical work that originally led me into engineering. Specific builds and repair write-ups to come.
+
+<p class="text-dim">Last updated: 2026-06-22</p>
