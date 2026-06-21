@@ -12,6 +12,8 @@ skills:
   - Flight Testing
   - Project Management
   - Remote Sensing
+  - Technical Documentation
+  - AI-Assisted Development
 ---
 
 **Task:** as UAS Systems Lead and Program Manager for the QUT Aerospace Society (QUTAS), lead the avionics integration and flight-readiness work on Believer, a long-range, beyond-visual-line-of-sight (BVLOS) fixed-wing observation platform. The aim is a long-range aircraft capable of advanced onboard decision-making, including object detection, for missions like shark spotting, monitoring of threatened ecosystems, and agricultural surveying.
@@ -58,3 +60,9 @@ Getting the RC link working cleanly took more than just pairing a transmitter an
 The power module took a few iterations too. An earlier candidate looked right on paper but turned out to report battery telemetry in a format the Pixhawk doesn't accept, so it got swapped out before it ever flew. The Holybro PM03D fitted now, partly sourced out of pocket once that gap turned up, gives the flight controller the voltage and current readings it needs and keeps the servo rail electrically isolated from the main supply.
 
 **Outcome:** establishing a redundant RC control link was the near-term goal in the original project proposal, and it's now done. Most of the maiden-flight build checklist is complete too: airframe, avionics mounting, pitot and magnetometer installation, antenna placement, and a parachute bay repair are all finished. What's left is mostly cosmetic (paint) and procedural (a final configuration and tuning pass, with a build log to document it), aside from one real hardware blocker: the RTK GPS module still needs its antenna fitted before centimetre-level positioning can come online. Flight controller tuning and expanded flight testing are next, with a companion computer and camera payload for onboard object detection planned further out.
+
+## Building a second brain for the project
+
+Believer's documentation is run as a second brain for the project: a private GitHub repo treated as its actual operating record rather than an afterthought, holding the project outline, interface control document, flight manual, purchase and spending history, component datasheets, and photos, alongside the PX4 parameter change log, with radio remote filesystem backups and ground station code planned to join it as those come online. I write and maintain it with AI assistance, working from a `context` folder of standing directives and project notes that gets read at the start of every session, so the documentation conventions and the project's accumulated facts carry across into a brand-new AI session rather than living only inside one chat history.
+
+That portability is the actual point, not speed for its own sake, though the speed is real too. The same standing directives that keep the documentation consistent also keep it honest: the AI is told explicitly to mark anything unconfirmed as TBD rather than guess, and to flag a judgment call rather than quietly make one. Every change to a parameter, a purchased part, or an interface definition gets logged with its reasoning at the time it happens, not reconstructed from memory weeks later, which is exactly how the PM06 V2 rejection and the ELRS channel remap above ended up as timestamped, reasoned entries in the project's own changelog and parameter log rather than half-remembered later. Used this way, AI assistance doesn't trade traceability for pace, it improves both at once, and that matters more on a project whose documentation people will eventually rely on to fly the aircraft safely.
