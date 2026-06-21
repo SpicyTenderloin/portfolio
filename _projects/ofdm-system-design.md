@@ -2,6 +2,7 @@
 title: OFDM System Design
 description: Team-designed and simulated OFDM communications system, from QUT's Advanced Telecommunications unit.
 category: university
+status: "Analytical design study"
 thumbnail: /assets/img/ofdm-system-design/orthogonal-subcarriers.png
 skills:
   - MATLAB

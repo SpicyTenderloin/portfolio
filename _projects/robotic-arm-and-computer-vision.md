@@ -2,6 +2,7 @@
 title: Robotic Arm and Computer Vision
 description: A vision-guided pick-and-place robot arm, from QUT's Introduction to Robotics unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/robotic-arm-and-computer-vision/workspace-overview.png
 skills:
   - Robotics

@@ -2,6 +2,7 @@
 title: Backpropagation by Hand
 description: A hand-worked numerical example of backpropagation through a small neural network, done to understand the mechanics behind how CNNs learn.
 category: personal
+status: "Completed"
 thumbnail: /assets/img/backpropagation-by-hand/network-architecture-diagram.png
 skills:
   - Machine Learning

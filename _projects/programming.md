@@ -2,6 +2,7 @@
 title: Programming
 description: Software and firmware projects.
 category: personal
+status: "In development"
 thumbnail: /assets/img/programming/code-editor.png
 skills:
   - Python

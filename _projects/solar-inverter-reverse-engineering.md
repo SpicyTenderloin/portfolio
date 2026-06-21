@@ -2,6 +2,7 @@
 title: Solar Inverter Reverse Engineering Project
 description: Reverse engineering and modelling of a commercial grid-connected solar inverter, from QUT's Power Electronics unit.
 category: university
+status: "Analytical design study"
 thumbnail: /assets/img/solar-inverter-reverse-engineering/teardown-photo.jpg
 skills:
   - LTspice

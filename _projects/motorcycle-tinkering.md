@@ -2,6 +2,7 @@
 title: Motorcycle Tinkering
 description: Personal motorcycle projects, repairs, and tinkering.
 category: personal
+status: "In development"
 thumbnail: /assets/img/motorcycle-tinkering/suzuki-dirt-bike.jpg
 skills:
   - Mechanical Repair

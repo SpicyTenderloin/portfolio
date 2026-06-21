@@ -2,6 +2,7 @@
 title: Search and Rescue UAS
 description: A nine-person team's autonomous unmanned aircraft system for search and rescue, built over two semesters.
 category: university
+status: "Completed"
 thumbnail: /assets/img/search-and-rescue-uas/team-photo.jpg
 skills:
   - UAV Systems

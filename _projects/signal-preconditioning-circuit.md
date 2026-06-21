@@ -2,6 +2,7 @@
 title: Signal Pre-Conditioning Circuit
 description: An analog front-end for a microphone-based digital voice recorder, from QUT's Electronic Design unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/signal-preconditioning-circuit/breadboard-prototype.jpg
 skills:
   - LTspice

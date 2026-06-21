@@ -2,6 +2,7 @@
 title: Battery Monitor
 description: An ESP32-based battery current/voltage monitor built to verify the capacity and quality of second-hand battery cells.
 category: personal
+status: "Completed"
 thumbnail: /assets/img/battery-monitor/discharge-test-plot.jpg
 skills:
   - Embedded C

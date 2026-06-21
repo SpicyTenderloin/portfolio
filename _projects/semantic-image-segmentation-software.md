@@ -2,6 +2,7 @@
 title: Semantic Image Segmentation Software
 description: Classical and machine-learning image segmentation compared head to head, from QUT's Digital Signals and Image Processing unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/semantic-image-segmentation-software/sun-best-case.jpg
 skills:
   - Image Processing

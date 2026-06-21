@@ -2,6 +2,7 @@
 title: DC Motor
 description: Analytical design, MATLAB simulation, construction, and experimental testing of a brushed DC motor, from QUT's Electromagnetics and Machines unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/dc-motor/thumbnail.jpg
 skills:
   - MATLAB

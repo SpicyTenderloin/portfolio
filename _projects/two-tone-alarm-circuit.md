@@ -2,6 +2,7 @@
 title: Two-Tone Alarm Circuit
 description: A two-tone siren circuit designed, simulated, and built from scratch, from QUT's Electronic Design unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/two-tone-alarm-circuit/breadboard-prototype.jpg
 skills:
   - LTspice

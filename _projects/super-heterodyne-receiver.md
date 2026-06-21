@@ -2,6 +2,7 @@
 title: Super Heterodyne Receiver
 description: Team-designed conceptual RF receiver covering a 3 to 5 GHz band, from QUT's Telecommunications and RF unit.
 category: university
+status: "Analytical design study"
 thumbnail: /assets/img/super-heterodyne-receiver/architecture-diagram.png
 skills:
   - RF Design

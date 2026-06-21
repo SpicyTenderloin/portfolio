@@ -2,6 +2,7 @@
 title: Drone PID Simulation Tool
 description: An in-progress MATLAB/Simulink teaching tool for QUTAS, letting members interactively explore PID control on a simulated drone.
 category: club
+status: "In progress"
 thumbnail: /assets/img/drone-pid-simulation-tool/pid-model-diagram.png
 skills:
   - MATLAB

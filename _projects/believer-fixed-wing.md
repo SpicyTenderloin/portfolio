@@ -2,6 +2,7 @@
 title: Believer Fixed Wing Drone
 description: Long-range fixed-wing UAV built through QUT Aerospace Society for BVLOS observation missions, shark spotting, ecosystem monitoring, and agricultural surveying.
 category: club
+status: "Pre-maiden"
 thumbnail: /assets/img/believer-fixed-wing/Believer.jpg
 skills:
   - PX4

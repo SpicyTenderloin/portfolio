@@ -6,6 +6,7 @@
       <img src="{{ project.thumbnail | relative_url }}" alt="{{ project.title }}">
       {% endif %}
       <div class="card-body">
+        {% if project.status %}<span class="status-badge">{{ project.status }}</span>{% endif %}
         <h2>{{ project.title }}</h2>
         <p>{{ project.description }}</p>
       </div>

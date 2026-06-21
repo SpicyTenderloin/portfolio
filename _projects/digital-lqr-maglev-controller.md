@@ -2,6 +2,7 @@
 title: Digital LQR Maglev Controller
 description: Digital control system design for a magnetic levitation module, from QUT's Modern Control unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/digital-lqr-maglev-controller/maglev-train.jpg
 skills:
   - MATLAB

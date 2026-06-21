@@ -2,6 +2,7 @@
 title: FPV Drones
 description: Building and flying FPV drones, from tiny whoops to 5-inch freestyle quads.
 category: personal
+status: "In progress"
 thumbnail: /assets/img/fpv-drones/Soldering.jpg
 skills:
   - FPV

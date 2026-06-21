@@ -2,6 +2,7 @@
 title: Audio Signal Visualiser
 description: An EESS project giving members hands-on exposure to analog circuit design and embedded systems.
 category: club
+status: "In progress"
 thumbnail: /assets/img/audio-signal-visualiser/AudioSignalVisualiser.jpg
 skills:
   - Analog Circuit Design

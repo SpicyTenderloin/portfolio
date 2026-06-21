@@ -2,6 +2,7 @@
 title: Electronic Design
 description: "Circuit design and electronics projects: schematics, PCB layout, and prototyping."
 category: personal
+status: "In development"
 thumbnail: /assets/img/electronic-design/pcb-prototypes.jpg
 skills:
   - Circuit Design

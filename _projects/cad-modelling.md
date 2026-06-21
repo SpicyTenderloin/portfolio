@@ -2,6 +2,7 @@
 title: CAD Modelling
 description: 3D CAD design and modelling work.
 category: personal
+status: "In development"
 thumbnail: /assets/img/cad-modelling/CADModelling.jpg
 skills:
   - Fusion 360

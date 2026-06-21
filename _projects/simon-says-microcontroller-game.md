@@ -2,6 +2,7 @@
 title: Simon Says Microcontroller Game
 description: An embedded implementation of the Simon memory game, from QUT's Microprocessors and Digital Systems unit.
 category: university
+status: "Completed"
 thumbnail: /assets/img/simon-says-microcontroller-game/quty-board-photo.webp
 skills:
   - Embedded C
