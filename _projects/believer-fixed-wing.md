@@ -66,6 +66,13 @@ Wherever possible, I avoided gluing any avionics component directly to the airfr
 
 The RFD900x itself sits inside the avionics bay, but its two antennas couldn't stay in there with it. At 900MHz the antennas are physically long, too long to fit cleanly inside the airframe while keeping them properly orthogonal, the perpendicular spacing that gives a diversity link its actual benefit by covering for whichever antenna's polarisation happens to be in a null at any given moment. Mounting them inside the bay also put a 900MHz transmitter uncomfortably close to the rest of the avionics, a real interference risk for sensitive equipment like the GPS receivers sitting right next to it. I designed a custom mount that moves both antennas outside the avionics bay, keeping them properly orthogonal to each other and putting real distance between the transmitter and the rest of the electronics.
 
+<figure>
+  <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/external-antenna-and-sensor-mount.png" | relative_url }}">
+    <img src="{{ "/assets/img/believer-fixed-wing/external-antenna-and-sensor-mount.png" | relative_url }}" alt="Rear view of the Believer airframe, showing the externally-mounted telemetry antenna and the GPS/magnetometer mast on top of the fuselage">
+  </a>
+  <figcaption>The externally-mounted telemetry antenna and the GPS/magnetometer mast, both kept clear of the avionics bay</figcaption>
+</figure>
+
 ## Commissioning the aircraft in QGroundControl
 
 Beyond wiring up the individual interfaces above, getting Believer flight-ready means working through PX4's full setup sequence in QGroundControl: selecting the airframe type, configuring the power module so the battery's cell count and voltage and current readings calibrate correctly, binding and verifying the RC receiver link, mapping every actuator output to its physical control surface or motor with the right direction, range, and trim, and setting up the motor outputs. Sensor calibration (accelerometer, gyroscope, compass, and airspeed) and a full RC and failsafe check follow before the aircraft is considered safe to fly. None of this is a one-off: per the project's own build checklist, the aircraft gets reconfigured and re-verified from scratch before each test flight rather than trusting a configuration that was last checked weeks earlier, which is exactly the kind of detail worth logging in the parameter change log above rather than re-discovering by trial and error each time.
