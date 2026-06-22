@@ -6,80 +6,49 @@ status: "Completed"
 thumbnail: /assets/img/dc-motor/thumbnail.jpg
 skills:
   - MATLAB
-  - Control Systems
   - Motor Control
   - Fabrication
   - Electrical
   - Troubleshooting
-  - Teamwork
-  - Project Management
 ---
 
-**Task:** as part of a small team, design, simulate, build, and test a permanent magnet brushed DC motor from raw materials, scaled as a prototype for a small conveyor-belt drive. The brief set hard electrical, mechanical, and manufacturing constraints, including a rotational speed limit, a current limit, and a ban on commercial carbon or graphite motor brushes, so even the brushes had to be designed and built from scratch.
+## Project overview
 
-**Approach:** my own contribution centred on the analytical and MATLAB side: optimising the wire gauge and turns count, optimising the supply voltage, and developing the full transient simulation used to predict the motor's behaviour before anything was built. The rest of the team led the physical construction and assembly, which I fed into and drew on for the technical analysis and interpretation of the results below.
+A small team's brief: design, simulate, build, and test a permanent magnet brushed DC motor from raw materials, scaled as a prototype for a small conveyor-belt drive, under hard constraints (a rotational speed limit, a current limit, and a ban on commercial carbon or graphite brushes, so even the brushes had to be designed and built from scratch). My own contribution centred on the analytical and MATLAB side, optimising the wire gauge, turns count, and supply voltage, and developing the transient simulation used to predict the motor's behaviour before anything was built. The rest of the team led the physical construction and assembly. This project is complete: built, tested, and assessed.
 
-## MATLAB simulation and optimisation
+## Selected engineering challenges and decisions
 
-The motor's magnetic circuit (the permanent magnets, the air gap, and the steel pole pieces and back-iron that carry the flux between them) sets the flux linkage everything else depends on, treating it the same way as an electrical circuit, with magnetomotive force in place of EMF and reluctance in place of resistance.
+**Choosing the wire gauge and operating point.** Wire gauge is a direct trade-off: thinner wire allows more turns in a fixed slot area, more flux linkage and torque, but adds resistance and copper losses, while thicker wire does the opposite. Rather than guess at it, I wrote a MATLAB script to sweep that trade-off properly, and a second script to find the supply voltage that made the best use of the motor's available current limit during startup. This mattered because the same trade-off, done by hand, is easy to get wrong in either direction, under-using the current limit or overheating the windings.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/magnetic-flux-circuit.png" | relative_url }}">
     <img src="{{ "/assets/img/dc-motor/magnetic-flux-circuit.png" | relative_url }}" alt="Magnetic circuit diagram of the two-pole permanent magnet machine, with the flux path through the magnets, air gap, and back-iron, and the magnetic-circuit equations relating flux, magnetomotive force, and reluctance">
   </a>
-  <figcaption>The motor's magnetic circuit: flux driven by the magnets' magnetomotive force, limited by the reluctance of the magnets and air gap</figcaption>
+  <figcaption>The magnetic circuit underlying that trade-off: flux driven by the magnets' magnetomotive force, limited by the reluctance of the magnets and air gap</figcaption>
 </figure>
 
-Wire gauge selection is a direct trade-off: thinner wire allows more turns in a fixed slot area (more flux linkage, more torque) but adds resistance and copper losses, while thicker wire does the opposite. I wrote a MATLAB script to sweep that trade-off properly rather than guess at it, and a second script to find the supply voltage that made the best use of the motor's available current limit during startup. The main simulation then modelled the motor's full transient response (current, torque, back-EMF, angular acceleration, speed, and power) using an adaptive ODE solver, swept across a range of possible air gap lengths, since the air gap has a direct effect on the motor constant and how stiff or fast the resulting machine would be.
+The full transient simulation (current, torque, back-EMF, angular acceleration, speed, and power, via an adaptive ODE solver) was swept across a range of air gap lengths, since the air gap directly affects the motor constant and how stiff or fast the resulting machine would be, to choose a practical operating point against the speed limit.
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/simulated-speed-transient.png" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/simulated-speed-transient.png" | relative_url }}" alt="Simulated transient speed response of the motor across a sweep of air gap lengths">
-  </a>
-  <figcaption>Simulated transient speed response across a sweep of air gap lengths, used to choose a practical operating point against the speed limit</figcaption>
-</figure>
+**Custom brushes and commutator under a no-commercial-parts constraint.** With commercial carbon or graphite brushes banned by the brief, the contact surfaces had to be designed from scratch, and the commutator went through four iterations: a PVC and 3D-printed hybrid, then a fully 3D-printed version, both of which suffered thermal wear and deformation under the heat generated by brush friction, before a final design using a PVC body, a press-fitted wooden insert, and copper pipe segments as the actual contact surfaces. The brushes themselves started as brass plates soldered to copper pipe supports, later refined to graphite rods for better contact and lower friction. This mattered because the brush-commutator interface turned out to be the dominant real-world loss in the finished motor (below), so its reliability under sustained friction and heat was never a minor detail.
 
-## Building the motor
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/commutator-iteration-wear.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/commutator-iteration-wear.jpg" | relative_url }}" alt="An early 3D-printed commutator iteration showing thermal wear after testing">
+    </a>
+    <figcaption>An early 3D-printed commutator iteration, showing the thermal wear that drove the next redesign</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/brass-brush-assembly.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/brass-brush-assembly.jpg" | relative_url }}" alt="Initial brush assembly built from brass plates soldered to copper pipe supports">
+    </a>
+    <figcaption>Initial brushes: brass plates soldered to copper pipe supports</figcaption>
+  </figure>
+</div>
 
-The team hand-wound the rotor as a six-coil simplex lap winding, insulating the sharp steel slot edges first (heat shrink tubing won out over electrical tape, which kept shifting during winding and limited the achievable packing factor).
+## Verification or evidence
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/rotor-winding.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/rotor-winding.jpg" | relative_url }}" alt="The hand-wound rotor, six coils labelled to track winding order">
-  </a>
-  <figcaption>The hand-wound rotor, each coil labelled to keep the winding order correct</figcaption>
-</figure>
-
-The commutator went through four separate design iterations: a PVC and 3D-printed hybrid, then a fully 3D-printed version, both of which suffered thermal wear and deformation under the heat generated by brush friction, before settling on a final design using a PVC body, a press-fitted wooden insert, and copper pipe segments as the actual contact surfaces.
-
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/commutator-iteration-wear.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/commutator-iteration-wear.jpg" | relative_url }}" alt="An early 3D-printed commutator iteration showing thermal wear after testing">
-  </a>
-  <figcaption>An early 3D-printed commutator iteration, showing the thermal wear that drove the next redesign</figcaption>
-</figure>
-
-Since commercial brushes weren't allowed, brushes were built first from brass plates soldered to copper pipe supports, then refined to graphite rods for better contact and lower friction.
-
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/brass-brush-assembly.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/brass-brush-assembly.jpg" | relative_url }}" alt="Initial brush assembly built from brass plates soldered to copper pipe supports">
-  </a>
-  <figcaption>Initial brushes, built from brass plates soldered to copper pipe supports since commercial brushes weren't allowed</figcaption>
-</figure>
-
-The back-iron pole pieces were shaped by hand from steel pipe, cut longitudinally with an angle grinder and flattened on a linishing machine.
-
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/shaping-back-iron-poles.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/shaping-back-iron-poles.jpg" | relative_url }}" alt="Shaping the back-iron pole pieces from steel pipe with an angle grinder">
-  </a>
-  <figcaption>Shaping the back-iron pole pieces from steel pipe</figcaption>
-</figure>
-
-## Testing and the real result
-
-With the motor built, a drill was clamped to the output shaft and used to spin it as a generator, measuring the resulting voltage and speed at several points to back out the motor's real electromagnetic constant, the same way the simulation had predicted it in theory.
+With the motor built, a drill clamped to the output shaft spun it as a generator, measuring voltage and speed at several points to back out the motor's real electromagnetic constant, the same way the simulation had predicted it in theory.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/test-bench-setup.jpg" | relative_url }}">
@@ -88,20 +57,48 @@ With the motor built, a drill was clamped to the output shaft and used to spin i
   <figcaption>The test bench: oscilloscopes and a multimeter recording voltage and speed while a drill spins the motor as a generator</figcaption>
 </figure>
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/motor-constant-derivation.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/dc-motor/motor-constant-derivation.jpg" | relative_url }}" alt="A drill clamped to the motor's shaft, spinning it as a generator to measure voltage and speed">
-  </a>
-  <figcaption>Using a drill to spin the motor as a generator, measuring voltage and speed to back out its real motor constant</figcaption>
-</figure>
-
-**Outcome:** the built motor reached about 1400 RPM at 19 V and 4.3 A unloaded. The most interesting result wasn't where the team expected it: the measured data showed the magnetic circuit performing close to its physical maximum, far stronger coupling than the original analytical model (which assumed significant flux leakage) had predicted. Instead, the real bottleneck turned out to be the brush-commutator interface, the effective armature resistance rose from a theoretical 0.23 ohms to a measured 1.3 to 3.7 ohms depending on load, with visible arcing and several volts dropped across the brushes alone. That pushed peak measured efficiency down to under 1%. The plot below is the actual evidence behind that finding: measured voltage against speed sitting well above the original theoretical prediction and much closer to the physical upper bound.
+The measured data told a clearer story than the original analytical model: the magnetic circuit performed close to its physical maximum, far stronger coupling than the original model (which assumed significant flux leakage) had predicted, while the effective armature resistance rose from a theoretical 0.23Ω to a measured 1.3 to 3.7Ω depending on load, with visible arcing and several volts dropped across the brushes alone.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/measured-motor-constant.png" | relative_url }}">
     <img src="{{ "/assets/img/dc-motor/measured-motor-constant.png" | relative_url }}" alt="Measured supply voltage against angular speed, compared with the theoretical prediction and the physical upper bound on motor constant">
   </a>
-  <figcaption>Measured data sitting much closer to the physical upper bound than the original theoretical prediction, the project's key finding</figcaption>
+  <figcaption>Measured data sitting much closer to the physical upper bound than the original theoretical prediction</figcaption>
 </figure>
 
-It was a good lesson in where to actually spend design effort: the team had focused heavily on the magnetic circuit, but the dominant real-world loss came from a part of the design (brush contact) that the original analytical model had under-weighted.
+## Current status
+
+**Completed:** the built motor reached about 1400 RPM at 19V and 4.3A unloaded, with the full set of design, simulation, build, and test results above. This was a closed university assessment; no further development is planned.
+
+## What I learned or am proud of
+
+The most interesting result wasn't where the team expected it. We'd focused heavily on the magnetic circuit, and it turned out to perform near its physical limit, but the dominant real-world loss came from the brush-commutator interface, a part of the design the original analytical model had under-weighted, pushing peak measured efficiency down to under 1%. The lesson I took from it: an analytical model is only as good as where you choose to spend your modelling effort, and measured data is what actually tells you whether you spent it in the right place.
+
+## Gallery
+
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/rotor-winding.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/rotor-winding.jpg" | relative_url }}" alt="The hand-wound rotor, six coils labelled to track winding order">
+    </a>
+    <figcaption>The hand-wound rotor, six-coil simplex lap winding</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/shaping-back-iron-poles.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/shaping-back-iron-poles.jpg" | relative_url }}" alt="Shaping the back-iron pole pieces from steel pipe with an angle grinder">
+    </a>
+    <figcaption>Shaping the back-iron pole pieces from steel pipe</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/motor-constant-derivation.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/motor-constant-derivation.jpg" | relative_url }}" alt="A drill clamped to the motor's shaft, spinning it as a generator to measure voltage and speed">
+    </a>
+    <figcaption>Spinning the motor as a generator to derive its real motor constant</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/dc-motor/simulated-speed-transient.png" | relative_url }}">
+      <img src="{{ "/assets/img/dc-motor/simulated-speed-transient.png" | relative_url }}" alt="Simulated transient speed response of the motor across a sweep of air gap lengths">
+    </a>
+    <figcaption>Simulated transient speed response across a sweep of air gap lengths</figcaption>
+  </figure>
+</div>
