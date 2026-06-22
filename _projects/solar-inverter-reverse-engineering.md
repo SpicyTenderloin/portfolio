@@ -102,4 +102,10 @@ Categorising losses by how they scale with current, rather than stopping at a si
     </a>
     <figcaption>A practice buck-converter simulation, building the switching-converter modelling technique used on the actual boost stage</figcaption>
   </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/solar-inverter-reverse-engineering/boost-converter-simulation.png" | relative_url }}">
+      <img src="{{ "/assets/img/solar-inverter-reverse-engineering/boost-converter-simulation.png" | relative_url }}" alt="An online circuit simulator showing a boost converter schematic with a live output voltage waveform ramping up">
+    </a>
+    <figcaption>An early boost-converter simulation, checking the output ramps up and settles as expected</figcaption>
+  </figure>
 </div>
