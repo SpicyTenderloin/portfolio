@@ -10,48 +10,49 @@ skills:
   - OFDM
   - Channel Modelling
   - Error Correction Coding
-  - Teamwork
 ---
 
-**Task:** as part of a small team, design an OFDM (Orthogonal Frequency Division Multiplexing) system to a given set of parameters, then evaluate its performance under realistic wireless channel conditions including multipath fading and noise.
+## Project overview
 
-**Approach:** worked through the system's link-level parameters (subcarrier spacing, symbol duration, guard interval, bandwidth) before simulating the system end to end in MATLAB. This included modelling AWGN and Rayleigh fading channels, characterising a multipath channel's power delay profile to check the guard interval was actually long enough to absorb it, measuring bit-error-rate (BER) performance against theoretical curves to validate the simulation, and adding forward error correction (LDPC coding) to recover performance lost to fading.
+A small team's task: design an OFDM (Orthogonal Frequency Division Multiplexing) system to a given set of parameters, then evaluate its performance under realistic wireless channel conditions, multipath fading and noise, in MATLAB simulation. This is an analytical study, not a build, the deliverable is a validated simulation of the system, not hardware. The project is complete.
+
+## System architecture
+
+OFDM's core idea is what makes the rest of the design possible: each subcarrier's spectrum is shaped so it peaks exactly where every other subcarrier crosses zero, letting them overlap in frequency without interfering.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/orthogonal-subcarriers.png" | relative_url }}">
     <img src="{{ "/assets/img/ofdm-system-design/orthogonal-subcarriers.png" | relative_url }}" alt="Five OFDM subcarriers in the frequency domain, each a sinc-shaped spectrum peaking exactly where every other subcarrier crosses zero">
   </a>
-  <figcaption>The core OFDM idea: each subcarrier's spectrum peaks exactly where every other subcarrier crosses zero, so they can overlap without interfering</figcaption>
+  <figcaption>The core OFDM idea: each subcarrier's spectrum peaks exactly where every other subcarrier crosses zero</figcaption>
 </figure>
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/channel-power-delay-profile.png" | relative_url }}">
-    <img src="{{ "/assets/img/ofdm-system-design/channel-power-delay-profile.png" | relative_url }}" alt="Power delay profile of the multipath channel used for simulation, compared against the guard interval length">
-  </a>
-  <figcaption>Power delay profile of the multipath channel, plotted against the guard interval to confirm it was long enough to absorb the delay spread</figcaption>
-</figure>
+The system's link-level parameters, subcarrier spacing, symbol duration, guard interval, and bandwidth, were worked out before simulating the system end to end.
 
-## Characterising the channel
+## Selected engineering challenges and decisions
 
-Before trusting any BER result from a fading channel simulation, I wanted to be sure the fading model itself was actually correct, not just plausible-looking. A flat Rayleigh fading channel is built from two independent Gaussian random variables treated as the real and imaginary parts of a complex channel gain, and the magnitude of that complex number is supposed to follow a Rayleigh distribution. Rather than taking that on faith, I generated a large number of samples from the simulated channel and compared their histogram against the theoretical Rayleigh probability density function. The close match confirmed the random channel generator was actually producing Rayleigh-distributed fading, not just noise that looked roughly right.
+**Validating the channel model before trusting any result built on it.** A flat Rayleigh fading channel is built from two independent Gaussian random variables treated as the real and imaginary parts of a complex channel gain, and the magnitude is supposed to follow a Rayleigh distribution. Rather than take that on faith, I generated a large number of samples from the simulated channel and compared their histogram against the theoretical Rayleigh probability density function, confirming the generator actually produced Rayleigh-distributed fading rather than noise that just looked roughly right. The multipath channel's power delay profile was checked the same way, against the guard interval length, to confirm the guard interval was actually long enough to absorb the channel's delay spread, not just assumed to be. This mattered because every BER result downstream is only as trustworthy as the channel model producing it.
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/rayleigh-envelope.png" | relative_url }}">
-    <img src="{{ "/assets/img/ofdm-system-design/rayleigh-envelope.png" | relative_url }}" alt="Histogram of simulated fading channel envelope amplitudes overlaid with the theoretical Rayleigh probability density function">
-  </a>
-  <figcaption>Simulated fading envelope statistics matching the theoretical Rayleigh distribution, validating the channel model before trusting any BER results built on top of it</figcaption>
-</figure>
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/rayleigh-envelope.png" | relative_url }}">
+      <img src="{{ "/assets/img/ofdm-system-design/rayleigh-envelope.png" | relative_url }}" alt="Histogram of simulated fading channel envelope amplitudes overlaid with the theoretical Rayleigh probability density function">
+    </a>
+    <figcaption>Simulated fading envelope matching the theoretical Rayleigh distribution</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/channel-power-delay-profile.png" | relative_url }}">
+      <img src="{{ "/assets/img/ofdm-system-design/channel-power-delay-profile.png" | relative_url }}" alt="Power delay profile of the multipath channel used for simulation, compared against the guard interval length">
+    </a>
+    <figcaption>Power delay profile checked against the guard interval length</figcaption>
+  </figure>
+</div>
 
-The multipath channel itself was also characterised in the frequency domain. Because the channel's delayed copies arrive with different phases at different frequencies, the channel doesn't attenuate every part of the signal's bandwidth equally, it has a frequency response with peaks and deep nulls across the occupied band. This frequency-selective behaviour is exactly why a single fading coefficient (flat fading) is only a valid simplification when the signal bandwidth is narrow compared to the channel's coherence bandwidth, and why OFDM's narrow subcarriers are useful here: each subcarrier is narrow enough to see a roughly flat slice of an otherwise frequency-selective channel.
+**Recovering performance lost to fading with forward error correction.** Multipath fading degraded raw bit-error-rate performance well below the AWGN baseline. Adding LDPC coding recovered a large part of that gap, visibly pulling the coded curve back up toward the AWGN baseline rather than leaving it on the uncoded fading curve. This mattered because it's the direct, practical answer to "the channel is degrading performance, what do you actually do about it," not just a description of the degradation.
 
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/channel-frequency-response.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/ofdm-system-design/channel-frequency-response.jpg" | relative_url }}" alt="Magnitude of the multipath channel's frequency response across the occupied bandwidth, showing deep frequency-selective nulls">
-  </a>
-  <figcaption>The multipath channel's frequency response across the occupied bandwidth, the deep nulls are why frequency-selective fading is a real concern and why each OFDM subcarrier needs to be narrow enough to see a roughly flat slice of it</figcaption>
-</figure>
+## Verification or evidence
 
-**Outcome:** the simulated BER closely tracked theoretical predictions for both AWGN and fading channels, validating the model.
+The simulated BER closely tracked theoretical predictions for both AWGN and fading channels, validating the simulation itself before drawing conclusions from it:
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/ber-awgn-vs-fading.png" | relative_url }}">
@@ -60,20 +61,36 @@ The multipath channel itself was also characterised in the frequency domain. Bec
   <figcaption>Simulated vs theoretical bit-error-rate for AWGN and fading channels</figcaption>
 </figure>
 
-Multipath fading clearly degraded raw performance compared to AWGN, but adding LDPC coding recovered a large part of that gap, visibly pulling the coded curve back up toward the AWGN baseline rather than sitting on the uncoded fading curve.
+The LDPC improvement and the constellation plot below show the same recovery two ways, numerically and visually: a received 64-QAM signal badly scattered by fading and noise is pulled back into clean, separable clusters once channel equalisation is applied.
+
+<div class="gallery">
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/ber-with-ldpc.png" | relative_url }}">
+      <img src="{{ "/assets/img/ofdm-system-design/ber-with-ldpc.png" | relative_url }}" alt="Bit-error-rate improvement after adding LDPC forward error correction">
+    </a>
+    <figcaption>Bit-error-rate improvement after adding LDPC coding</figcaption>
+  </figure>
+  <figure>
+    <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/qam-constellation.jpg" | relative_url }}">
+      <img src="{{ "/assets/img/ofdm-system-design/qam-constellation.jpg" | relative_url }}" alt="64-QAM constellation before and after channel equalisation">
+    </a>
+    <figcaption>64-QAM constellation before and after channel equalisation</figcaption>
+  </figure>
+</div>
+
+## Current status
+
+**Completed:** the simulation matches theory across both channel types, and LDPC coding measurably recovers performance lost to fading. This was a closed university assessment; no further development is planned.
+
+## What I learned or am proud of
+
+The habit I'd take from this project: a simulation's results are only as trustworthy as the model producing them, so validate the model's statistical behaviour (the Rayleigh check, the power delay profile against the guard interval) before trusting any performance number built on top of it. Skipping that step doesn't make a simulation wrong, but it does mean you wouldn't actually know if it were.
+
+## Gallery
 
 <figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/ber-with-ldpc.png" | relative_url }}">
-    <img src="{{ "/assets/img/ofdm-system-design/ber-with-ldpc.png" | relative_url }}" alt="Bit-error-rate improvement after adding LDPC forward error correction">
+  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/channel-frequency-response.jpg" | relative_url }}">
+    <img src="{{ "/assets/img/ofdm-system-design/channel-frequency-response.jpg" | relative_url }}" alt="Magnitude of the multipath channel's frequency response across the occupied bandwidth, showing deep frequency-selective nulls">
   </a>
-  <figcaption>Bit-error-rate improvement after adding LDPC forward error correction</figcaption>
-</figure>
-
-The constellation plot below shows the same story visually: a received 64-QAM signal is badly scattered by fading and noise, then pulled back into clean, separable clusters once channel equalisation is applied.
-
-<figure>
-  <a class="lightbox-trigger" href="{{ "/assets/img/ofdm-system-design/qam-constellation.jpg" | relative_url }}">
-    <img src="{{ "/assets/img/ofdm-system-design/qam-constellation.jpg" | relative_url }}" alt="64-QAM constellation before and after channel equalisation">
-  </a>
-  <figcaption>64-QAM constellation before and after channel equalisation</figcaption>
+  <figcaption>The multipath channel's frequency response, deep frequency-selective nulls are why each OFDM subcarrier needs to be narrow enough to see a roughly flat slice of it</figcaption>
 </figure>
