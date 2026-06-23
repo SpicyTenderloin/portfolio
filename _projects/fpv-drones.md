@@ -9,9 +9,11 @@ skills:
   - FPV Acro Mode
   - Soldering
   - Drone Building
-  - RF Design
-  - PCB Design
 ---
+
+## Project overview
+
+An ongoing personal hobby: building, repairing, and flying FPV drones, from tiny whoops to 5-inch freestyle quads. This page covers a few distinct facets of it rather than a single build, repair work, simulator practice, and an active 5" build, and keeps growing as new builds and repairs happen.
 
 ## Tiny Whoops
 
@@ -64,3 +66,7 @@ That practice carries straight over to real flying: the same acro inputs, now wi
 </div>
 
 Build log and more photos coming soon.
+
+## Current status
+
+**In progress:** the SpeedyBee 5" build is wired and being finished off; tiny whoop repairs and simulator practice are ongoing, not one-off events.
