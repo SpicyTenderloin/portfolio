@@ -49,32 +49,42 @@ The Pixhawk 6X sits at the centre of the avionics architecture:
 | Power (Holybro PM03D, INA228) | Battery voltage and current monitoring; isolated 5V servo rail |
 | Actuators (PWM, MAIN 1-6) | V-tail, aileron, and motor commands |
 
-## When the battery monitor reported -100%
+## Power telemetry validation
 
-An earlier power module reported battery telemetry in a format the Pixhawk couldn't parse: the battery setup screen couldn't be calibrated, the charge indicator read -100%, and the status panel reported "Charge State: Ok" beside a blank voltage field, the kind of contradiction that makes the reading impossible to act on.
+Reliable battery telemetry is a flight-safety requirement. It supports pre-flight checks, remaining-endurance estimates, low-battery failsafes, and every battery-related decision.
+
+The original power module was a Holybro PM06, which provides analogue voltage and current outputs. The Pixhawk 6X expects battery telemetry through its digital power-monitor interface, so it could not obtain a valid battery measurement from the PM06. In QGroundControl, this appeared as unavailable calibration fields, a zero cell count, a battery indication of -100%, and other values that could not be treated as trustworthy.
+
+Rather than attempting to calibrate invalid telemetry, I replaced the PM06 with a Holybro PM03D digital power module. The PM03D communicates voltage and current data over I2C using an INA228 power-monitor IC, making it suitable for the Pixhawk 6X.
+
+The hardware change resolved the interface mismatch but did not immediately produce complete telemetry. Initial readings from the PM03D remained incomplete or erroneous because PX4 had not enabled the INA228 driver. Enabling the SENS_EN_INA228 parameter and rebooting the flight controller allowed PX4 to initialise the correct driver and read the power module correctly.
+
+Following this configuration change, battery voltage and current telemetry became coherent in ground testing, providing a reliable basis for battery configuration, pre-flight checks, and in-flight monitoring.
 
 <div class="gallery">
   <figure>
     <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-setup-uncalibrated.png" | relative_url }}">
-      <img src="{{ "/assets/img/believer-fixed-wing/battery-setup-uncalibrated.png" | relative_url }}" alt="QGroundControl battery setup screen with the cell count at 0 and the voltage divider and amps-per-volt calibration both left at -1, uncalibrated">
+      <img src="{{ "/assets/img/believer-fixed-wing/battery-setup-uncalibrated.png" | relative_url }}" alt="QGroundControl battery setup screen with unavailable calibration fields and zero cell count">
     </a>
-    <figcaption>Left uncalibrated: no sensible reading to calibrate against</figcaption>
+    <figcaption>PM06 analogue power module: calibration was unavailable because the Pixhawk 6X was not receiving a valid digital battery signal.</figcaption>
   </figure>
   <figure>
     <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-negative-100-percent.png" | relative_url }}">
       <img src="{{ "/assets/img/believer-fixed-wing/battery-negative-100-percent.png" | relative_url }}" alt="Battery indicator reading negative 100 percent">
     </a>
-    <figcaption>A battery reading of -100%</figcaption>
+    <figcaption>PM06 analogue power module: invalid telemetry produced a battery reading of -100%.</figcaption>
   </figure>
   <figure>
     <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/battery-voltage-blank.png" | relative_url }}">
-      <img src="{{ "/assets/img/believer-fixed-wing/battery-voltage-blank.png" | relative_url }}" alt="QGroundControl status panel showing Charge State Ok next to a blank voltage field">
+      <img src="{{ "/assets/img/believer-fixed-wing/battery-voltage-blank.png" | relative_url }}" alt="QGroundControl status panel showing Charge State Ok beside a blank voltage field">
     </a>
-    <figcaption>"Charge State: Ok," voltage blank: the contradiction that gave it away</figcaption>
+    <figcaption>PM03D installed, but INA228 driver not yet enabled: "Charge State: Ok" appeared beside a blank voltage field, indicating incomplete telemetry.</figcaption>
   </figure>
 </div>
 
-Battery monitoring underpins every go/no-go call in flight, so trusting a reading that couldn't agree with itself wasn't an option. The fix was a Holybro PM03D power module (INA228-based), sourced partly out of pocket once the gap was identified, now confirmed reporting clean voltage and current across the full operating range.
+<!-- PLACEHOLDER: add fourth screenshot here when provided -->
+<!-- Image path: /assets/img/believer-fixed-wing/<filename> -->
+<!-- Caption: PM03D telemetry after enabling the INA228 driver: coherent battery voltage and current data in QGroundControl. -->
 
 ## Tuning the long-range RF link
 
