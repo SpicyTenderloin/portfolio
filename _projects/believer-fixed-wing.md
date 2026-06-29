@@ -15,7 +15,11 @@ skills:
 
 ## Project overview
 
-Believer is a long-range, fixed-wing UAV built through the QUT Aerospace Society (QUTAS) for beyond-visual-line-of-sight (BVLOS) observation: shark spotting, monitoring threatened ecosystems, and agricultural surveying. As UAS Systems Lead and Program Manager, I lead avionics integration and flight-readiness on a V-tail, twin-motor airframe built around a Holybro Pixhawk 6X flight controller running PX4. Avionics integration and ground verification are substantially complete; final configuration, RTK GPS commissioning, and the maiden flight remain.
+Believer is a long-range, fixed-wing UAS developed through the QUT Aerospace Society (QUTAS) as a research and development platform for prospective beyond-visual-line-of-sight environmental-monitoring and aerial-survey applications. Potential future uses include shark spotting, threatened-ecosystem monitoring, and agricultural surveying.
+
+I have developed the project end-to-end, from system architecture and avionics integration through to mechanical installation, PX4 configuration, ground verification, and flight-readiness planning. The aircraft is a V-tail, twin-motor platform built around a Holybro Pixhawk 6X flight controller running PX4, with long-range telemetry, ExpressLRS control, dual GNSS receivers, airspeed sensing, and onboard power monitoring.
+
+Avionics integration and ground verification are substantially complete, with final configuration, RTK GPS commissioning, and the maiden flight remaining.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/Believer.jpg" | relative_url }}">
