@@ -15,7 +15,7 @@ skills:
 
 ## Project overview
 
-Believer is a long-range, fixed-wing UAV built through the QUT Aerospace Society (QUTAS) for beyond-visual-line-of-sight (BVLOS) observation: shark spotting, monitoring threatened ecosystems, and agricultural surveying. As UAS Systems Lead and Program Manager, I lead the avionics integration and flight-readiness work on a V-tail, twin-motor airframe built around a Holybro Pixhawk 6X flight controller running PX4. Avionics integration is largely complete and the redundant RC control link is done; the aircraft has not yet flown.
+Believer is a long-range, fixed-wing UAV built through the QUT Aerospace Society (QUTAS) for beyond-visual-line-of-sight (BVLOS) observation: shark spotting, monitoring threatened ecosystems, and agricultural surveying. As UAS Systems Lead and Program Manager, I lead avionics integration and flight-readiness on a V-tail, twin-motor airframe built around a Holybro Pixhawk 6X flight controller running PX4. Avionics integration and ground verification are substantially complete; final configuration, RTK GPS commissioning, and the maiden flight remain.
 
 <figure>
   <a class="lightbox-trigger" href="{{ "/assets/img/believer-fixed-wing/Believer.jpg" | relative_url }}">
@@ -33,17 +33,17 @@ Believer is a long-range, fixed-wing UAV built through the QUT Aerospace Society
   <figcaption>Believer's ICD block diagram: the full avionics architecture in one view</figcaption>
 </figure>
 
-The Pixhawk 6X sits at the centre of every link below. Each exists for a specific reason, not just "because the airframe has one":
+The Pixhawk 6X sits at the centre of the avionics architecture:
 
-| Link | Carries | Why it exists |
-|---|---|---|
-| RC link (GX12 → DBR4, ExpressLRS) | Pilot stick/switch commands, plus MAVLink | Primary flight control, shares one radio with telemetry instead of needing a second |
-| Telemetry (RFD900x) | Two-way MAVLink to the ground station | Long-range command and monitoring, BVLOS by design |
-| GPS 1 (u-blox M8N) | Primary position fix | Navigation today |
-| GPS 2 (SparkFun ZED-F9P) | RTK-corrected position fix | Future centimetre-level positioning, not yet online, antenna not fitted |
-| Airspeed (MS4525DO, I2C) | Differential pressure → airspeed estimate | Feeds the autopilot's airspeed control |
-| Power (Holybro PM03D, INA228) | Battery voltage/current, isolated 5V servo rail | Battery monitoring and a servo supply independent of the flight controller's own rail |
-| Actuators (PWM, MAIN 1-6) | Control surface and motor commands | V-tail, ailerons, and twin motors |
+| Component | Role |
+|---|---|
+| RC link (GX12 → DBR4, ExpressLRS) | Primary flight control; pilot commands and MAVLink telemetry over a single radio |
+| Telemetry (RFD900x) | Long-range, two-way MAVLink to the ground station |
+| GPS 1 (u-blox M8N) | Primary position and navigation |
+| GPS 2 (SparkFun ZED-F9P) | RTK-corrected centimetre-level positioning (antenna installation pending) |
+| Airspeed (MS4525DO, I2C) | Differential pressure measurement for autopilot airspeed control |
+| Power (Holybro PM03D, INA228) | Battery voltage and current monitoring; isolated 5V servo rail |
+| Actuators (PWM, MAIN 1-6) | V-tail, aileron, and motor commands |
 
 ## A flight-mode switch that never arrived
 
