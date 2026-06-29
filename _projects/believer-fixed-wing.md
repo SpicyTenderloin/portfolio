@@ -49,10 +49,6 @@ The Pixhawk 6X sits at the centre of the avionics architecture:
 | Power (Holybro PM03D, INA228) | Battery voltage and current monitoring; isolated 5V servo rail |
 | Actuators (PWM, MAIN 1-6) | V-tail, aileron, and motor commands |
 
-## A flight-mode switch that never arrived
-
-ExpressLRS Hybrid mode only carries the first 12 RC channels, but the flight-mode selector switch was originally wired to channel 13. PX4 never saw it move: a silent failure on one of the aircraft's core safety controls, with no warning, just a switch that appeared to work and didn't. The fix was a full channel remap: arm and kill onto channels that are actually transmitted, the flight-mode selector onto channel 6, and a separate channel repurposed as a direct override into Hold, a fast backup path into a safe holding pattern independent of whatever mode the main selector is in. Arm, kill, and flight-mode are exactly the controls a pilot needs to trust completely; the remap is documented and verified in the parameter log.
-
 ## When the battery monitor reported -100%
 
 An earlier power module reported battery telemetry in a format the Pixhawk couldn't parse: the battery setup screen couldn't be calibrated, the charge indicator read -100%, and the status panel reported "Charge State: Ok" beside a blank voltage field, the kind of contradiction that makes the reading impossible to act on.
