@@ -118,7 +118,7 @@
     .detect-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
     .detect-progress { width:100%; height:5px; border-radius:20px; overflow:hidden; accent-color:#7ee4c9; }
     .detect-status { margin-top:8px; color:#a6c7d0; font-size:11px; line-height:1.6; }
-    .detected-note { position:absolute; z-index:2; height:17px; border:1px dashed #aaffdf; border-radius:4px; background:#44ebbb55; color:#d4fff3; font:700 10px/15px ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; cursor:pointer; box-shadow:0 0 5px #5be9c755; }
+    .detected-note { position:absolute; z-index:2; height:calc(var(--row,20px) - 3px); border:1px dashed #aaffdf; border-radius:4px; background:#44ebbb55; color:#d4fff3; font:700 var(--row-font,10px)/calc(var(--row,20px) - 5px) ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; cursor:pointer; box-shadow:0 0 5px #5be9c755; }
     .detected-note:hover { background:#44ebbb88; box-shadow:0 0 9px #5be9c7aa; }
     .midi-mapping { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 15px; margin:13px 0; }
     .midi-mapping label { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
@@ -137,6 +137,10 @@
     .piano-intro p { margin:6px 0 0; color:#9bafc3; font-size:12px; line-height:1.5; }
     .motor-tabs { display:flex; gap:6px; flex-wrap:wrap; }
     .motor-tab { border:1px solid #425064; background:#233044; color:#aebfd2; border-radius:9px; padding:10px 13px; font-weight:800; font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .motor-tab { opacity:.62; }
+    .motor-tab::before { content:''; display:inline-block; width:8px; height:8px; border-radius:50%; border:2px solid var(--track-color); margin-right:7px; vertical-align:-1px; }
+    .motor-tab.on { opacity:1; color:#e6f2f8; border-color:var(--track-color); background:#2a384c; }
+    .motor-tab.on::before { background:var(--track-color); }
     .motor-tab.active { color:#fff; border-color:var(--track-color); background:#344154; box-shadow:inset 0 -2px var(--track-color); }
     .piano-toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
     .piano-toolbar .hint { color:#94a8bb; font-size:12px; }
@@ -156,14 +160,14 @@
     .beat-mark.bar { color:#e4f3fd; font-weight:800; border-left:2px solid #7091a9; }
     .piano-stage { display:flex; width:max-content; }
     .piano-keys { width:70px; flex:none; position:sticky; left:0; z-index:5; background:#223045; border-right:1px solid #52667a; }
-    .piano-key { height:20px; display:flex; align-items:center; justify-content:end; padding-right:8px; border-bottom:1px solid #344257; color:#a9bece; font-size:10px; font-weight:700; }
+    .piano-key { height:var(--row,20px); display:flex; align-items:center; justify-content:end; padding-right:8px; border-bottom:1px solid #344257; color:#a9bece; font-size:var(--row-font,10px); font-weight:700; overflow:hidden; }
     .piano-key.black { background:#131e2e; color:#6b8195; }
     .piano-key.tonic { color:#b9f9fa; }
     .piano-key { cursor:pointer; }
     .piano-key:hover { background:#2d3f57; }
     .piano-key.black:hover { background:#1d2b40; }
     .piano-roll { position:relative; flex:none; cursor:crosshair; touch-action:pan-x pan-y; }
-    .pitch-row { position:absolute; left:0; right:0; height:20px; border-bottom:1px solid #30415775; background:#19273a; pointer-events:none; }
+    .pitch-row { position:absolute; left:0; right:0; height:var(--row,20px); border-bottom:1px solid #30415775; background:#19273a; pointer-events:none; }
     .pitch-row.black { background:#132033; }
     .pitch-row.tonic { background:#1d3546; }
     .piano-key.in-key { background:#264339; color:#d9fff0; box-shadow:inset 3px 0 0 #6ee2b0; }
@@ -178,9 +182,20 @@
     .pitch-row.out-of-range { background:repeating-linear-gradient(135deg,#121a26 0 6px,#0f1621 6px 12px); }
     .gridline { position:absolute; top:0; bottom:0; width:1px; background:#49607565; pointer-events:none; }
     .gridline.bar { width:2px; background:#7a96ae77; }
-    .midi-note { position:absolute; z-index:3; height:17px; border:1px solid #ffffff55; border-radius:4px; background:var(--track-color); color:#102134; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px; font-weight:900; line-height:15px; padding:0 11px 0 5px; white-space:nowrap; overflow:hidden; cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 4px #0004; }
+    .midi-note { position:absolute; z-index:3; height:calc(var(--row,20px) - 3px); border:1px solid #ffffff55; border-radius:4px; background:var(--track-color); color:#102134; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:var(--row-font,10px); font-weight:900; line-height:calc(var(--row,20px) - 5px); padding:0 11px 0 5px; white-space:nowrap; overflow:hidden; cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 4px #0004; }
     .midi-note.selected { outline:2px solid #fff; outline-offset:1px; z-index:4; }
     .midi-note.dragging { cursor:grabbing; opacity:.84; }
+    .ghost-note { position:absolute; z-index:2; height:calc(var(--row,20px) - 3px); border:1px solid var(--track-color); border-radius:4px; background:color-mix(in srgb, var(--track-color) 32%, transparent); color:#e8f3fa; font:700 var(--row-font,10px)/calc(var(--row,20px) - 5px) ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; cursor:pointer; opacity:.7; touch-action:none; user-select:none; }
+    .ghost-note:hover { opacity:1; }
+    .midi-note.overlap { border:2px solid #ff3b4f; box-shadow:0 0 0 1px #ff3b4f, 0 0 10px #ff3b4f99; }
+    .piano-zoom { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-left:auto; color:#95aabe; font-size:12px; }
+    .piano-zoom .tiny { min-width:32px; }
+    .piano-zoom .tiny:disabled { opacity:.45; cursor:default; }
+    .piano-zoom .zoom-label { margin-left:6px; }
+    .piano-panel:fullscreen { margin:0; border-radius:0; overflow:auto; display:flex; flex-direction:column; background:#161e2c; }
+    .piano-panel:fullscreen > * { flex:none; }
+    .piano-panel:fullscreen > .piano-scroll { flex:1 1 0; min-height:220px; max-height:none; }
+    .piano-panel:fullscreen > .piano-help { display:none; }
     .midi-note .resize-grip { position:absolute; right:0; top:0; bottom:0; width:10px; cursor:ew-resize; background:#ffffff55; border-left:1px solid #26374666; }
     .piano-inspector { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:14px; background:#111b2a; border:1px solid #354357; border-radius:10px; padding:13px 14px; }
     .piano-inspector .note-title { font-size:13px; font-weight:800; color:#e8f3fa; min-width:128px; }
@@ -346,8 +361,8 @@
 
     <section class="panel piano-panel" id="pianoPanel" aria-label="Piano roll note editor">
       <div class="piano-intro">
-        <div><div class="panel-title">Piano-roll editor <span style="color:#6ee2e3">↔ RTTTL</span></div><p>Move notes to change pitch or timing; drag their right edge to change duration.</p></div>
-        <div class="motor-tabs" id="motorTabs" role="group" aria-label="Select motor to edit"></div>
+        <div><div class="panel-title">Piano-roll editor <span style="color:#6ee2e3">↔ RTTTL</span></div><p>Move notes to change pitch or timing; drag their right edge to change duration. Switch channels on to overlay them; you edit the one marked ✎.</p></div>
+        <div class="motor-tabs" id="motorTabs" role="group" aria-label="Switch channels on or off in the piano roll"></div>
       </div>
       <div class="piano-toolbar">
         <div class="hint"><strong id="selectedMotorName">ESC 1 · Higher melody</strong> <span id="pianoReadout">· 7 notes</span></div>
@@ -364,8 +379,18 @@
       <div class="piano-transport" role="group" aria-label="Piano-roll playback">
         <button class="tiny ref-play" id="pianoPlay" type="button">▶ Play</button>
         <button class="tiny" id="pianoRewind" type="button" title="Back to the start" aria-label="Back to the start">⏮</button>
-        <select id="pianoScope" aria-label="What to play"><option value="motor">This motor</option><option value="all">All motors</option></select>
+        <select id="pianoScope" aria-label="What to play"><option value="shown" selected>Channels switched on</option><option value="motor">Editing channel only</option><option value="all">All motors</option></select>
         <span class="ref-time" id="pianoTime" aria-live="off">0:00.00</span>
+        <div class="piano-zoom" role="group" aria-label="Piano-roll zoom">
+          <span class="zoom-label">Time</span>
+          <button class="tiny" id="pianoZoomOutX" type="button" title="Zoom out in time (Ctrl + mouse wheel)" aria-label="Zoom out in time">−</button>
+          <button class="tiny" id="pianoZoomInX" type="button" title="Zoom in in time (Ctrl + mouse wheel)" aria-label="Zoom in in time">+</button>
+          <span class="zoom-label">Pitch</span>
+          <button class="tiny" id="pianoZoomOutY" type="button" title="Show more pitches (Ctrl + Shift + mouse wheel)" aria-label="Show more pitches">−</button>
+          <button class="tiny" id="pianoZoomInY" type="button" title="Show fewer, taller pitch rows (Ctrl + Shift + mouse wheel)" aria-label="Show fewer pitches">+</button>
+          <button class="tiny" id="pianoFit" type="button" title="Fit the whole melody in view">Fit</button>
+          <button class="tiny" id="pianoFullscreen" type="button" hidden>⛶ Full screen</button>
+        </div>
       </div>
       <div class="piano-scroll" id="pianoScroll" aria-label="Scrollable interactive MIDI note grid">
         <div class="piano-header"><div class="piano-corner">PITCH</div><div class="piano-beats" id="pianoBeats"></div></div>
@@ -376,11 +401,11 @@
         <div class="note-inspector">
           <label>Pitch <select id="pitchSelect" aria-label="Selected note pitch"></select></label>
           <label>Start beat <input id="noteStart" type="number" min="0" step="0.125" aria-label="Selected note start beat"></label>
-          <label>Length <select id="noteDuration" aria-label="Selected note duration"></select></label>
+          <label title="Fraction of a whole note: 1/4 is one beat">Length <select id="noteDuration" aria-label="Selected note length, as a fraction of a whole note"></select></label>
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note; select a note and press Delete to remove it. Choose a Key to highlight its notes on the keyboard and grid. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note; select a note and press Delete to remove it. Choose a Key to highlight its notes on the keyboard and grid. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -462,7 +487,8 @@
     const noteIndex = {c:0,d:2,e:4,f:5,g:7,a:9,b:11};
     const pitchNames = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
     const rtttlPitchNames = ['c','c#','d','d#','e','f','f#','g','g#','a','a#','b'];
-    const beatPx = 92, rowPx = 20;
+    let beatPx = 92, rowPx = 20; // piano-roll zoom: pixels per beat and per semitone row
+    const PIANO_BEAT_PX = [12,480], PIANO_ROW_PX = [8,40];
     const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
     const beatSnap = document.getElementById('snapGrid');
     const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale');
@@ -471,7 +497,7 @@
     const BLUEJAY_MIN_MIDI = 51, BLUEJAY_MAX_MIDI = 98, DETUNE_FROM_MIDI = 84;
     const scaleSteps = {major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], majpent:[0,2,4,7,9], minpent:[0,3,5,7,10]};
     const pianoGrid = document.getElementById('pianoRoll');
-    const pianoKeys = document.getElementById('pianoKeys');
+    const pianoKeys = document.getElementById('pianoKeys'), pianoScroll = document.getElementById('pianoScroll');
     const pianoBeats = document.getElementById('pianoBeats');
     const motorTabs = document.getElementById('motorTabs');
     const notePitchSelect = document.getElementById('pitchSelect');
@@ -510,6 +536,7 @@
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
     const settings={bpm:125,signature:'4/4',metronome:false,mode:'square',stereo:65,ripple:false,snap:.25,...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
+    if(settings.pianoZoom){beatPx=clamp(Number(settings.pianoZoom.x)||92,...PIANO_BEAT_PX);rowPx=clamp(Math.round(Number(settings.pianoZoom.y))||20,...PIANO_ROW_PX);}
     if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
     bpmInput.value=String(settings.bpm);timeSignatureInput.value=settings.signature;
     motorCountInput.value=String(tracks.length);
@@ -621,6 +648,7 @@
         if(action==='solo'){ tracks[i].solo=!tracks[i].solo; updateButtons(); updateGains(); }
         if(action==='preview'){ await play(i); }
         if(action==='copy'){
+          if(liveDraft(tracks[i])){notify(`ESC ${i+1} has overlapping notes; fix them in the piano roll before copying`);return;}
           try { await navigator.clipboard.writeText(tracks[i].value); notify(`ESC ${i+1} melody copied`); }
           catch(_){ document.getElementById(`rtttl-${i}`).focus(); document.getElementById(`rtttl-${i}`).select(); notify('Select and copy the highlighted melody'); }
         }
@@ -675,6 +703,8 @@
         const marks=t.parsed?[]:(t.errorRanges||[]);
         error.textContent=t.error?(marks.length>1?`${t.error}. All highlighted above; click to select the first.`:marks.length?`${t.error} (highlighted above, click to select it)`:t.error):'';
         error.classList.toggle('has-range',Boolean(t.errorRange));
+        const draft=t.parsed&&liveDraft(t);
+        if(draft)error.textContent=`${overlapIndices(draft.events).size} notes overlap in the piano roll (red outlines). A motor plays one note at a time, so this RTTTL is the last version without overlaps; Play, copy and MIDI export stay off until they're fixed.`;
         const mark=document.getElementById(`rtttl-mark-${i}`);
         if(mark){
           const v=t.value;let html='',at=0;
@@ -686,8 +716,9 @@
       length=maxLength;
       info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds`;
       updateGuideInfo();
-      playButton.disabled=valid!==tracks.length;
-      if(valid!==tracks.length)playButton.title='Correct the invalid RTTTL string first'; else playButton.removeAttribute('title');
+      const overlapping=tracks.some(t=>t.parsed&&liveDraft(t));
+      playButton.disabled=valid!==tracks.length||overlapping;
+      if(valid!==tracks.length)playButton.title='Correct the invalid RTTTL string first'; else if(overlapping)playButton.title='Fix the overlapping notes in the piano roll first'; else playButton.removeAttribute('title');
       if(startTime===null)renderClock(0);
       drawTimeline();
       if(renderEditor && !dragState)renderPiano();
@@ -730,6 +761,7 @@
     }
 
     function currentLevel(i) {
+      if(audition instanceof Set)return audition.has(i) ? 1 : 0;
       if(audition!==null)return i===audition ? 1 : 0;
       const anySolo=tracks.some(t=>t.solo);
       return !tracks[i].muted && (!anySolo || tracks[i].solo) ? 1 : 0;
@@ -816,6 +848,7 @@
     let scheduleFloor=0; // earliest audio-clock time anything may start (playback can begin part-way through)
     async function play(index=null,from=0) {
       if(tracks.some(t=>!t.parsed)){notify('Fix the highlighted RTTTL error first');return;}
+      if(tracks.some(t=>liveDraft(t))){notify('Fix the overlapping notes (red outlines) in the piano roll first');return;}
       halt();
       try {await audioSetup();}catch(err){notify(err.message);return;}
       audition=index; speedAtStart=Number(speedInput.value);
@@ -872,17 +905,22 @@
       const x=t*bpm/60*beatPx;head.style.left=`${x}px`;
       if(playing){const sc=document.getElementById('pianoScroll'),keys=70;if(x<sc.scrollLeft||x>sc.scrollLeft+sc.clientWidth-keys-30)sc.scrollLeft=Math.max(0,x-60);}
     }
+    // What the piano-roll transport plays: all motors (null), the editing channel, or the channels switched on
+    function pianoAudition(){
+      const scope=document.getElementById('pianoScope').value;
+      return scope==='all'?null:scope==='motor'||pianoShown.size===1?editMotor:new Set(pianoShown);
+    }
     function pianoPlayPause(){
       if(motorsPlaying()){pianoPos=elapsed();halt();return;}
-      const scopeAll=document.getElementById('pianoScope').value==='all';
-      const end=scopeAll?Math.max(...tracks.map(t=>t.parsed?.length||0)):(tracks[editMotor].parsed?.length||0);
+      const who=pianoAudition(),playing=tracks.filter((t,i)=>who===null||(who instanceof Set?who.has(i):i===who));
+      const end=Math.max(0,...playing.map(t=>t.parsed?.length||0));
       if(pianoPos>=end-.01)pianoPos=0;
-      play(scopeAll?null:editMotor,pianoPos);
+      play(who,pianoPos);
     }
     function seekPiano(t){
       const wasPlaying=motorsPlaying();
       pianoPos=Math.max(0,t);
-      if(wasPlaying){const scopeAll=document.getElementById('pianoScope').value==='all';play(scopeAll?null:editMotor,pianoPos);}
+      if(wasPlaying)play(pianoAudition(),pianoPos);
       else updatePianoTransport();
     }
     function elapsed() {return startTime===null || !ctx ? 0 : Math.max(0,(ctx.currentTime-startTime)*speedAtStart);}
@@ -1326,6 +1364,7 @@
     }
     function exportMidi(){
       if(tracks.some(t=>!t.parsed)){notify('Fix RTTTL errors before MIDI export');return;}
+      if(tracks.some(t=>liveDraft(t))){notify('Fix the overlapping notes in the piano roll before MIDI export');return;}
       const bpm=Number(bpmInput.value);
       const voices=tracks.map((t)=>({name:t.name,notes:t.parsed.notes.filter(n=>!n.rest).map(n=>({start:n.start*bpm/60,duration:n.seconds*bpm/60,midi:n.midi}))}));
       const [num,den]=timeSignatureInput.value.split('/').map(Number);
@@ -1352,8 +1391,27 @@
       const suffix=pitch===null?'p':`${rtttlPitchNames[pitch%12]}${Math.floor(pitch/12)-1}`;
       return d.token.endsWith('.')?`${d.token.slice(0,-1)}${suffix}.`:`${d.token}${suffix}`;
     }
-    function voiceEvents(){
-      const parsed=tracks[editMotor].parsed;if(!parsed)return {events:[],tail:.5,parsed:null};
+    function durationLabel(beats){
+      const d=durationCode(beats);if(!d)return `${beats} beats`;
+      const n=parseInt(d.token,10);
+      return d.token.endsWith('.')?`3/${2*n} (dotted 1/${n})`:`1/${n}`;
+    }
+    // Overlapping notes can't be written as RTTTL (one note at a time per motor), so the piano roll
+    // keeps them as a draft on the track. The draft only applies while the RTTTL text is unchanged.
+    function liveDraft(t){return t.draft&&t.draft.text===t.value?t.draft:null;}
+    function overlapIndices(events){
+      const hits=new Set();
+      for(let i=0;i<events.length;i++)for(let j=i+1;j<events.length;j++){
+        const a=events[i],b=events[j];
+        if(a.start<b.start+b.duration-.0001&&b.start<a.start+a.duration-.0001){hits.add(i);hits.add(j);}
+      }
+      return hits;
+    }
+    function eventsEnd(events){return Math.max(0,...events.map(e=>e.start+e.duration));}
+    function voiceEvents(motor=editMotor){
+      const t=tracks[motor],parsed=t.parsed;if(!parsed)return {events:[],tail:.5,parsed:null};
+      const draft=liveDraft(t);
+      if(draft)return {events:draft.events.map(e=>({...e})),tail:draft.tail,parsed};
       let beat=0;const events=[];
       for(const n of parsed.notes){if(!n.rest)events.push({start:roundBeat(beat),duration:n.beats,midi:n.midi});beat+=n.beats;}
       const last=events.at(-1);const end=last?last.start+last.duration:0;
@@ -1383,42 +1441,58 @@
       const {d,o,b}=parsed.defaults;
       return `${parsed.name}:d=${d},o=${o},b=${b}:${parts.join(',')}`;
     }
-    function saveHistory(){editHistory.push({motor:editMotor,text:tracks[editMotor].value});if(editHistory.length>45)editHistory.shift();redoHistory.length=0;document.getElementById('undoEdit').disabled=false;document.getElementById('redoEdit').disabled=true;}
-    function commitEvents(events,tail,render=true){
-      const parsed=tracks[editMotor].parsed;
+    function snapshot(motor=editMotor){const t=tracks[motor],d=liveDraft(t);return {motor,text:t.value,draft:d?JSON.parse(JSON.stringify(d)):null};}
+    function restoreSnapshot(item){
+      editMotor=item.motor;const t=tracks[editMotor];
+      t.value=item.text;t.draft=item.draft;document.getElementById(`rtttl-${editMotor}`).value=item.text;
+      saveEdits();updateParsed();
+    }
+    function saveHistory(){editHistory.push(snapshot());if(editHistory.length>45)editHistory.shift();redoHistory.length=0;document.getElementById('undoEdit').disabled=false;document.getElementById('redoEdit').disabled=true;}
+    // Returns the events in start order (selectedNote follows the note at selIndex), or false if they can't be encoded
+    function commitEvents(events,tail,render=true,selIndex=selectedNote){
+      const t=tracks[editMotor],sel=events[selIndex];
+      const sorted=[...events].sort((a,b)=>a.start-b.start||b.midi-a.midi);
       try{
-        const next=serializeEvents(events,tail,parsed);
-        tracks[editMotor].value=next;
-        document.getElementById(`rtttl-${editMotor}`).value=next;
-        saveEdits();updateParsed(render);
-        return true;
+        if(overlapIndices(sorted).size)t.draft={events:sorted.map(e=>({...e})),tail,text:t.value};
+        else{
+          const next=serializeEvents(sorted,tail,t.parsed);
+          t.draft=null;t.value=next;
+          document.getElementById(`rtttl-${editMotor}`).value=next;
+          saveEdits();
+        }
       }catch(err){if(render)notify(err.message);return false;}
+      if(sel)selectedNote=sorted.indexOf(sel);
+      updateParsed(render);
+      return sorted;
     }
     function selectMotor(index,scroll=false){
-      editMotor=index;selectedNote=0;renderPiano();
+      editMotor=index;selectedNote=0;pianoShown.add(index);renderPiano();
       if(scroll)document.getElementById('pianoPanel').scrollIntoView({behavior:'smooth',block:'start'});
     }
     function updateNoteInspector(events){
       const note=events[selectedNote];const enabled=!!note;
       const title=document.getElementById('selectedNoteTitle');
-      title.textContent=note?`Note ${selectedNote+1} of ${events.length} · ${pitchLabel(note.midi)}`:'Select a note';
+      title.textContent=note?`Note ${selectedNote+1} of ${events.length} · ${pitchLabel(note.midi)} · ${durationLabel(note.duration)}`:'Select a note';
       [notePitchSelect,noteDurationSelect,noteStartInput,document.getElementById('deleteNote')].forEach(x=>x.disabled=!enabled);
       if(note){notePitchSelect.value=String(note.midi);noteDurationSelect.value=String(note.duration);noteStartInput.value=String(roundBeat(note.start));}
     }
     function renderPiano(){
-      motorTabs.innerHTML=tracks.map((t,i)=>`<button type="button" class="motor-tab ${i===editMotor?'active':''}" data-motor="${i}" aria-pressed="${i===editMotor}" style="--track-color:${t.color}" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name||'Unnamed')}</button>`).join('');
-      const t=tracks[editMotor];document.getElementById('selectedMotorName').textContent=`ESC ${editMotor+1} · ${t.name}`;
+      for(const m of pianoShown)if(m>=tracks.length)pianoShown.delete(m);
+      pianoShown.add(editMotor);
+      motorTabs.innerHTML=tracks.map((t,i)=>`<button type="button" class="motor-tab ${pianoShown.has(i)?'on':''} ${i===editMotor?'active':''}" data-motor="${i}" aria-pressed="${pianoShown.has(i)}" style="--track-color:${t.color}" title="${escapeHTML(t.name)}: click to switch ${pianoShown.has(i)?'off':'on'}">${i===editMotor?'✎ ':''}ESC ${i+1} · ${escapeHTML(t.name||'Unnamed')}</button>`).join('');
+      const t=tracks[editMotor];document.getElementById('selectedMotorName').textContent=`Editing ESC ${editMotor+1} · ${t.name}`;
       if(!t.parsed){pianoGrid.innerHTML='<p style="padding:20px;color:#ffaaaa">Correct this motor’s RTTTL string below to enable visual editing.</p>';pianoKeys.innerHTML='';pianoBeats.innerHTML='';updateNoteInspector([]);return;}
       const {events,tail}=voiceEvents();selectedNote=events.length?clamp(selectedNote,0,events.length-1):-1;
       const targetBeat=showTimeGuide.checked?guideSeconds()*t.parsed.bpm/60:0;
       const proposals=suggestionNotes.map(n=>({start:(refOffset+n.start)*t.parsed.bpm/60,duration:n.duration*t.parsed.bpm/60,midi:n.midi}));
       const proposedEnd=proposals.length?Math.max(...proposals.map(n=>n.start+n.duration)):0;
-      const bar=barBeats();
-      const maxBeat=Math.max(8,Math.ceil((Math.max(t.parsed.totalBeats,targetBeat,proposedEnd)+1)/bar)*bar);
-      const minSound=Math.min(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
-      const maxSound=Math.max(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
-      pianoMinPitch=clamp(Math.floor(minSound/12)*12,48,72);
-      pianoMaxPitch=Math.min(BLUEJAY_MAX_MIDI,Math.max(pianoMinPitch+23,maxSound+3));
+      const bar=barBeats(),songBeats=eventsEnd(events)+tail,overlaps=overlapIndices(events);
+      const others=[...pianoShown].filter(m=>m!==editMotor&&tracks[m].parsed).map(m=>({motor:m,...voiceEvents(m)}));
+      const othersEnd=Math.max(0,...others.map(o=>eventsEnd(o.events)+o.tail));
+      const maxBeat=Math.max(8,Math.ceil((Math.max(songBeats,othersEnd,targetBeat,proposedEnd)+1)/bar)*bar);
+      // Always lay out Bluejay's whole range; zoom and scrolling decide how much of it is visible
+      pianoMinPitch=BLUEJAY_MIN_MIDI;pianoMaxPitch=BLUEJAY_MAX_MIDI;
+      pianoScroll.style.setProperty('--row',`${rowPx}px`);pianoScroll.style.setProperty('--row-font',`${clamp(rowPx-8,7,10)}px`);
       const rows=pianoMaxPitch-pianoMinPitch+1;
       const width=maxBeat*beatPx,height=rows*rowPx;
       const keys=[],background=[],notes=[];
@@ -1429,40 +1503,86 @@
         keys.push(`<div class="piano-key ${kind} ${inKey}">${pitchLabel(midi)}</div>`);
         background.push(`<div class="pitch-row ${kind} ${inKey}" style="top:${y}px"></div>`);
       }
-      for(let beat=0;beat<=maxBeat;beat+=.5){const type=Math.abs(beat/bar-Math.round(beat/bar))<.001?'bar':'';background.push(`<div class="gridline ${type}" style="left:${beat*beatPx}px"></div>`);}
+      const gridStep=beatPx<24?1:beatPx>=180?.25:.5;
+      for(let beat=0;beat<=maxBeat;beat+=gridStep){const type=Math.abs(beat/bar-Math.round(beat/bar))<.001?'bar':'';background.push(`<div class="gridline ${type}" style="left:${beat*beatPx}px"></div>`);}
       if(showTimeGuide.checked){background.push(`<div class="guide-marker" style="left:${targetBeat*beatPx}px"><span>${guideSeconds().toFixed(2)}s</span></div>`);}
       for(const n of proposals){
         const x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(7,n.duration*beatPx-2);
         notes.push(`<div class="detected-note" data-midi="${n.midi}" data-seconds="${(n.duration*60/t.parsed.bpm).toFixed(3)}" style="left:${x}px;top:${y}px;width:${w}px" title="Suggested ${pitchLabel(n.midi)} (click to hear it)"></div>`);
       }
+      for(const o of others)o.events.forEach((n,j)=>{
+        const x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(10,n.duration*beatPx-2);
+        notes.push(`<div class="ghost-note" data-motor="${o.motor}" data-note="${j}" style="--track-color:${tracks[o.motor].color};left:${x}px;top:${y}px;width:${w}px" title="ESC ${o.motor+1} · ${escapeHTML(tracks[o.motor].name)}: ${pitchLabel(n.midi)} (click to edit this channel)">${pitchLabel(n.midi)}</div>`);
+      });
       for(let i=0;i<events.length;i++){
         const n=events[i],x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(10,n.duration*beatPx-2);
-        notes.push(`<div class="midi-note ${i===selectedNote?'selected':''}" style="--track-color:${t.color};left:${x}px;top:${y}px;width:${w}px" data-note="${i}" role="button" tabindex="0" aria-label="Note ${i+1}: ${pitchLabel(n.midi)}, starts at beat ${n.start}, duration ${n.duration} beats"><span>${pitchLabel(n.midi)}</span><span class="resize-grip" title="Drag to change length"></span></div>`);
+        const clash=overlaps.has(i);
+        notes.push(`<div class="midi-note ${i===selectedNote?'selected':''} ${clash?'overlap':''}" style="--track-color:${t.color};left:${x}px;top:${y}px;width:${w}px" data-note="${i}" role="button" tabindex="0"${clash?' title="Overlaps another note: a motor plays one note at a time"':''} aria-label="Note ${i+1}: ${pitchLabel(n.midi)}, starts at beat ${n.start}, length ${durationLabel(n.duration)}${clash?', overlaps another note':''}"><span>${pitchLabel(n.midi)}</span><span class="resize-grip" title="Drag to change length"></span></div>`);
       }
       pianoGrid.style.width=`${width}px`;pianoGrid.style.height=`${height}px`;
       pianoKeys.style.height=`${height}px`;pianoKeys.innerHTML=keys.join('');
-      pianoBeats.style.width=`${width}px`;pianoBeats.innerHTML=Array.from({length:Math.ceil(maxBeat)},(_,beat)=>`<div class="beat-mark ${beat%bar===0?'bar':''}" style="left:${beat*beatPx}px">${beat%bar===0?`Bar ${Math.floor(beat/bar)+1}`:beat+1}</div>`).join('');
+      pianoBeats.style.width=`${width}px`;pianoBeats.innerHTML=Array.from({length:Math.ceil(maxBeat)},(_,beat)=>`<div class="beat-mark ${beat%bar===0?'bar':''}" style="left:${beat*beatPx}px">${beat%bar===0?`Bar ${Math.floor(beat/bar)+1}`:beatPx<34?'':beat+1}</div>`).join('');
       pianoGrid.innerHTML=background.join('')+notes.join('')+'<div class="piano-playhead" id="pianoPlayhead"></div>';
       updatePianoTransport();
-      document.getElementById('pianoReadout').textContent=`· ${events.length} notes · ${t.parsed.totalBeats.toFixed(2)} beats`;
-      updateNoteInspector(events);
+      document.getElementById('pianoReadout').textContent=`· ${events.length} notes · ${songBeats.toFixed(2)} beats${overlaps.size?` · ${overlaps.size} overlapping (red), RTTTL not updated until fixed`:''}`;
+      updateNoteInspector(events);updatePianoZoomButtons();
+      centerPianoOn(events,pianoViewMotor!==editMotor);pianoViewMotor=editMotor;
+    }
+    let pianoViewMotor=-1;
+    const pianoShown=new Set([0]); // channels switched on in the piano roll (insertion order = order switched on)
+    function toggleMotor(index){
+      if(pianoShown.has(index)){
+        if(pianoShown.size===1){notify('Keep at least one channel switched on');return;}
+        pianoShown.delete(index);
+        if(index===editMotor){editMotor=[...pianoShown].at(-1);selectedNote=0;}
+      }else{pianoShown.add(index);editMotor=index;selectedNote=0;}
+      pianoViewMotor=editMotor;renderPiano();
+    }
+    // Scroll the notes into view vertically: always when switching motor, otherwise only if none are visible
+    function centerPianoOn(events,force){
+      if(!events.length)return;
+      const rowTop=m=>(pianoMaxPitch-m)*rowPx,hi=rowTop(Math.max(...events.map(n=>n.midi))),lo=rowTop(Math.min(...events.map(n=>n.midi)))+rowPx;
+      const top=pianoScroll.scrollTop,visible=pianoScroll.clientHeight-29;
+      if(!force&&lo>top&&hi<top+visible)return;
+      pianoScroll.scrollTop=Math.max(0,(hi+lo-visible)/2);
+    }
+    function updatePianoZoomButtons(){
+      document.getElementById('pianoZoomOutX').disabled=beatPx<=PIANO_BEAT_PX[0];document.getElementById('pianoZoomInX').disabled=beatPx>=PIANO_BEAT_PX[1];
+      document.getElementById('pianoZoomOutY').disabled=rowPx<=PIANO_ROW_PX[0];document.getElementById('pianoZoomInY').disabled=rowPx>=PIANO_ROW_PX[1];
+    }
+    function savePianoZoom(){settings.pianoZoom={x:beatPx,y:rowPx};saveSettings();}
+    // Zoom keeping the beat/pitch under the anchor (px from the top-left of the visible grid) in place
+    function zoomPiano(fx,fy,anchorX,anchorY){
+      const ax=anchorX??(pianoScroll.clientWidth-70)/2,ay=anchorY??(pianoScroll.clientHeight-29)/2;
+      const beat=(pianoScroll.scrollLeft+ax)/beatPx,row=(pianoScroll.scrollTop+ay)/rowPx;
+      beatPx=Math.round(clamp(beatPx*fx,...PIANO_BEAT_PX)*100)/100;
+      rowPx=clamp(Math.round(rowPx*fy),...PIANO_ROW_PX);
+      renderPiano();
+      pianoScroll.scrollLeft=beat*beatPx-ax;pianoScroll.scrollTop=row*rowPx-ay;
+      savePianoZoom();
+    }
+    function fitPiano(){
+      const {events,tail}=voiceEvents();
+      const maxH=parseFloat(getComputedStyle(pianoScroll).maxHeight),height=(Number.isFinite(maxH)?maxH:pianoScroll.clientHeight)-29-8;
+      beatPx=Math.round(clamp((pianoScroll.clientWidth-70-24)/Math.max(1,eventsEnd(events)+tail),...PIANO_BEAT_PX)*100)/100;
+      if(events.length){const span=Math.max(...events.map(n=>n.midi))-Math.min(...events.map(n=>n.midi))+5;rowPx=clamp(Math.floor(height/span),...PIANO_ROW_PX);}
+      renderPiano();pianoScroll.scrollLeft=0;centerPianoOn(events,true);
+      savePianoZoom();
     }
 
     function changeSelected(kind,value){
       const {events,tail}=voiceEvents(),n=events[selectedNote];if(!n)return;
       if(!Number.isFinite(Number(value))){renderPiano();return;}
-      const next=events.map(e=>({...e}));const prev=next[selectedNote-1],following=next[selectedNote+1];
+      const next=events.map(e=>({...e}));const prev=next[selectedNote-1];
       if(kind==='pitch')next[selectedNote].midi=clamp(Number(value),BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
       if(kind==='duration'){
         const dur=Number(value),delta=dur-next[selectedNote].duration;
-        if(!rippleInput.checked&&following&&next[selectedNote].start+dur>following.start+.0001){notify('Length overlaps the next note; enable Ripple editing to shift it');renderPiano();return;}
         next[selectedNote].duration=dur;
         if(rippleInput.checked)for(let j=selectedNote+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+delta);
       }
       if(kind==='start'){
-        const min=prev?prev.start+prev.duration:0;
-        let target=Math.max(min,snapValue(Number(value)));
-        if(!rippleInput.checked&&following)target=Math.min(target,following.start-next[selectedNote].duration);
+        const min=rippleInput.checked&&prev?prev.start+prev.duration:0;
+        const target=Math.max(min,snapValue(Number(value)));
         const delta=target-next[selectedNote].start;
         if(rippleInput.checked)for(let j=selectedNote;j<next.length;j++)next[j].start=roundBeat(next[j].start+delta);
         else next[selectedNote].start=roundBeat(target);
@@ -1476,26 +1596,25 @@
       if(events.length>=58){notify('Too many notes for Bluejay');return;}
       const next=events.map(e=>({...e}));
       const last=next.at(-1);
-      let beat=start===null?(last?last.start+last.duration:0):Math.max(0,snapValue(start));
-      beat=roundBeat(beat);
+      let beat=roundBeat(start===null?eventsEnd(next):Math.max(0,snapValue(start)));
       const duration=.5;
       const pitch=clamp(midi??last?.midi??69,BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
       let insert=next.findIndex(e=>e.start>=beat);if(insert<0)insert=next.length;
-      const prev=next[insert-1];if(prev)beat=Math.max(beat,prev.start+prev.duration);
-      if(insert<next.length){
-        const shift=Math.max(0,beat+duration-next[insert].start);
-        if(!rippleInput.checked&&shift>.0001){notify('Not enough room; enable Ripple editing or select an empty gap');return;}
-        if(rippleInput.checked)for(let j=insert;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
+      if(rippleInput.checked){
+        // Ripple: start after the previous note and push later notes along to make room
+        const prev=next[insert-1];if(prev)beat=Math.max(beat,prev.start+prev.duration);
+        const shift=insert<next.length?Math.max(0,beat+duration-next[insert].start):0;
+        for(let j=insert;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
       }
       next.splice(insert,0,{start:beat,duration,midi:pitch});
       selectedNote=insert;saveHistory();halt();commitEvents(next,tail);
     }
     function deletePianoNote(){
       const {events,tail}=voiceEvents();if(!events[selectedNote])return;
+      const total=eventsEnd(events)+tail;
       const next=events.map(e=>({...e}));const removed=next.splice(selectedNote,1)[0];
       if(rippleInput.checked)for(let i=selectedNote;i<next.length;i++)next[i].start=roundBeat(next[i].start-removed.duration);
-      const total=tracks[editMotor].parsed.totalBeats;
-      const last=next.at(-1);const newTail=rippleInput.checked?tail:roundBeat(Math.max(0,total-(last?last.start+last.duration:0)));
+      const newTail=rippleInput.checked?tail:roundBeat(Math.max(0,total-eventsEnd(next)));
       selectedNote=clamp(selectedNote,0,next.length-1);saveHistory();halt();commitEvents(next,newTail);
     }
 
@@ -1515,6 +1634,13 @@
     }
     function noteSeconds(beats){return beats*60/(tracks[editMotor]?.parsed?.bpm||Number(bpmInput.value)||120);}
     function startNoteDrag(e){
+      const ghost=e.target.closest('.ghost-note');
+      if(ghost&&e.button===0){
+        const original=e;
+        editMotor=Number(ghost.dataset.motor);selectedNote=Number(ghost.dataset.note);pianoViewMotor=editMotor;renderPiano();
+        const target=pianoGrid.querySelector(`.midi-note[data-note="${selectedNote}"]`);if(!target)return;
+        e={target,button:0,pointerId:original.pointerId,clientX:original.clientX,clientY:original.clientY,preventDefault:()=>original.preventDefault()};
+      }
       const node=e.target.closest('.midi-note');if(!node || e.button!==0)return;
       const {events,tail}=voiceEvents();const index=Number(node.dataset.note);
       selectedNote=index;const mode=e.target.closest('.resize-grip')?'resize':'move';
@@ -1530,45 +1656,65 @@
       const next=d.original.map(n=>({...n}));const note=next[d.index];
       const dx=e.clientX-d.originX,dy=e.clientY-d.originY;
       if(d.mode==='resize'){
-        let candidate=closestDuration(Math.max(.0625,note.duration+dx/beatPx));
-        const following=next[d.index+1];
-        if(!rippleInput.checked&&following&&note.start+candidate>following.start+.00001){
-          const fitting=durationChoices.filter(c=>c.beats<=following.start-note.start+.00001);
-          candidate=fitting.length?fitting.reduce((best,c)=>Math.abs(candidate-c.beats)<Math.abs(candidate-best.beats)?c:best).beats:note.duration;
-        }
+        const candidate=closestDuration(Math.max(.0625,note.duration+dx/beatPx));
         const shift=roundBeat(candidate-note.duration);note.duration=candidate;
         if(rippleInput.checked)for(let j=d.index+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
       }else{
         note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
         if(note.midi!==d.lastMidi){d.lastMidi=note.midi;previewNote(note.midi,Math.min(.3,noteSeconds(note.duration)));}
-        const predecessor=next[d.index-1],following=next[d.index+1];
-        const min=predecessor?predecessor.start+predecessor.duration:0;
-        let desired=roundBeat(Math.max(min,d.original[d.index].start+snapValue(dx/beatPx)));
-        if(!rippleInput.checked&&following)desired=Math.min(desired,following.start-note.duration);
+        // Without ripple a note can slide past its neighbours; any overlap is flagged rather than blocked
+        const predecessor=next[d.index-1];
+        const min=rippleInput.checked&&predecessor?predecessor.start+predecessor.duration:0;
+        const desired=roundBeat(Math.max(min,d.original[d.index].start+snapValue(dx/beatPx)));
         const shift=roundBeat(desired-note.start);
         if(rippleInput.checked)for(let j=d.index;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
         else note.start=roundBeat(desired);
       }
-      if(!commitEvents(next,d.tail,false))return;
+      const sorted=commitEvents(next,d.tail,false,d.index);if(!sorted)return;
       d.node.style.left=`${note.start*beatPx}px`;
       d.node.style.width=`${Math.max(10,note.duration*beatPx-2)}px`;
       d.node.style.top=`${(pianoMaxPitch-note.midi)*rowPx+1}px`;
-      d.node.setAttribute('aria-label',`Note ${d.index+1}: ${pitchLabel(note.midi)}, ${note.duration} beats`);
+      d.node.setAttribute('aria-label',`Note ${d.index+1}: ${pitchLabel(note.midi)}, length ${durationLabel(note.duration)}`);
       d.node.firstElementChild.textContent=pitchLabel(note.midi);
-      updateNoteInspector(next);
+      const hits=overlapIndices(next);
+      pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('overlap',hits.has(Number(n.dataset.note))));
+      updateNoteInspector(sorted);
     }
     function endNoteDrag(e){
       const d=dragState;if(!d||e.pointerId!==d.pointerId)return;
       try{d.node.releasePointerCapture(e.pointerId);}catch(_){}
       // A click that changed nothing shouldn't leave an empty undo step behind
       const top=editHistory.at(-1);
-      if(top&&top.motor===editMotor&&top.text===tracks[editMotor].value){editHistory.pop();redoHistory.push(...d.redo);document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=!redoHistory.length;}
+      if(top&&top.motor===editMotor&&top.text===tracks[editMotor].value&&JSON.stringify(top.draft)===JSON.stringify(liveDraft(tracks[editMotor]))){editHistory.pop();redoHistory.push(...d.redo);document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=!redoHistory.length;}
       dragState=null;renderPiano();
     }
 
-    motorTabs.addEventListener('click',e=>{const b=e.target.closest('[data-motor]');if(b)selectMotor(Number(b.dataset.motor));});
+    motorTabs.addEventListener('click',e=>{const b=e.target.closest('[data-motor]');if(b)toggleMotor(Number(b.dataset.motor));});
     timeline.addEventListener('click',e=>{const rect=timeline.getBoundingClientRect();selectMotor(clamp(Math.floor((e.clientY-rect.top)/45),0,tracks.length-1),true);});
     pianoGrid.addEventListener('pointerdown',startNoteDrag);
+    document.getElementById('pianoZoomOutX').addEventListener('click',()=>zoomPiano(1/1.4,1));
+    document.getElementById('pianoZoomInX').addEventListener('click',()=>zoomPiano(1.4,1));
+    document.getElementById('pianoZoomOutY').addEventListener('click',()=>zoomPiano(1,1/1.25));
+    document.getElementById('pianoZoomInY').addEventListener('click',()=>zoomPiano(1,1.25));
+    document.getElementById('pianoFit').addEventListener('click',fitPiano);
+    pianoScroll.addEventListener('wheel',e=>{
+      if(!e.ctrlKey&&!e.metaKey)return;
+      e.preventDefault();
+      const rect=pianoScroll.getBoundingClientRect(),delta=e.deltaY||e.deltaX;if(!delta)return;
+      if(e.shiftKey)zoomPiano(1,delta<0?1.25:1/1.25,undefined,e.clientY-rect.top-29);
+      else zoomPiano(Math.exp(-clamp(delta,-120,120)*.0025),1,e.clientX-rect.left-70); // smooth for trackpad pinch
+    },{passive:false});
+    const pianoPanel=document.getElementById('pianoPanel'),pianoFullscreenButton=document.getElementById('pianoFullscreen');
+    if(document.fullscreenEnabled){
+      pianoFullscreenButton.hidden=false;
+      pianoFullscreenButton.addEventListener('click',()=>{document.fullscreenElement===pianoPanel?document.exitFullscreen():pianoPanel.requestFullscreen().catch(()=>notify('Full screen is not available here'));});
+    }
+    document.addEventListener('fullscreenchange',()=>{
+      const fs=document.fullscreenElement;
+      pianoFullscreenButton.textContent=fs===pianoPanel?'✕ Exit full screen':'⛶ Full screen';
+      (fs&&fs!==document.documentElement?fs:document.body).appendChild(document.getElementById('toast')); // keep toasts visible over a full-screen panel
+      renderPiano();
+    });
     pianoGrid.addEventListener('pointerdown',e=>{const n=e.target.closest('.detected-note');if(n&&e.button===0)previewNote(Number(n.dataset.midi),Number(n.dataset.seconds));});
     pianoKeys.addEventListener('pointerdown',e=>{if(!e.target.closest('.piano-key')||e.button!==0)return;const rect=pianoKeys.getBoundingClientRect();previewNote(pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx),.4);});
     pianoGrid.addEventListener('pointermove',moveNoteDrag);
@@ -1579,21 +1725,19 @@
     document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
     document.getElementById('deleteNote').addEventListener('click',deletePianoNote);
     notePitchSelect.innerHTML=Array.from({length:BLUEJAY_MAX_MIDI-BLUEJAY_MIN_MIDI+1},(_,i)=>`<option value="${i+BLUEJAY_MIN_MIDI}">${pitchLabel(i+BLUEJAY_MIN_MIDI)}</option>`).join('');
-    noteDurationSelect.innerHTML=durationChoices.map(c=>`<option value="${c.beats}">${c.beats} beat${c.beats===1?'':'s'}</option>`).join('');
+    noteDurationSelect.innerHTML=durationChoices.map(c=>`<option value="${c.beats}">${durationLabel(c.beats)}</option>`).join('');
     notePitchSelect.addEventListener('change',e=>changeSelected('pitch',e.target.value));
     noteDurationSelect.addEventListener('change',e=>changeSelected('duration',e.target.value));
     noteStartInput.addEventListener('change',e=>changeSelected('start',e.target.value));
     document.getElementById('undoEdit').addEventListener('click',()=>{
-      const item=editHistory.pop();if(!item)return;halt();editMotor=item.motor;
-      redoHistory.push({motor:editMotor,text:tracks[editMotor].value});
-      tracks[editMotor].value=item.text;document.getElementById(`rtttl-${editMotor}`).value=item.text;
-      saveEdits();updateParsed();document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=false;
+      const item=editHistory.pop();if(!item)return;halt();
+      redoHistory.push(snapshot(item.motor));restoreSnapshot(item);
+      document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=false;
     });
     document.getElementById('redoEdit').addEventListener('click',()=>{
-      const item=redoHistory.pop();if(!item)return;halt();editMotor=item.motor;
-      editHistory.push({motor:editMotor,text:tracks[editMotor].value});
-      tracks[editMotor].value=item.text;document.getElementById(`rtttl-${editMotor}`).value=item.text;
-      saveEdits();updateParsed();document.getElementById('redoEdit').disabled=!redoHistory.length;document.getElementById('undoEdit').disabled=false;
+      const item=redoHistory.pop();if(!item)return;halt();
+      editHistory.push(snapshot(item.motor));restoreSnapshot(item);
+      document.getElementById('redoEdit').disabled=!redoHistory.length;document.getElementById('undoEdit').disabled=false;
     });
 
     motorCountInput.addEventListener('change',()=>resizeMotorCount(motorCountInput.value));
@@ -1699,6 +1843,8 @@
     volumeInput.addEventListener('input',()=>{volumeValue.textContent=`${volumeInput.value}%`;if(masterGain&&ctx)masterGain.gain.setTargetAtTime((Number(volumeInput.value)/100)*.25,ctx.currentTime,.02);});
     document.getElementById('reset').addEventListener('click',()=>{halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;tracks.forEach((t,i)=>{t.value=defaultMotor(i).value;document.getElementById(`rtttl-${i}`).value=t.value;t.muted=false;t.solo=false;});saveEdits();updateParsed();updateButtons();notify(`Default arrangement restored across ${tracks.length} motors`);});
     document.getElementById('exportProject').addEventListener('click',()=>{
+      const drafts=tracks.map((t,i)=>liveDraft(t)?`ESC ${i+1}`:null).filter(Boolean);
+      if(drafts.length&&!window.confirm(`${drafts.join(', ')} ${drafts.length>1?'have':'has'} overlapping notes that aren't in the RTTTL yet. The project will save the last version without overlaps. Export anyway?`))return;
       saveSettings();
       const project={format:'rtttl-quad-lab',version:3,exportedAt:new Date().toISOString(),tracks:tracks.map(t=>({name:t.name,rtttl:t.value})),targetTime:{enabled:showTimeGuide.checked,seconds:guideSeconds()},settings:{...settings},reference:{filename:refFileName||null,start:refStart,duration:refDuration,offset:refOffset,volume:Number(referenceVolumeInput.value),mix:referenceMixInput.checked,view:refView?{start:refView.start,end:refView.end}:null}};
       downloadFile(JSON.stringify(project,null,2),'application/json','rtttl-quad-project.json');notify('Project file downloaded');
@@ -1826,7 +1972,7 @@
     if(document.fullscreenEnabled){
       fullscreenToggle.hidden=false;
       fullscreenToggle.addEventListener('click',()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>notify('Full screen is not available here'));});
-      document.addEventListener('fullscreenchange',()=>{fullscreenToggle.textContent=document.fullscreenElement?'✕ Exit full screen':'⛶ Full screen';});
+      document.addEventListener('fullscreenchange',()=>{fullscreenToggle.textContent=document.fullscreenElement===document.documentElement?'✕ Exit full screen':'⛶ Full screen';});
     }
 
     // When embedded, report content height so the host page can size the iframe with no inner scrollbar
