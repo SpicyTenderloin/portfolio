@@ -166,6 +166,14 @@
     .pitch-row { position:absolute; left:0; right:0; height:20px; border-bottom:1px solid #30415775; background:#19273a; pointer-events:none; }
     .pitch-row.black { background:#132033; }
     .pitch-row.tonic { background:#1d3546; }
+    .piano-key.in-key { background:#264339; color:#d9fff0; box-shadow:inset 3px 0 0 #6ee2b0; }
+    .piano-key.black.in-key { background:#1c362e; }
+    .piano-key.key-root { background:#2e6653; color:#fff; box-shadow:inset 5px 0 0 #8ef9d8; }
+    .piano-key.off-key { color:#56687a; }
+    .pitch-row.in-key { background:#1a302d; }
+    .pitch-row.black.in-key { background:#162b27; }
+    .pitch-row.key-root { background:#20403a; }
+    .pitch-row.off-key { background:#131c29; }
     .gridline { position:absolute; top:0; bottom:0; width:1px; background:#49607565; pointer-events:none; }
     .gridline.bar { width:2px; background:#7a96ae77; }
     .midi-note { position:absolute; z-index:3; height:17px; border:1px solid #ffffff55; border-radius:4px; background:var(--track-color); color:#102134; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px; font-weight:900; line-height:15px; padding:0 11px 0 5px; white-space:nowrap; overflow:hidden; cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 4px #0004; }
@@ -342,6 +350,8 @@
       <div class="piano-toolbar">
         <div class="hint"><strong id="selectedMotorName">ESC 1 · Higher melody</strong> <span id="pianoReadout">· 7 notes</span></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label>Key <select id="keyRoot" aria-label="Key root note"><option value="">None</option><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></label>
+          <select id="keyScale" aria-label="Scale"><option value="major">Major</option><option value="minor">Minor</option><option value="majpent">Major pentatonic</option><option value="minpent">Minor pentatonic</option></select>
           <label>Snap <select id="snapGrid"><option value="1">1/4 note</option><option value="0.5">1/8 note</option><option value="0.25" selected>1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></label>
           <label><input id="rippleEdit" type="checkbox"> Ripple editing</label>
           <button class="tiny" id="addNote" type="button">+ Add note</button>
@@ -368,7 +378,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note; select a note and press Delete to remove it. Choose a Key to highlight its notes on the keyboard and grid. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -453,6 +463,8 @@
     const beatPx = 92, rowPx = 20;
     const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
     const beatSnap = document.getElementById('snapGrid');
+    const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale');
+    const scaleSteps = {major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], majpent:[0,2,4,7,9], minpent:[0,3,5,7,10]};
     const pianoGrid = document.getElementById('pianoRoll');
     const pianoKeys = document.getElementById('pianoKeys');
     const pianoBeats = document.getElementById('pianoBeats');
@@ -498,6 +510,7 @@
     motorCountInput.value=String(tracks.length);
     metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
     stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
+    keyRootInput.value=/^(\d|1[01])$/.test(String(settings.keyRoot))?String(settings.keyRoot):'';keyScaleInput.value=scaleSteps[settings.keyScale]?settings.keyScale:'major';
     let editMotor = 0, selectedNote = 0, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
     const editHistory = [],redoHistory=[];
     let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
@@ -563,7 +576,7 @@
     function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
     function saveNames() { try { localStorage.setItem(namesKey, JSON.stringify(tracks.map(t=>t.name))); } catch (_) {} }
     function saveSettings(){
-      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value)});
+      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value});
       try{localStorage.setItem(settingsKey,JSON.stringify(settings));}catch(_){}
     }
     function barBeats(){const [n,d]=timeSignatureInput.value.split('/').map(Number);return n*4/d;}
@@ -1316,6 +1329,11 @@
     // format, so gaps are serialized as rests and all notes remain monophonic.
     function pitchLabel(midi){return `${pitchNames[midi%12]}${Math.floor(midi/12)-1}`;}
     function isBlack(midi){return [1,3,6,8,10].includes(midi%12);}
+    function keyClass(midi){
+      if(keyRootInput.value==='')return '';
+      const step=(midi-Number(keyRootInput.value)+120)%12;
+      return step===0?'in-key key-root':scaleSteps[keyScaleInput.value].includes(step)?'in-key':'off-key';
+    }
     function roundBeat(beats){return Math.round(beats*64)/64;}
     function clamp(value,lo,hi){return Math.min(hi,Math.max(lo,value));}
     function snapValue(beats){const step=Number(beatSnap.value);return Math.round(beats/step)*step;}
@@ -1399,8 +1417,9 @@
       for(let midi=pianoMaxPitch;midi>=pianoMinPitch;midi--){
         const y=(pianoMaxPitch-midi)*rowPx;
         const kind=isBlack(midi)?'black':midi%12===0?'tonic':'';
-        keys.push(`<div class="piano-key ${kind}">${pitchLabel(midi)}</div>`);
-        background.push(`<div class="pitch-row ${kind}" style="top:${y}px"></div>`);
+        const inKey=keyClass(midi);
+        keys.push(`<div class="piano-key ${kind} ${inKey}">${pitchLabel(midi)}</div>`);
+        background.push(`<div class="pitch-row ${kind} ${inKey}" style="top:${y}px"></div>`);
       }
       for(let beat=0;beat<=maxBeat;beat+=.5){const type=Math.abs(beat/bar-Math.round(beat/bar))<.001?'bar':'';background.push(`<div class="gridline ${type}" style="left:${beat*beatPx}px"></div>`);}
       if(showTimeGuide.checked){background.push(`<div class="guide-marker" style="left:${targetBeat*beatPx}px"><span>${guideSeconds().toFixed(2)}s</span></div>`);}
@@ -1492,7 +1511,7 @@
       const {events,tail}=voiceEvents();const index=Number(node.dataset.note);
       selectedNote=index;const mode=e.target.closest('.resize-grip')?'resize':'move';
       dragState={node,pointerId:e.pointerId,originX:e.clientX,originY:e.clientY,index,mode,original:events.map(n=>({...n})),tail};
-      saveHistory();halt();node.setPointerCapture(e.pointerId);
+      dragState.redo=redoHistory.slice();saveHistory();halt();node.setPointerCapture(e.pointerId);
       dragState.lastMidi=events[index].midi;previewNote(events[index].midi,noteSeconds(events[index].duration));
       node.classList.add('selected','dragging');
       pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('selected',Number(n.dataset.note)===index));
@@ -1533,6 +1552,9 @@
     function endNoteDrag(e){
       const d=dragState;if(!d||e.pointerId!==d.pointerId)return;
       try{d.node.releasePointerCapture(e.pointerId);}catch(_){}
+      // A click that changed nothing shouldn't leave an empty undo step behind
+      const top=editHistory.at(-1);
+      if(top&&top.motor===editMotor&&top.text===tracks[editMotor].value){editHistory.pop();redoHistory.push(...d.redo);document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=!redoHistory.length;}
       dragState=null;renderPiano();
     }
 
@@ -1585,6 +1607,15 @@
       input.addEventListener('change',()=>{saveSettings();updateStereo();});
     }
     beatSnap.addEventListener('change',()=>{saveSettings();});
+    for(const input of [keyRootInput,keyScaleInput])input.addEventListener('change',()=>{saveSettings();renderPiano();});
+    let pianoActive=false;
+    document.addEventListener('pointerdown',e=>{pianoActive=Boolean(e.target.closest('#pianoPanel'));},true);
+    document.addEventListener('keydown',e=>{
+      if((e.key!=='Delete'&&e.key!=='Backspace')||!pianoActive||e.ctrlKey||e.metaKey||e.altKey)return;
+      const el=document.activeElement;if(el&&(['TEXTAREA','INPUT','SELECT'].includes(el.tagName)||el.isContentEditable))return;
+      if(!voiceEvents().events[selectedNote])return;
+      e.preventDefault();deletePianoNote();
+    });
 
     document.getElementById('loadReference').addEventListener('click',()=>referenceFile.click());
     referenceFile.addEventListener('change',async()=>{await loadReferenceAudio(referenceFile.files?.[0]);referenceFile.value='';});
@@ -1690,6 +1721,8 @@
           if(['square','sine','motor'].includes(s.mode))soundModeInput.value=s.mode;
           if(Number.isFinite(s.stereo))stereoWidthInput.value=String(clamp(s.stereo,0,100));
           if([1,.5,.25,.125,.0625].includes(s.snap))beatSnap.value=String(s.snap);
+          if(typeof s.keyRoot==='string'&&/^(|\d|1[01])$/.test(s.keyRoot))keyRootInput.value=s.keyRoot;
+          if(scaleSteps[s.keyScale])keyScaleInput.value=s.keyScale;
           metronomeInput.checked=Boolean(s.metronome);rippleInput.checked=Boolean(s.ripple);
         }
         if(project.reference){
