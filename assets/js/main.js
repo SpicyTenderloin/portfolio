@@ -43,3 +43,15 @@ function openTargetDetails() {
 
 window.addEventListener("DOMContentLoaded", openTargetDetails);
 window.addEventListener("hashchange", openTargetDetails);
+
+// Embedded in-browser apps (.app-embed iframes) post their content height so
+// the iframe can grow to fit, leaving the page as the only scrollbar.
+window.addEventListener("message", function (e) {
+  if (e.origin !== location.origin || !e.data || e.data.type !== "app-embed:height") return;
+  var frames = document.querySelectorAll(".app-embed iframe");
+  for (var i = 0; i < frames.length; i++) {
+    if (frames[i].contentWindow === e.source) {
+      frames[i].style.height = Math.max(400, Math.ceil(e.data.height) + 2) + "px";
+    }
+  }
+});

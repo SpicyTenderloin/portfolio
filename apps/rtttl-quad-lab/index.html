@@ -26,6 +26,27 @@
     .subtitle { margin:15px 0 0; color:#abb9ca; font-size:15px; line-height:1.65; max-width:690px; }
     .song-pill { flex:none; color:#b4c5d4; font-size:12px; background:#1c2b39; border:1px solid #334b55; border-radius:100px; padding:11px 15px; }
     .song-pill strong { color:#ebf8f8; font-weight:700; }
+    html { background:var(--bg); }
+    .embedded body { min-height:0; }
+    .top-right { display:flex; align-items:center; gap:16px; flex-wrap:wrap; justify-content:flex-end; }
+    .fs-btn { border:1px solid #334b55; background:#1c2b39; color:#cfe3ea; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:700; }
+    .fs-btn:hover { border-color:#4b8794; color:#fff; }
+    .examples { position:relative; flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .examples-btn { border:1px solid #4b8794; background:#193039; color:#e8fbfb; border-radius:100px; padding:11px 17px; font-size:13px; font-weight:800; }
+    .examples-btn:hover { background:#1f3c47; }
+    .examples-loaded { color:#b4c5d4; font-size:12px; max-width:320px; text-align:right; }
+    .examples-loaded strong { color:#ebf8f8; font-weight:700; }
+    .examples-panel { position:absolute; top:calc(100% + 8px); right:0; z-index:30; width:min(430px,calc(100vw - 28px)); background:#151d2b; border:1px solid var(--border); border-radius:14px; box-shadow:0 24px 60px #000a; padding:12px; }
+    .examples-panel[hidden] { display:none; }
+    .examples-search { width:100%; border:1px solid #465870; border-radius:8px; background:#101a2a; color:#eef7fb; padding:9px 11px; font-size:13px; }
+    .examples-list { list-style:none; margin:10px 0 0; padding:0; max-height:min(420px,60vh); overflow:auto; }
+    .example-item { width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; text-align:left; border:0; background:none; color:#e6eef6; border-radius:8px; padding:9px 10px; font-size:13px; }
+    .example-item:hover, .example-item:focus-visible { background:#223044; }
+    .example-meta { flex:none; color:#8fa3b8; font-size:11px; font-weight:700; }
+    .example-meta.warn { color:#f0b46a; }
+    .examples-status { color:#93a6ba; font-size:12px; padding:10px 4px 2px; }
+    .examples-credit { color:#7f92a6; font-size:11px; line-height:1.5; margin:10px 2px 0; }
+    .examples-credit a { color:var(--cyan); }
     .panel { background:linear-gradient(155deg, #1c2433 0%, #161e2c 75%); border:1px solid var(--border); border-radius:18px; box-shadow:0 20px 45px #05081230; }
     .transport { display:flex; gap:20px; flex-wrap:wrap; align-items:center; padding:19px 21px; }
     .transport-actions { display:flex; gap:9px; align-items:center; }
@@ -76,6 +97,11 @@
     .reference-note { color:#90a5b9; font-size:11px; line-height:1.5; margin:5px 0 0; }
     .reference-wave { height:116px; width:100%; background:#0d1a2a; border:1px solid #38516a; border-radius:8px; display:block; touch-action:none; cursor:crosshair; }
     .reference-wave.empty { cursor:default; }
+    .zoom-controls { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .zoom-controls .tiny:disabled { opacity:.45; cursor:default; }
+    .zoom-readout { color:#90a5b9; font-size:11px; min-width:70px; }
+    .reference-pan { width:100%; margin:8px 0 0; accent-color:var(--cyan); }
+    .reference-pan:disabled { opacity:.35; }
     .detect-box { margin-top:15px; padding:14px; border:1px solid #3a6470; border-radius:11px; background:linear-gradient(100deg,#17313b,#152335); }
     .detect-head { display:flex; align-items:center; justify-content:space-between; gap:13px; flex-wrap:wrap; }
     .detect-head .panel-title { color:#a9f4ec; }
@@ -167,7 +193,7 @@
     .tips span { color:var(--cyan); font-weight:900; }
     .toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,15px); z-index:20; background:#def7ef; border:1px solid #b1ebdc; color:#153b3b; font-size:13px; font-weight:700; border-radius:10px; padding:11px 16px; opacity:0; pointer-events:none; transition:opacity .15s,transform .15s; box-shadow:0 15px 40px #0005; }
     .toast.visible { opacity:1; transform:translate(-50%,0); }
-    @media(max-width:900px) { .tracks { grid-template-columns:1fr; } .validation-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro { align-items:start; } .song-pill { display:none; } .transport-amount { margin-left:0; width:100%; justify-content:space-between; } }
+    @media(max-width:900px) { .tracks { grid-template-columns:1fr; } .validation-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro { align-items:start; flex-wrap:wrap; } .song-pill { display:none; } .examples { align-items:flex-start; } .examples-panel { left:0; right:auto; } .examples-loaded { text-align:left; } .transport-amount { margin-left:0; width:100%; justify-content:space-between; } }
     @media(max-width:620px) { .shell { padding:20px 14px 35px; } .top { margin-bottom:37px; } .top-note { font-size:10px; } .intro { margin-bottom:24px; } .subtitle { font-size:13px; } .transport { padding:15px; gap:16px; } .transport-actions { width:100%; } .primary,.secondary { flex:1; justify-content:center; } .transport-amount { gap:10px; } .setting { gap:7px; } input[type="range"] { width:70px; } .time-readout { padding-left:10px; font-size:12px; } .overview { padding:17px 12px; } .timeline-labels { width:92px; } .timeline-label { font-size:10px; gap:5px; } .timeline { gap:8px; } .ruler { margin-left:100px; } .guide-controls { justify-content:flex-start; } .guide-info { width:100%; } .track { padding:16px; } .track-top { flex-wrap:wrap; } .track-buttons { margin-left:auto; } .piano-panel { padding:16px 11px; } .piano-intro { gap:10px; } .motor-tab { padding:9px 11px; max-width:150px; } .piano-help { font-size:10px; } .studio-controls { padding:15px; } .reference-panel,.midi-panel,.validation-panel { padding:16px 13px; } .validation-grid,.midi-mapping { grid-template-columns:1fr; } }
   </style>
 </head>
@@ -175,7 +201,10 @@
   <main class="shell">
     <header class="top">
       <div class="brand"><div class="brand-mark" aria-hidden="true">≋</div><span>RTTTL / QUAD LAB</span></div>
-      <div class="top-note"><span class="live-dot" aria-hidden="true"></span> Browser audio · No ESC connection needed</div>
+      <div class="top-right">
+        <div class="top-note"><span class="live-dot" aria-hidden="true"></span> Browser audio · No ESC connection needed</div>
+        <button class="fs-btn" id="fullscreenToggle" type="button" hidden>⛶ Full screen</button>
+      </div>
     </header>
 
     <section class="intro">
@@ -184,7 +213,16 @@
         <h1><span id="motorHeadline">Four motors.</span><br><em>One melody.</em></h1>
         <p class="subtitle">An expandable multi-channel startup melody studio: edit RTTTL and MIDI-style notes, compare a reference audio clip, and preview the result before programming Bluejay ESCs.</p>
       </div>
-      <div class="song-pill">Demo loaded&nbsp; <strong>Four-motor hook</strong></div>
+      <div class="examples" id="examples">
+        <button class="examples-btn" id="examplesButton" type="button" aria-expanded="false" aria-controls="examplesPanel">♫ Example songs</button>
+        <div class="examples-loaded">Loaded:&nbsp; <strong id="loadedSong">Four-motor hook (demo)</strong></div>
+        <div class="examples-panel" id="examplesPanel" hidden>
+          <input class="examples-search" id="examplesSearch" type="search" placeholder="Search Bluejay example songs" aria-label="Search example songs">
+          <ul class="examples-list" id="examplesList" aria-label="Example songs"></ul>
+          <div class="examples-status" id="examplesStatus"></div>
+          <p class="examples-credit">Bluejay's example melodies, loaded live from the <a href="https://github.com/stylesuxx/esc-configurator" target="_blank" rel="noopener">ESC Configurator</a> preset library (AGPL-3.0). Needs an internet connection the first time.</p>
+        </div>
+      </div>
     </section>
 
     <section class="panel transport" aria-label="Playback controls">
@@ -232,6 +270,8 @@
         <div class="reference-buttons">
           <button class="tiny" id="loadReference" type="button">↑ Load audio</button><input id="referenceFile" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" hidden>
           <button class="tiny" id="playReference" type="button" disabled>▶ Clip only</button>
+          <button class="tiny" id="trimReference" type="button" title="Keep only the selected section of the audio" disabled>✂ Trim to selection</button>
+          <button class="tiny" id="undoTrim" type="button" title="Undo the last trim" disabled>↶ Undo trim</button>
           <button class="tiny" id="clearReference" type="button" disabled>Clear</button>
         </div>
       </div>
@@ -241,10 +281,17 @@
         <label>Alignment <input id="referenceOffset" type="number" value="0" min="0" step="0.05"> s</label>
         <label>Level <input id="referenceVolume" type="range" min="0" max="100" value="45" aria-label="Reference audio level"></label>
         <label><input id="referenceMix" type="checkbox" checked> Play with motors</label>
-        <label><input id="referenceZoom" type="checkbox"> Zoom around clip</label>
+        <div class="zoom-controls" role="group" aria-label="Waveform zoom">
+          <button class="tiny" id="refZoomOut" type="button" title="Zoom out" aria-label="Zoom out" disabled>−</button>
+          <button class="tiny" id="refZoomIn" type="button" title="Zoom in" aria-label="Zoom in" disabled>+</button>
+          <button class="tiny" id="refZoomClip" type="button" disabled>Fit clip</button>
+          <button class="tiny" id="refZoomAll" type="button" disabled>Whole file</button>
+          <span class="zoom-readout" id="refZoomReadout"></span>
+        </div>
       </div>
       <canvas class="reference-wave empty" id="referenceWave" height="116" aria-label="Audio waveform with highlighted selected clip"></canvas>
-      <p class="reference-note">Click or drag the waveform to choose where the clip starts. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
+      <input class="reference-pan" id="refPan" type="range" min="0" max="1000" value="0" disabled aria-label="Scroll the zoomed waveform">
+      <p class="reference-note">Click or drag the waveform to choose where the clip starts, or drag either yellow edge to adjust the selection. Trim to selection keeps only the selected audio so you can whittle a song down to the section you want. Zoom with the buttons, a trackpad pinch or Ctrl + scroll over the waveform; pan with the bar underneath or Shift + scroll. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
       <div class="detect-box" aria-label="Automatic pitch detection">
         <div class="detect-head">
           <div><div class="panel-title">✧ Automatic pitch detection <span style="color:#89afbd">· Basic Pitch</span></div><p class="reference-note">Analyse the selected clip locally. Suggested notes appear as mint-green outlines on the piano roll; your RTTTL is unchanged until you apply them.</p></div>
@@ -396,7 +443,7 @@
     const referenceOffsetInput=document.getElementById('referenceOffset');
     const referenceVolumeInput=document.getElementById('referenceVolume');
     const referenceMixInput=document.getElementById('referenceMix');
-    const referenceZoomInput=document.getElementById('referenceZoom');
+    const refPan=document.getElementById('refPan'),refZoomReadout=document.getElementById('refZoomReadout');
     const pitchSensitivity=document.getElementById('pitchSensitivity');
     const pitchMin=document.getElementById('pitchMin');
     const pitchMax=document.getElementById('pitchMax');
@@ -409,6 +456,8 @@
     const midiMapping=document.getElementById('midiMapping');
     let pendingMidi=null,refBuffer=null,refFileName='',referencePreview=false,referenceDrag=false;
     let refStart=0,refDuration=4,refOffset=0,refSource=null,refGain=null,motorWave=null,panners=[],wavePeaks=[];
+    let refView=null,refChannel=null,viewPeaks=null; // refView: {start,end} in seconds, null = whole file
+    let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
     const settings={bpm:125,signature:'4/4',metronome:false,mode:'square',stereo:65,ripple:false,snap:.25,...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
@@ -426,11 +475,11 @@
       if (pieces.length !== 3) throw new Error('Expected name:defaults:notes (two colons).');
       const defaults = {d:4,o:5,b:120};
       for (const item of pieces[1].split(',')) {
-        const bits = item.trim().toLowerCase().match(/^([dob])\s*=\s*(\d+)$/);
+        const bits = item.trim().toLowerCase().match(/^([a-z])\s*=\s*(\d+)$/);
         if (!bits) throw new Error('Invalid default setting: ' + item.trim());
-        defaults[bits[1]] = Number(bits[2]);
+        if ('dob'.includes(bits[1])) defaults[bits[1]] = Number(bits[2]);
       }
-      if (![1,2,4,8,16,32,64].includes(defaults.d) || defaults.o < 3 || defaults.o > 8 || defaults.b < 20 || defaults.b > 900) throw new Error('Check d (note length), o (octave), or b (20–900 BPM).');
+      if (![1,2,4,8,16,32,64].includes(defaults.d) || defaults.o < 1 || defaults.o > 8 || defaults.b < 20 || defaults.b > 900) throw new Error('Check d (note length), o (octave), or b (20–900 BPM).');
       const notes = [];
       let currentTime = 0;
       const tokens = pieces[2].split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
@@ -438,7 +487,8 @@
       if (tokens.length > 62) throw new Error('This track has more than 62 notes/rests (Bluejay melody limit).');
       for (const token of tokens) {
         // Accept both common dotted forms: 8c#6. and 8c#.6
-        const normal = token.replace(/^(\d*[a-g]#?)\.(\d)$/, '$1$2.');
+        // "h" is the German name for B, used by some Bluejay example songs
+        const normal = token.replace(/^(\d*)h/, '$1b').replace(/^(\d*[a-g]#?)\.(\d)$/, '$1$2.');
         const match = normal.match(/^(\d{0,2})([a-gp])(#?)([3-8]?)(\.)?$/);
         if (!match) throw new Error('Invalid note: ' + token);
         const denom = match[1] ? Number(match[1]) : defaults.d;
@@ -447,6 +497,8 @@
         const seconds = beatCount * 60 / defaults.b;
         const rest = match[2] === 'p';
         const octave = match[4] ? Number(match[4]) : defaults.o;
+        // A low default octave is fine (some Bluejay examples use o=2) as long as no note actually lands there
+        if (!rest && (octave < 3 || octave > 8)) throw new Error('Note outside octaves 3 to 8: ' + token);
         const midi = rest ? null : ((octave + 1) * 12 + noteIndex[match[2]] + (match[3] ? 1 : 0));
         const hz = rest ? 0 : 440 * Math.pow(2, (midi - 69) / 12);
         notes.push({start:currentTime, seconds, beats:beatCount, hz, midi, rest, token});
@@ -465,7 +517,13 @@
     function guideSeconds() { return Math.min(600,Math.max(.05,Number(targetSeconds.value)||2.5)); }
     function saveGuide() { try { localStorage.setItem(guideKey, JSON.stringify({enabled:showTimeGuide.checked,seconds:guideSeconds()})); } catch (_) {} }
     function formatTime(value) { const min=Math.floor(value/60); const sec=Math.floor(value%60).toString().padStart(2,'0'); const dec=Math.floor((value%1)*10); return `${min}:${sec}.${dec}`; }
-    function notify(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('visible'); clearTimeout(toastTimeout); toastTimeout=setTimeout(()=>el.classList.remove('visible'),2400); }
+    const embedded=window.self!==window.top;
+    function placeToast(el){
+      el.style.top='';el.style.bottom='';
+      if(!embedded||document.fullscreenElement)return;
+      try{const r=window.frameElement.getBoundingClientRect(),visible=Math.min(r.height,window.parent.innerHeight-r.top);el.style.top=`${Math.max(12,visible-70)}px`;el.style.bottom='auto';}catch(_){}
+    }
+    function notify(message) { const el=document.getElementById('toast'); placeToast(el); el.textContent=message; el.classList.add('visible'); clearTimeout(toastTimeout); toastTimeout=setTimeout(()=>el.classList.remove('visible'),2400); }
     function escapeHTML(s) { return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
     function buildUI() {
@@ -741,7 +799,10 @@
       const startX=W*(refStart-viewStart)/duration,endX=W*(refStart+refDuration-viewStart)/duration;
       g.fillStyle='#30556690';g.fillRect(startX,0,Math.max(1,endX-startX),H);
       g.strokeStyle='#74dee0';g.lineWidth=1;g.beginPath();
-      wavePeaks.forEach((p,i)=>{
+      const detail=detailedPeaks(viewStart,viewEnd,Math.round(W));
+      if(detail){
+        detail.forEach((p,x)=>{g.moveTo(x+.5,H/2-p[1]*(H*.42));g.lineTo(x+.5,H/2-Math.min(p[0],p[1]-.01)*(H*.42));});
+      }else wavePeaks.forEach((p,i)=>{
         const audioTime=i*refBuffer.duration/wavePeaks.length;
         if(audioTime<viewStart||audioTime>viewEnd)return;
         const x=(audioTime-viewStart)*W/duration;
@@ -760,37 +821,101 @@
         if(t>=0&&t<=refDuration){const x=W*(refStart+t-viewStart)/duration;g.strokeStyle='#fff';g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
       }
       g.fillStyle='#b6ccde';g.font='11px system-ui';
-      g.fillText(`${viewStart.toFixed(1)} s`,6,H-9);const end=`${viewEnd.toFixed(1)} s`;
+      const places=duration<.5?3:duration<5?2:1;
+      g.fillText(`${viewStart.toFixed(places)} s`,6,H-9);const end=`${viewEnd.toFixed(places)} s`;
       g.fillText(end,Math.max(6,W-g.measureText(end).width-8),H-9);
     }
     function referenceViewRange(){
       if(!refBuffer)return {start:0,end:1};
-      if(!referenceZoomInput.checked)return {start:0,end:refBuffer.duration};
-      const margin=Math.max(.5,refDuration*.25);
-      return {start:Math.max(0,refStart-margin),end:Math.min(refBuffer.duration,refStart+refDuration+margin)};
+      return refView||{start:0,end:refBuffer.duration};
+    }
+    function detailedPeaks(start,end,columns){
+      if(!refChannel||columns<1)return null;
+      const rate=refBuffer.sampleRate,perColumn=(end-start)*rate/columns;
+      if(perColumn>=refChannel.length/wavePeaks.length)return null; // overview bins are already this fine
+      if(viewPeaks&&viewPeaks.start===start&&viewPeaks.end===end&&viewPeaks.columns===columns)return viewPeaks.peaks;
+      const peaks=[];
+      for(let x=0;x<columns;x++){
+        const from=Math.floor(start*rate+x*perColumn),to=Math.max(from+1,Math.floor(start*rate+(x+1)*perColumn));
+        let min=1,max=-1;
+        for(let j=Math.max(0,from);j<Math.min(refChannel.length,to);j++){const v=refChannel[j];if(v<min)min=v;if(v>max)max=v;}
+        peaks.push(min>max?[0,0]:[min,max]);
+      }
+      viewPeaks={start,end,columns,peaks};
+      return peaks;
+    }
+    function setReferenceView(start,end){
+      if(!refBuffer)return;
+      const total=refBuffer.duration,span=clamp(end-start,Math.min(.02,total),total);
+      if(span>=total*.999)refView=null;
+      else{const from=clamp(start,0,total-span);refView={start:from,end:from+span};}
+      updateZoomControls();drawReferenceWave();
+    }
+    function zoomReference(factor,anchor){
+      const v=referenceViewRange(),span=v.end-v.start,at=anchor??(v.start+v.end)/2,frac=(at-v.start)/span,next=span*factor;
+      setReferenceView(at-frac*next,at-frac*next+next);
+    }
+    function fitReferenceClip(){const margin=Math.max(.1,refDuration*.15);setReferenceView(refStart-margin,refStart+refDuration+margin);}
+    function updateZoomControls(){
+      const has=Boolean(refBuffer),zoomed=has&&Boolean(refView);
+      document.getElementById('refZoomIn').disabled=!has||(zoomed&&refView.end-refView.start<=.021);
+      document.getElementById('refZoomOut').disabled=!zoomed;document.getElementById('refZoomAll').disabled=!zoomed;
+      document.getElementById('refZoomClip').disabled=!has;refPan.disabled=!zoomed;
+      if(zoomed){const span=refView.end-refView.start,room=refBuffer.duration-span;refPan.value=String(room>0?Math.round(refView.start/room*1000):0);}
+      else refPan.value='0';
+      refZoomReadout.textContent=!has?'':zoomed?`${(refView.end-refView.start).toFixed(refView.end-refView.start<10?2:1)} s shown`:'Whole file';
     }
 
+    function setReferenceBuffer(next,start,duration){
+      refBuffer=next;refStart=start;refDuration=duration;
+      referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);
+      wavePeaks=[];const data=next.getChannelData(0),bins=2000;refChannel=data;refView=null;viewPeaks=null;
+      const samplesPerBin=Math.max(1,Math.ceil(data.length/bins));
+      for(let i=0;i<bins;i++){
+        let min=1,max=-1;const from=i*samplesPerBin,to=Math.min(data.length,from+samplesPerBin);
+        const stride=Math.max(1,Math.floor((to-from)/80));
+        for(let j=from;j<to;j+=stride){min=Math.min(min,data[j]);max=Math.max(max,data[j]);}
+        wavePeaks.push([min===1?0:min,max===-1?0:max]);
+      }
+      const trimmed=trimHistory.length?` · trimmed to ${trimOrigin.toFixed(2)}–${(trimOrigin+next.duration).toFixed(2)} s of the original`:'';
+      document.getElementById('referenceStatus').textContent=`${refFileName} · ${next.duration.toFixed(1)} s · ${next.sampleRate} Hz${trimmed} · clip remains local to this browser session`;
+      document.getElementById('trimReference').disabled=false;document.getElementById('undoTrim').disabled=!trimHistory.length;
+      updateZoomControls();drawReferenceWave();
+    }
+    function trimReferenceToSelection(){
+      if(!refBuffer)return;
+      const rate=refBuffer.sampleRate,from=Math.floor(refStart*rate),to=Math.min(refBuffer.length,Math.ceil((refStart+refDuration)*rate));
+      if(to-from<rate*.05){notify('Select at least 0.05 s to trim to');return;}
+      if(from===0&&to===refBuffer.length){notify('The selection already covers the whole clip');return;}
+      halt();
+      const next=ctx.createBuffer(refBuffer.numberOfChannels,to-from,rate);
+      for(let c=0;c<refBuffer.numberOfChannels;c++)next.copyToChannel(refBuffer.getChannelData(c).subarray(from,to),c);
+      trimHistory.push({buffer:refBuffer,start:refStart,duration:refDuration,origin:trimOrigin});
+      trimOrigin+=from/rate;
+      setReferenceBuffer(next,0,next.duration);
+      clearPitchSuggestions('Clip trimmed. Detect notes again for the new clip.');
+      notify(`Trimmed to ${next.duration.toFixed(2)} s`);
+    }
+    function undoReferenceTrim(){
+      const last=trimHistory.pop();if(!last)return;
+      halt();trimOrigin=last.origin;
+      setReferenceBuffer(last.buffer,last.start,last.duration);
+      clearPitchSuggestions('Trim undone. Detect notes again if needed.');
+      notify('Trim undone');
+    }
     async function loadReferenceAudio(file){
       if(!file)return;
       if(file.size>30000000){notify('Reference audio must be under 30 MB');return;}
       try{
         await audioSetup();
         const next=await ctx.decodeAudioData(await file.arrayBuffer());
-        halt();refBuffer=next;refFileName=file.name;refStart=0;refDuration=Math.min(8,next.duration);refOffset=0;
+        halt();refFileName=file.name;refOffset=0;trimHistory=[];trimOrigin=0;
+        setReferenceBuffer(next,0,Math.min(8,next.duration));
         clearPitchSuggestions('Reference loaded. Choose a clip and click Detect notes.');
-        referenceStartInput.value='0';referenceDurationInput.value=refDuration.toFixed(2);referenceOffsetInput.value='0';
-        wavePeaks=[];const data=next.getChannelData(0),bins=2000;
-        const samplesPerBin=Math.max(1,Math.ceil(data.length/bins));
-        for(let i=0;i<bins;i++){
-          let min=1,max=-1;const from=i*samplesPerBin,to=Math.min(data.length,from+samplesPerBin);
-          const stride=Math.max(1,Math.floor((to-from)/80));
-          for(let j=from;j<to;j+=stride){min=Math.min(min,data[j]);max=Math.max(max,data[j]);}
-          wavePeaks.push([min===1?0:min,max===-1?0:max]);
-        }
-        document.getElementById('referenceStatus').textContent=`${file.name} · ${next.duration.toFixed(1)} s · ${next.sampleRate} Hz · clip remains local to this browser session`;
+        referenceOffsetInput.value='0';
         document.getElementById('playReference').disabled=false;document.getElementById('clearReference').disabled=false;
         detectButton.disabled=false;
-        referenceWave.classList.remove('empty');drawReferenceWave();notify('Reference audio loaded');
+        referenceWave.classList.remove('empty');notify('Reference audio loaded');
       }catch(err){notify('Could not decode audio: '+(err.message||'unsupported format'));}
     }
 
@@ -906,22 +1031,38 @@
       const rect=referenceWave.getBoundingClientRect(),range=referenceViewRange();
       return range.start+clamp((e.clientX-rect.left)/rect.width,0,1)*(range.end-range.start);
     }
+    function selectionEdgeAt(e){
+      const rect=referenceWave.getBoundingClientRect(),v=referenceViewRange(),toX=t=>(t-v.start)/(v.end-v.start)*rect.width;
+      const x=e.clientX-rect.left,dStart=Math.abs(x-toX(refStart)),dEnd=Math.abs(x-toX(refStart+refDuration)),grab=e.pointerType==='touch'?14:6;
+      if(Math.min(dStart,dEnd)>grab)return null;
+      return dEnd<dStart||(dEnd===dStart&&x>toX(refStart))?'end':'start';
+    }
     referenceWave.addEventListener('pointerdown',e=>{
       if(!refBuffer||e.button!==0)return;
-      referenceDrag={pointer:e.pointerId,at:selectionAtPointer(e),moved:false};referenceWave.setPointerCapture(e.pointerId);e.preventDefault();
+      const edge=selectionEdgeAt(e);
+      referenceDrag={pointer:e.pointerId,at:selectionAtPointer(e),x:e.clientX,moved:false,edge,anchor:edge==='start'?refStart+refDuration:refStart};
+      referenceWave.setPointerCapture(e.pointerId);e.preventDefault();
     });
     referenceWave.addEventListener('pointermove',e=>{
-      if(!referenceDrag||!refBuffer||e.pointerId!==referenceDrag.pointer)return;
-      const end=selectionAtPointer(e);if(Math.abs(end-referenceDrag.at)<.05)return;
-      referenceDrag.moved=true;refStart=Math.min(referenceDrag.at,end);refDuration=Math.max(.05,Math.abs(end-referenceDrag.at));
+      if(!refBuffer)return;
+      if(!referenceDrag){referenceWave.style.cursor=selectionEdgeAt(e)?'ew-resize':'';return;}
+      if(e.pointerId!==referenceDrag.pointer)return;
+      const t=selectionAtPointer(e);
+      if(!referenceDrag.moved&&Math.abs(e.clientX-referenceDrag.x)<3)return;
+      referenceDrag.moved=true;
+      const from=referenceDrag.edge?referenceDrag.anchor:referenceDrag.at;
+      refStart=Math.min(from,t);refDuration=Math.max(.05,Math.abs(t-from));
+      if(refStart+refDuration>refBuffer.duration)refStart=Math.max(0,refBuffer.duration-refDuration);
       referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);drawReferenceWave();
     });
     referenceWave.addEventListener('pointerup',e=>{
       if(!referenceDrag||e.pointerId!==referenceDrag.pointer)return;
-      if(!referenceDrag.moved){refStart=clamp(referenceDrag.at,0,refBuffer.duration-.05);refDuration=Math.min(refDuration,refBuffer.duration-refStart);}
+      if(!referenceDrag.moved&&!referenceDrag.edge){refStart=clamp(referenceDrag.at,0,refBuffer.duration-.05);refDuration=Math.min(refDuration,refBuffer.duration-refStart);}
+      referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);
       referenceDrag=false;syncReferenceInputs();
     });
     referenceWave.addEventListener('pointercancel',()=>{referenceDrag=false;});
+    referenceWave.addEventListener('pointerleave',()=>{if(!referenceDrag)referenceWave.style.cursor='';});
 
     function drawTimeline(){
       if(!timeline.getContext)return;
@@ -1280,7 +1421,8 @@
     referenceFile.addEventListener('change',async()=>{await loadReferenceAudio(referenceFile.files?.[0]);referenceFile.value='';});
     document.getElementById('playReference').addEventListener('click',playReferenceOnly);
     document.getElementById('clearReference').addEventListener('click',()=>{
-      halt();refBuffer=null;refFileName='';wavePeaks=[];
+      halt();refBuffer=null;refFileName='';wavePeaks=[];refChannel=null;refView=null;viewPeaks=null;trimHistory=[];trimOrigin=0;updateZoomControls();
+      document.getElementById('trimReference').disabled=true;document.getElementById('undoTrim').disabled=true;
       detectButton.disabled=true;clearPitchSuggestions('Reference cleared. Load audio to analyse another clip.');
       document.getElementById('referenceStatus').textContent='Reference cleared. Load your own audio to compare it with the motor arrangement.';
       document.getElementById('playReference').disabled=true;document.getElementById('clearReference').disabled=true;
@@ -1289,7 +1431,25 @@
     for(const input of [referenceStartInput,referenceDurationInput,referenceOffsetInput])input.addEventListener('change',syncReferenceInputs);
     referenceVolumeInput.addEventListener('input',()=>{if(refGain&&ctx)refGain.gain.setTargetAtTime(Number(referenceVolumeInput.value)/100,ctx.currentTime,.02);});
     referenceMixInput.addEventListener('change',drawReferenceWave);
-    referenceZoomInput.addEventListener('change',drawReferenceWave);
+    document.getElementById('trimReference').addEventListener('click',trimReferenceToSelection);
+    document.getElementById('undoTrim').addEventListener('click',undoReferenceTrim);
+    document.getElementById('refZoomIn').addEventListener('click',()=>zoomReference(.5));
+    document.getElementById('refZoomOut').addEventListener('click',()=>zoomReference(2));
+    document.getElementById('refZoomClip').addEventListener('click',fitReferenceClip);
+    document.getElementById('refZoomAll').addEventListener('click',()=>setReferenceView(0,Infinity));
+    refPan.addEventListener('input',()=>{if(!refView)return;const span=refView.end-refView.start,from=Number(refPan.value)/1000*(refBuffer.duration-span);setReferenceView(from,from+span);});
+    referenceWave.addEventListener('wheel',e=>{
+      if(!refBuffer)return;
+      const rect=referenceWave.getBoundingClientRect(),v=referenceViewRange(),span=v.end-v.start;
+      if(e.ctrlKey||e.metaKey){ // trackpad pinch arrives as ctrl+wheel
+        e.preventDefault();
+        zoomReference(Math.exp(clamp(e.deltaY,-100,100)*.01),v.start+clamp((e.clientX-rect.left)/rect.width,0,1)*span);
+      }else if(refView&&(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY))){
+        e.preventDefault();
+        const delta=(e.shiftKey&&!e.deltaX)?e.deltaY:e.deltaX;
+        setReferenceView(v.start+delta/rect.width*span,v.end+delta/rect.width*span);
+      }
+    },{passive:false});
     detectButton.addEventListener('click',detectReferencePitch);
     document.getElementById('clearDetected').addEventListener('click',()=>clearPitchSuggestions());
     applyDetectedButton.addEventListener('click',applyPitchSuggestions);
@@ -1326,7 +1486,7 @@
     document.getElementById('reset').addEventListener('click',()=>{halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;tracks.forEach((t,i)=>{t.value=defaultMotor(i).value;document.getElementById(`rtttl-${i}`).value=t.value;t.muted=false;t.solo=false;});saveEdits();updateParsed();updateButtons();notify(`Default arrangement restored across ${tracks.length} motors`);});
     document.getElementById('exportProject').addEventListener('click',()=>{
       saveSettings();
-      const project={format:'rtttl-quad-lab',version:3,exportedAt:new Date().toISOString(),tracks:tracks.map(t=>({name:t.name,rtttl:t.value})),targetTime:{enabled:showTimeGuide.checked,seconds:guideSeconds()},settings:{...settings},reference:{filename:refFileName||null,start:refStart,duration:refDuration,offset:refOffset,volume:Number(referenceVolumeInput.value),mix:referenceMixInput.checked,zoom:referenceZoomInput.checked}};
+      const project={format:'rtttl-quad-lab',version:3,exportedAt:new Date().toISOString(),tracks:tracks.map(t=>({name:t.name,rtttl:t.value})),targetTime:{enabled:showTimeGuide.checked,seconds:guideSeconds()},settings:{...settings},reference:{filename:refFileName||null,start:refStart,duration:refDuration,offset:refOffset,volume:Number(referenceVolumeInput.value),mix:referenceMixInput.checked,view:refView?{start:refView.start,end:refView.end}:null}};
       downloadFile(JSON.stringify(project,null,2),'application/json','rtttl-quad-project.json');notify('Project file downloaded');
     });
     const projectFile=document.getElementById('projectFile');
@@ -1362,16 +1522,104 @@
           referenceStartInput.value=String(r.start||0);referenceDurationInput.value=String(r.duration||4);referenceOffsetInput.value=String(r.offset||0);
           if(Number.isFinite(r.volume))referenceVolumeInput.value=String(clamp(r.volume,0,100));
           referenceMixInput.checked=Boolean(r.mix);
-          referenceZoomInput.checked=Boolean(r.zoom);
+          refView=null;viewPeaks=null;
           syncReferenceInputs();
+          if(refBuffer&&r.view&&Number.isFinite(r.view.start)&&Number.isFinite(r.view.end))setReferenceView(r.view.start,r.view.end);else updateZoomControls();
           if(r.filename&&!refBuffer)document.getElementById('referenceStatus').textContent=`Reference file was ${r.filename}; reload that audio file to hear it. Project JSON does not embed audio.`;
         }
-        saveEdits();saveNames();saveGuide();saveSettings();refreshChannelLabels();updateParsed();updateButtons();notify('Project imported successfully');
+        saveEdits();saveNames();saveGuide();saveSettings();refreshChannelLabels();updateParsed();updateButtons();setLoadedSong('Imported project');notify('Project imported successfully');
       }catch(err){notify(err.message||'Could not import project');}
       finally{projectFile.value='';}
     });
     window.addEventListener('resize',drawTimeline);
     document.addEventListener('keydown',e=>{if(e.code==='Space' && !['TEXTAREA','INPUT','BUTTON'].includes(document.activeElement?.tagName)){e.preventDefault();startTime===null?play():halt();}});
+    // Example songs: Bluejay's preset melodies from ESC Configurator, fetched on first open
+    const examplesUrl='https://raw.githubusercontent.com/stylesuxx/esc-configurator/master/src/melodies.json';
+    const examplesCacheKey='rtttl-quad-lab-examples-cache-v1';
+    const examplesButton=document.getElementById('examplesButton'),examplesPanel=document.getElementById('examplesPanel');
+    const examplesSearch=document.getElementById('examplesSearch'),examplesList=document.getElementById('examplesList'),examplesStatus=document.getElementById('examplesStatus');
+    let examples=null,examplesLoading=null;
+    const loadedSongKey='rtttl-quad-lab-loaded-song-v1',loadedSongEl=document.getElementById('loadedSong'),demoSongName=loadedSongEl.textContent;
+    function setLoadedSong(name){loadedSongEl.textContent=name;try{localStorage.setItem(loadedSongKey,name);}catch(_){}}
+    try{const savedSong=localStorage.getItem(loadedSongKey);if(savedSong)loadedSongEl.textContent=savedSong;}catch(_){}
+    document.getElementById('reset').addEventListener('click',()=>setLoadedSong(demoSongName));
+    function validPresets(data){
+      return Array.isArray(data)?data.filter(p=>p&&typeof p.name==='string'&&Array.isArray(p.tracks)&&p.tracks.length&&p.tracks.every(t=>typeof t==='string'&&t.length<5000)):[];
+    }
+    function loadExamples(){
+      if(examples)return Promise.resolve(examples);
+      if(examplesLoading)return examplesLoading;
+      examplesStatus.textContent='Loading example songs…';
+      examplesLoading=fetch(examplesUrl,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json();}).then(data=>{
+        const list=validPresets(data);if(!list.length)throw Error('empty list');
+        try{localStorage.setItem(examplesCacheKey,JSON.stringify(list));}catch(_){}
+        return list;
+      }).catch(err=>{
+        let cached=[];try{cached=validPresets(JSON.parse(localStorage.getItem(examplesCacheKey)));}catch(_){}
+        if(cached.length)return cached;
+        throw err;
+      }).then(list=>{
+        examples=list.map(p=>({...p,broken:p.tracks.slice(0,maxMotors).filter(t=>{try{parseRTTTL(t);return false;}catch(_){return true;}}).length}));
+        return examples;
+      }).finally(()=>{examplesLoading=null;});
+      return examplesLoading;
+    }
+    function renderExamples(){
+      const q=examplesSearch.value.trim().toLowerCase();
+      const shown=(examples||[]).filter(p=>p.name.toLowerCase().includes(q));
+      examplesList.innerHTML=shown.map(p=>{
+        const n=Math.min(p.tracks.length,maxMotors),meta=p.broken?`⚠ ${p.broken} track${p.broken>1?'s':''} need fixing`:(n===1?'1 track':`${n} motors`);
+        return `<li><button class="example-item" type="button" data-example="${examples.indexOf(p)}"><span>${escapeHTML(p.name)}</span><span class="example-meta${p.broken?' warn':''}">${meta}</span></button></li>`;
+      }).join('');
+      examplesStatus.textContent=examples?(shown.length?`${shown.length} of ${examples.length} songs`:'No matching songs'):'';
+    }
+    function setExamplesOpen(open){
+      examplesPanel.hidden=!open;examplesButton.setAttribute('aria-expanded',String(open));
+      if(!open)return;
+      examplesSearch.focus();
+      loadExamples().then(renderExamples).catch(()=>{examplesStatus.textContent='Could not load the example songs. Check your internet connection and try again.';});
+    }
+    function loadExample(preset){
+      const parts=preset.tracks.slice(0,maxMotors).map(t=>t.trim());
+      if(!window.confirm(`Load "${preset.name}"? Your current melodies and channel names will be replaced. Export first if you want to keep a backup.`))return;
+      halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;
+      const bpm=Number((parts[0].match(/b\s*=\s*(\d+)/i)||[])[1]);
+      const count=Math.max(4,parts.length);
+      tracks.splice(0,tracks.length,...Array.from({length:count},(_,i)=>{
+        const own=i<parts.length;
+        return {...defaultMotor(i),name:own?(parts.length===1?'Melody':`Part ${i+1}`):'Unused',subtitle:own?preset.name:'Not used by this example',value:own?parts[i]:`Unused:d=4,o=5,b=${bpm||125}:4p`,muted:false,solo:false,parsed:null,error:null};
+      }));
+      try{localStorage.setItem(motorCountKey,String(tracks.length));}catch(_){}
+      editMotor=0;selectedNote=0;buildUI();ensureAudioChannels();
+      if(bpm>=20&&bpm<=900)bpmInput.value=String(bpm);
+      saveEdits();saveNames();saveSettings();refreshChannelLabels();updateParsed();updateButtons();
+      setLoadedSong(preset.name);
+      setExamplesOpen(false);
+      const bad=tracks.filter(t=>t.error).length;
+      notify(bad?`Loaded ${preset.name}: ${bad} track${bad>1?'s':''} need fixing before playback`:`Loaded ${preset.name}`);
+    }
+    examplesButton.addEventListener('click',()=>setExamplesOpen(examplesPanel.hidden));
+    examplesSearch.addEventListener('input',renderExamples);
+    examplesList.addEventListener('click',e=>{const b=e.target.closest('[data-example]');if(b&&examples)loadExample(examples[Number(b.dataset.example)]);});
+    document.addEventListener('click',e=>{if(!examplesPanel.hidden&&!document.getElementById('examples').contains(e.target))setExamplesOpen(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!examplesPanel.hidden){setExamplesOpen(false);examplesButton.focus();}});
+
+    // Full screen (works standalone and inside the portfolio page's iframe)
+    const fullscreenToggle=document.getElementById('fullscreenToggle');
+    if(document.fullscreenEnabled){
+      fullscreenToggle.hidden=false;
+      fullscreenToggle.addEventListener('click',()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>notify('Full screen is not available here'));});
+      document.addEventListener('fullscreenchange',()=>{fullscreenToggle.textContent=document.fullscreenElement?'✕ Exit full screen':'⛶ Full screen';});
+    }
+
+    // When embedded, report content height so the host page can size the iframe with no inner scrollbar
+    if(embedded){
+      document.documentElement.classList.add('embedded');
+      const reportHeight=()=>{try{window.parent.postMessage({type:'app-embed:height',height:Math.ceil(document.body.getBoundingClientRect().height)},'*');}catch(_){}};
+      new ResizeObserver(reportHeight).observe(document.body);
+      window.addEventListener('load',reportHeight);
+    }
+
     buildUI();
   })();
   </script>

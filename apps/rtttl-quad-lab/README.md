@@ -2,7 +2,7 @@
 
 A self-contained, browser-based **4–12-channel** RTTTL melody editor for previewing Bluejay ESC startup tunes (four channels by default). Each motor has its own RTTTL string, editable channel name, mute/solo and preview controls. The synchronized overview and piano-roll editor let you adjust pitch, start time, and duration. A configurable target-time marker appears on both timelines.
 
-No Python, Node.js, build step, application server, internet connection, or paid domain is required to **run** this project. The runtime consists of `index.html`, `midi.js`, and `pitch-model.js` together in this folder. The bundled pitch model and TensorFlow.js engine are included locally; they are loaded only when you click **Detect notes**.
+No Python, Node.js, build step, application server, internet connection, or paid domain is required to **run** this project (the optional example-song library is the one feature that goes online, see below). The runtime consists of `index.html`, `midi.js`, and `pitch-model.js` together in this folder. The bundled pitch model and TensorFlow.js engine are included locally; they are loaded only when you click **Detect notes**.
 
 ## Where it runs
 
@@ -26,11 +26,13 @@ The app stores edits, motor count and channel names in your browser's local stor
 - Set a global **BPM** to change all four RTTTL tempos together; choose a time signature and enable a metronome during playback.
 - Turn **Ripple editing** on to push later notes, or leave it off to move/resize notes independently and encode gaps as RTTTL rests. Use Undo/Redo to reverse piano-roll edits.
 - Choose Square, Sine or Motor-like audio synthesis and adjust the stereo spread of the four motor voices. Motor-like is a harmonic approximation, not a physical model of your ESC and motor.
-- **Load audio** to decode an MP3/WAV locally, select a segment by dragging the waveform or entering start/duration, and play the clip alone or in sync with the motors. **Alignment** delays the reference clip relative to the ESCs.
+- **Load audio** to decode an MP3/WAV locally, select a segment by dragging the waveform, dragging either yellow edge of an existing selection, or entering start/duration. Zoom with the − / + / Fit clip / Whole file buttons, a trackpad pinch or Ctrl + scroll (zooming in draws the waveform from the raw samples); pan with the bar under the waveform or Shift + scroll. **Trim to selection** discards audio outside the selection (repeatable, with **Undo trim**) so a full song can be whittled down to the section you want. Then and play the clip alone or in sync with the motors. **Alignment** delays the reference clip relative to the ESCs.
 - **Detect notes** analyses a selected reference clip (up to 20 seconds) with Spotify's Basic Pitch model entirely in the browser. The green dashed piano-roll rectangles are *suggestions*, not edits. Change **Sensitivity**, **Lowest note**, **Highest note** and **Min. note** to refine them without repeating the costly model inference. Use **Apply to selected ESC** to convert the suggestions into RTTTL on the currently selected motor. The app confirms before replacing the existing melody and preserves Undo. Only one note can play at once per ESC: overlapping suggestions are skipped. A long/dense result may exceed Bluejay's 62-token limit; shorten the clip or raise the minimum note duration.
 - **Choose MIDI** to import type 0 or 1 Standard MIDI Files with PPQ timing, map MIDI voices to individual ESCs and quantise notes to the current snap grid; **Export MIDI** writes a four-track SMF.
 - Check **Bluejay preflight** for per-channel event count, frequency range, duration, BPM and warnings.
 - **Export project** downloads a JSON backup; **Import project** brings the arrangement into another device or browser.
+- **Example songs** opens Bluejay's preset melodies (the library ESC Configurator ships, about 100 songs, 1 to 4 tracks each) with a search box. Choosing one replaces the current arrangement after a confirmation. The list is fetched from ESC Configurator's GitHub on first use (AGPL-3.0, not bundled here) and cached in the browser for offline use afterwards. A handful of upstream presets contain typos; they are flagged in the list and their tracks show what needs fixing.
+- **Full screen** in the top bar uses the browser's Fullscreen API, both standalone and when embedded in the portfolio page.
 - **Reset melodies** restores the original tune while preserving custom channel names and target-time settings.
 
 MIDI import is intentionally monophonic per ESC. Overlapping notes on one imported voice are moved later; notes outside the editor's C3–B7 register are transposed by octaves. More than 62 encoded notes/rests in a voice causes an import error for that mapping. MIDI tempo changes are flattened to the file's initial tempo because each RTTTL string has a single BPM.
@@ -71,4 +73,4 @@ package.json              # optional developer build dependencies
 README.md                 # instructions
 ```
 
-The runtime uses no external network dependencies.
+The runtime has no external network dependencies apart from the optional example-song list. When embedded in an iframe the app posts its content height to the parent page (`app-embed:height` message) so the host can size the frame without an inner scrollbar.

@@ -16,14 +16,14 @@ skills:
 
 Bluejay ESC firmware can play a startup tune through each motor, and because every ESC takes its own melody, a quad's four motors can play four separate parts at once. The format is RTTTL (the old Nokia ringtone language), each ESC is monophonic, and each melody is capped at about 62 notes and rests. The existing tools preview one RTTTL string at a time, so there was no way to hear a four-motor arrangement before flashing it.
 
-RTTTL Quad Lab fills that gap: a self-contained studio that plays 4 to 12 motor channels in sync, with a piano-roll editor, MIDI import and export, reference-audio alignment, in-browser pitch detection, and a Bluejay compatibility check. It started as a way to arrange the "Owner of a Lonely Heart" hook for my quad and grew into a general tool. It is plain HTML and JavaScript with no server, so the app below is the real thing, running in your browser.
+RTTTL Quad Lab fills that gap: a self-contained studio that plays 4 to 12 motor channels in sync, with a piano-roll editor, a one-click library of Bluejay's example songs, MIDI import and export, reference-audio alignment, in-browser pitch detection, and a Bluejay compatibility check. It started as a way to arrange the "Owner of a Lonely Heart" hook for my quad and grew into a general tool. It is plain HTML and JavaScript with no server, so the app below is the real thing, running in your browser.
 
 I set the requirements and directed the design through iterative testing and review, with ChatGPT as the coding assistant. Development now continues in this site's repository.
 
 <div class="app-embed">
-  <iframe src="{{ "/apps/rtttl-quad-lab/" | relative_url }}" title="RTTTL Quad Lab, live app"></iframe>
+  <iframe src="{{ "/apps/rtttl-quad-lab/" | relative_url }}" title="RTTTL Quad Lab, live app" allow="fullscreen" allowfullscreen></iframe>
 </div>
-<p class="app-embed-note">Press <strong>Play all motors</strong> to start audio. Edits are saved in your browser; use Export project to keep a copy. <a href="{{ "/apps/rtttl-quad-lab/" | relative_url }}">Open full screen</a></p>
+<p class="app-embed-note">Press <strong>Play all motors</strong> to start audio, or pick one of Bluejay's <strong>Example songs</strong>. Use <strong>Full screen</strong> in the app's top bar for more room. Edits are saved in your browser; use Export project to keep a copy. <a href="{{ "/apps/rtttl-quad-lab/" | relative_url }}">Open in its own tab</a></p>
 
 ## System architecture
 
@@ -48,7 +48,7 @@ Every feature has to respect what the ESC can actually play. A per-channel prefl
 
 ## From a recording to RTTTL
 
-To speed up transcription, the app can load an MP3 or WAV, select a clip of up to 20 seconds on its waveform, and run Spotify's open-source Basic Pitch model on it, entirely in the browser. Detected notes appear as dashed suggestions over the piano roll rather than edits, so existing work is never overwritten until the suggestions are explicitly applied to a chosen motor (with undo). Sensitivity, pitch range and minimum note length re-filter the stored result without re-running the model. The model weights are embedded in a script file so the app also works when opened offline from a local file. Detection is most reliable on an isolated voice or instrument; a full mix produces extra notes from the accompaniment, so it is a starting point for manual editing, not a finished transcription.
+To speed up transcription, the app can load an MP3 or WAV, select a clip of up to 20 seconds on its waveform, and run Spotify's open-source Basic Pitch model on it, entirely in the browser. Detected notes appear as dashed suggestions over the piano roll rather than edits, so existing work is never overwritten until the suggestions are explicitly applied to a chosen motor (with undo). Sensitivity, pitch range and minimum note length re-filter the stored result without re-running the model. The model weights are embedded in a script file so the app also works when opened offline from a local file. Detection is most reliable on an isolated voice or instrument; a full mix produces extra notes from the accompaniment, so it is a starting point for manual editing, not a finished transcription. To make that workable on a whole song, the waveform view zooms down to individual cycles, the selection edges can be dragged, and the audio can be trimmed to the selection (with undo) to whittle a track down to the section being arranged.
 
 ## Next phase
 
