@@ -1,8 +1,8 @@
 # Project Portfolio
 
-Source for my GitHub Pages portfolio site, published at https://spicytenderloin.github.io/portfolio/
+Source for my GitHub Pages portfolio site, published at https://www.julianw.io
 
-Built with Jekyll, GitHub Pages builds it automatically on push, no local build step needed.
+Built with Jekyll, a GitHub Actions workflow builds and deploys it automatically on push, no local build step needed.
 
 ## Adding a new project
 
