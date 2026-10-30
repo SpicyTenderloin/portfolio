@@ -97,10 +97,15 @@
     .reference-note { color:#90a5b9; font-size:11px; line-height:1.5; margin:5px 0 0; }
     .reference-wave { height:116px; width:100%; background:#0d1a2a; border:1px solid #38516a; border-radius:8px; display:block; touch-action:none; cursor:crosshair; }
     .reference-wave.empty { cursor:default; }
+    .ref-transport { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:0 0 9px; }
+    .ref-transport .tiny:disabled { opacity:.45; cursor:default; }
+    .tiny.ref-play { min-width:86px; color:#0d1a22; background:var(--cyan); border-color:var(--cyan); }
+    .tiny.ref-play:disabled { background:#273144; color:#bdc9d8; border-color:#3a495a; }
+    .ref-time { color:#d8edf2; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; margin:0 6px; }
     .zoom-controls { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
     .zoom-controls .tiny:disabled { opacity:.45; cursor:default; }
     .zoom-readout { color:#90a5b9; font-size:11px; min-width:70px; }
-    .reference-pan { width:100%; margin:8px 0 0; accent-color:var(--cyan); }
+    input.reference-pan { display:block; width:100%; padding:0; margin:8px 0 0; accent-color:var(--cyan); }
     .reference-pan:disabled { opacity:.35; }
     .detect-box { margin-top:15px; padding:14px; border:1px solid #3a6470; border-radius:11px; background:linear-gradient(100deg,#17313b,#152335); }
     .detect-head { display:flex; align-items:center; justify-content:space-between; gap:13px; flex-wrap:wrap; }
@@ -140,7 +145,12 @@
     .piano-scroll { border:1px solid #33455b; border-radius:10px; overflow:auto; max-height:515px; background:#152031; }
     .piano-header { display:flex; position:sticky; top:0; z-index:8; height:29px; width:max-content; background:#1b293c; }
     .piano-corner { position:sticky; left:0; z-index:9; width:70px; flex:none; background:#24354a; border-right:1px solid #4b6276; display:grid; place-items:center; font-weight:800; font-size:10px; color:#b3ccdf; }
-    .piano-beats { position:relative; height:29px; flex:none; }
+    .piano-beats { position:relative; height:29px; flex:none; cursor:pointer; }
+    .piano-playhead { position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:#fff; z-index:6; pointer-events:none; box-shadow:0 0 8px #fff8; }
+    .piano-playhead::before { content:''; position:absolute; top:0; left:-5px; border:6px solid transparent; border-top-color:#fff; }
+    .piano-transport { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:0 0 10px; }
+    .piano-transport .ref-play { min-width:86px; }
+    .piano-transport select { border:1px solid #465870; border-radius:7px; background:#101a2a; color:#eef7fb; padding:7px 8px; font-size:12px; }
     .beat-mark { position:absolute; top:0; height:29px; padding:6px 0 0 7px; color:#99b6cd; border-left:1px solid #466178; font-size:11px; font-variant-numeric:tabular-nums; }
     .beat-mark.bar { color:#e4f3fd; font-weight:800; border-left:2px solid #7091a9; }
     .piano-stage { display:flex; width:max-content; }
@@ -297,9 +307,15 @@
           <span class="zoom-readout" id="refZoomReadout"></span>
         </div>
       </div>
+      <div class="ref-transport" role="group" aria-label="Reference audio playback">
+        <button class="tiny ref-play" id="refPlayPause" type="button" disabled>▶ Play</button>
+        <span class="ref-time" id="refTime" aria-live="off">0:00.00 / 0:00.00</span>
+        <button class="tiny" id="refSetStart" type="button" title="Move the selection start to the playhead" disabled>[ Set start here</button>
+        <button class="tiny" id="refSetEnd" type="button" title="Move the selection end to the playhead" disabled>Set end here ]</button>
+      </div>
       <canvas class="reference-wave empty" id="referenceWave" height="116" aria-label="Audio waveform with highlighted selected clip"></canvas>
       <input class="reference-pan" id="refPan" type="range" min="0" max="1000" value="0" disabled aria-label="Scroll the zoomed waveform">
-      <p class="reference-note">Click or drag the waveform to choose where the clip starts, or drag either yellow edge to adjust the selection. Trim to selection keeps only the selected audio so you can whittle a song down to the section you want. Zoom with the buttons, a trackpad pinch or Ctrl + scroll over the waveform; pan with the bar underneath or Shift + scroll. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
+      <p class="reference-note">Click the waveform to move the playhead (white line), then Play / Pause to find the exact spot and use Set start / Set end. Drag across the waveform to select a new range, or drag either yellow edge to adjust it. Trim to selection keeps only the selected audio so you can whittle a song down to the section you want. Zoom with the buttons, a trackpad pinch or Ctrl + scroll over the waveform; pan with the bar underneath or Shift + scroll. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
       <div class="detect-box" aria-label="Automatic pitch detection">
         <div class="detect-head">
           <div><div class="panel-title">✧ Automatic pitch detection <span style="color:#89afbd">· Basic Pitch</span></div><p class="reference-note">Analyse the selected clip locally. Suggested notes appear as mint-green outlines on the piano roll; your RTTTL is unchanged until you apply them.</p></div>
@@ -332,6 +348,12 @@
           <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
         </div>
       </div>
+      <div class="piano-transport" role="group" aria-label="Piano-roll playback">
+        <button class="tiny ref-play" id="pianoPlay" type="button">▶ Play</button>
+        <button class="tiny" id="pianoRewind" type="button" title="Back to the start" aria-label="Back to the start">⏮</button>
+        <select id="pianoScope" aria-label="What to play"><option value="motor">This motor</option><option value="all">All motors</option></select>
+        <span class="ref-time" id="pianoTime" aria-live="off">0:00.00</span>
+      </div>
       <div class="piano-scroll" id="pianoScroll" aria-label="Scrollable interactive MIDI note grid">
         <div class="piano-header"><div class="piano-corner">PITCH</div><div class="piano-beats" id="pianoBeats"></div></div>
         <div class="piano-stage"><div class="piano-keys" id="pianoKeys"></div><div class="piano-roll" id="pianoRoll" aria-label="Drag notes vertically for pitch, horizontally for start time, or resize the right edge"></div></div>
@@ -345,7 +367,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -465,6 +487,7 @@
     let pendingMidi=null,refBuffer=null,refFileName='',referencePreview=false,referenceDrag=false;
     let refStart=0,refDuration=4,refOffset=0,refSource=null,refGain=null,motorWave=null,panners=[],wavePeaks=[];
     let refView=null,refChannel=null,viewPeaks=null; // refView: {start,end} in seconds, null = whole file
+    let refPlayhead=0,scrubSource=null,scrubStartedAt=0,scrubFrom=0,scrubRaf=0; // whole-file play/pause transport
     let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
     const settings={bpm:125,signature:'4/4',metronome:false,mode:'square',stereo:65,ripple:false,snap:.25,...savedSettings};
@@ -733,6 +756,7 @@
       const beatSeconds=60/Number(bpmInput.value),step=4/den,beats=Math.min(1024,Math.ceil(length/(beatSeconds*step))),bar=barBeats();
       for(let b=0;b<=beats;b++){
         const beatPosition=b*step,at=startTime+beatPosition*beatSeconds/speedAtStart;
+        if(at<scheduleFloor-.001)continue;
         const sound=ctx.createOscillator(),gain=ctx.createGain();
         const downbeat=Math.abs(beatPosition/bar-Math.round(beatPosition/bar))<.001;
         const subgroup=den===8&&num%3===0&&b%3===0;
@@ -748,30 +772,33 @@
       const start=Math.min(refStart,Math.max(0,refBuffer.duration-.01));
       const duration=Math.min(refDuration,refBuffer.duration-start);
       if(duration<=0)return;
-      const at=startTime+refOffset/speedAtStart;
+      let at=startTime+refOffset/speedAtStart,from=start,span=duration;
+      if(at<scheduleFloor){const skip=(scheduleFloor-at)*speedAtStart;if(skip>=span)return;from+=skip;span-=skip;at=scheduleFloor;}
       const source=ctx.createBufferSource();source.buffer=refBuffer;source.playbackRate.value=speedAtStart;
       refGain.gain.value=Number(referenceVolumeInput.value)/100;
-      source.connect(refGain);source.start(at,start,duration);sources.push(source);refSource=source;
+      source.connect(refGain);source.start(at,from,span);sources.push(source);refSource=source;
       length=Math.max(length,refOffset+duration);
     }
 
     function halt() {
+      pauseScrub();
       cancelAnimationFrame(raf); raf=0;
       if(ctx)for(const source of sources){try{source.stop(ctx.currentTime);}catch(_){} }
       sources=[]; startTime=null; audition=null;
       refSource=null;referencePreview=false;
       playButton.innerHTML='<span aria-hidden="true">▶</span><span>Play all motors</span>';
       stopButton.disabled=true;
-      renderClock(0); drawTimeline();drawReferenceWave();
+      renderClock(0); drawTimeline();drawReferenceWave();updatePianoTransport();
     }
 
-    async function play(index=null) {
+    let scheduleFloor=0; // earliest audio-clock time anything may start (playback can begin part-way through)
+    async function play(index=null,from=0) {
       if(tracks.some(t=>!t.parsed)){notify('Fix the highlighted RTTTL error first');return;}
       halt();
       try {await audioSetup();}catch(err){notify(err.message);return;}
       audition=index; speedAtStart=Number(speedInput.value);
       updateGains();
-      startTime=ctx.currentTime+.065;
+      scheduleFloor=ctx.currentTime+.065;startTime=scheduleFloor-from/speedAtStart;
       const activeTracks=index===null?tracks.map((_,i)=>i):[index];
       length=Math.max(...activeTracks.map(i=>tracks[i].parsed.length));
       if(referenceMixInput.checked)scheduleReference();
@@ -780,8 +807,10 @@
         const voice=tracks[i].parsed;
         for(const note of voice.notes){
           if(note.rest)continue;
-          const start=startTime+note.start/speedAtStart;
-          const dur=note.seconds/speedAtStart;
+          let start=startTime+note.start/speedAtStart;
+          let dur=note.seconds/speedAtStart;
+          if(start+dur<=scheduleFloor+.01)continue;
+          if(start<scheduleFloor){dur-=scheduleFloor-start;start=scheduleFloor;}
           const oscillator=ctx.createOscillator();
           if(soundModeInput.value==='motor')oscillator.setPeriodicWave(motorWave);
           else oscillator.type=soundModeInput.value==='sine'?'sine':'square';
@@ -805,13 +834,38 @@
       if(!refBuffer)return;
       halt();try{await audioSetup();}catch(err){notify(err.message);return;}
       referencePreview=true;audition=-1;updateGains();speedAtStart=Number(speedInput.value);
-      startTime=ctx.currentTime+.065;length=0;scheduleReference();
+      startTime=scheduleFloor=ctx.currentTime+.065;length=0;scheduleReference();
       stopButton.disabled=false;tick();
     }
 
+    let pianoPos=0; // paused position in seconds for the piano-roll transport
+    function motorsPlaying(){return startTime!==null&&audition!==-1;}
+    function pianoPosition(){return motorsPlaying()?elapsed():pianoPos;}
+    function updatePianoTransport(){
+      const playing=motorsPlaying(),t=pianoPosition();
+      document.getElementById('pianoPlay').textContent=playing?'❚❚ Pause':'▶ Play';
+      document.getElementById('pianoTime').textContent=formatRefTime(t);
+      const head=document.getElementById('pianoPlayhead'),bpm=tracks[editMotor]?.parsed?.bpm;
+      if(!head||!bpm)return;
+      const x=t*bpm/60*beatPx;head.style.left=`${x}px`;
+      if(playing){const sc=document.getElementById('pianoScroll'),keys=70;if(x<sc.scrollLeft||x>sc.scrollLeft+sc.clientWidth-keys-30)sc.scrollLeft=Math.max(0,x-60);}
+    }
+    function pianoPlayPause(){
+      if(motorsPlaying()){pianoPos=elapsed();halt();return;}
+      const scopeAll=document.getElementById('pianoScope').value==='all';
+      const end=scopeAll?Math.max(...tracks.map(t=>t.parsed?.length||0)):(tracks[editMotor].parsed?.length||0);
+      if(pianoPos>=end-.01)pianoPos=0;
+      play(scopeAll?null:editMotor,pianoPos);
+    }
+    function seekPiano(t){
+      const wasPlaying=motorsPlaying();
+      pianoPos=Math.max(0,t);
+      if(wasPlaying){const scopeAll=document.getElementById('pianoScope').value==='all';play(scopeAll?null:editMotor,pianoPos);}
+      else updatePianoTransport();
+    }
     function elapsed() {return startTime===null || !ctx ? 0 : Math.max(0,(ctx.currentTime-startTime)*speedAtStart);}
     function renderClock(t){clock.innerHTML=`${formatTime(t)} <span>/ ${formatTime(length)}</span>`;}
-    function tick(){const e=elapsed();renderClock(Math.min(e,length));drawTimeline();drawReferenceWave();if(e>length+.08){halt();return;}raf=requestAnimationFrame(tick);}
+    function tick(){const e=elapsed();renderClock(Math.min(e,length));drawTimeline();drawReferenceWave();updatePianoTransport();if(e>length+.08){pianoPos=0;halt();return;}raf=requestAnimationFrame(tick);}
 
     function syncReferenceInputs(){
       const previousStart=refStart,previousDuration=refDuration;
@@ -856,6 +910,7 @@
           const x=W*(markerTime-viewStart)/duration;g.strokeStyle='#fff4b1';g.setLineDash([5,4]);g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.setLineDash([]);
         }
       }
+      {const t=scrubPosition();if(t>=viewStart&&t<=viewEnd){const x=W*(t-viewStart)/duration;g.strokeStyle='#ffffff';g.lineWidth=1.5;g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.fillStyle='#ffffff';g.beginPath();g.moveTo(x-5,0);g.lineTo(x+5,0);g.lineTo(x,7);g.closePath();g.fill();}}
       if(startTime!==null && (referencePreview||referenceMixInput.checked)){
         const t=elapsed()-refOffset;
         if(t>=0&&t<=refDuration){const x=W*(refStart+t-viewStart)/duration;g.strokeStyle='#fff';g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
@@ -906,6 +961,57 @@
       refZoomReadout.textContent=!has?'':zoomed?`${(refView.end-refView.start).toFixed(refView.end-refView.start<10?2:1)} s shown`:'Whole file';
     }
 
+    function formatRefTime(t){const m=Math.floor(t/60),sec=t-m*60;return `${m}:${sec.toFixed(2).padStart(5,'0')}`;}
+    function scrubPosition(){return scrubSource?clamp(scrubFrom+(ctx.currentTime-scrubStartedAt),0,refBuffer.duration):refPlayhead;}
+    function updateRefTransport(){
+      const has=Boolean(refBuffer),playing=Boolean(scrubSource);
+      const btn=document.getElementById('refPlayPause');btn.disabled=!has;btn.textContent=playing?'❚❚ Pause':'▶ Play';
+      document.getElementById('refSetStart').disabled=!has;document.getElementById('refSetEnd').disabled=!has;
+      document.getElementById('refTime').textContent=has?`${formatRefTime(scrubPosition())} / ${formatRefTime(refBuffer.duration)}`:'0:00.00 / 0:00.00';
+    }
+    function pauseScrub(){
+      if(!scrubSource)return;
+      refPlayhead=scrubPosition();
+      const source=scrubSource;scrubSource=null;source.onended=null;try{source.stop();}catch(_){}
+      cancelAnimationFrame(scrubRaf);scrubRaf=0;
+      updateRefTransport();drawReferenceWave();
+    }
+    async function playScrub(){
+      if(!refBuffer)return;
+      halt();await audioSetup();
+      if(refPlayhead>=refBuffer.duration-.01)refPlayhead=0;
+      refGain.gain.value=Number(referenceVolumeInput.value)/100;
+      const source=ctx.createBufferSource();source.buffer=refBuffer;source.connect(refGain);
+      scrubFrom=refPlayhead;scrubStartedAt=ctx.currentTime+.01;source.start(scrubStartedAt,refPlayhead);
+      source.onended=()=>{if(scrubSource!==source)return;scrubSource=null;refPlayhead=refBuffer?refBuffer.duration:0;cancelAnimationFrame(scrubRaf);updateRefTransport();drawReferenceWave();};
+      scrubSource=source;updateRefTransport();
+      const frame=()=>{
+        if(scrubSource!==source)return;
+        const t=scrubPosition();
+        if(refView&&(t>refView.end||t<refView.start)){const span=refView.end-refView.start;setReferenceView(t-span*.1,t+span*.9);} // keep the playhead in view when zoomed
+        updateRefTransport();drawReferenceWave();scrubRaf=requestAnimationFrame(frame);
+      };
+      scrubRaf=requestAnimationFrame(frame);
+    }
+    function seekScrub(t){
+      if(!refBuffer)return;
+      const playing=Boolean(scrubSource);
+      if(playing)pauseScrub();
+      refPlayhead=clamp(t,0,refBuffer.duration);updateRefTransport();drawReferenceWave();
+      if(playing)playScrub();
+    }
+    function setSelectionEdgeAtPlayhead(edge){
+      if(!refBuffer)return;
+      const t=scrubPosition(),end=refStart+refDuration;
+      if(edge==='start'){
+        if(t<end-.05){refStart=t;refDuration=end-t;}
+        else{refStart=Math.min(t,refBuffer.duration-.05);refDuration=Math.min(refDuration,refBuffer.duration-refStart);}
+      }else{
+        if(t<=refStart+.05){notify('The playhead is before the selection start; set the start first');return;}
+        refDuration=t-refStart;
+      }
+      referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);syncReferenceInputs();
+    }
     function setReferenceBuffer(next,start,duration){
       refBuffer=next;refStart=start;refDuration=duration;
       referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);
@@ -920,7 +1026,8 @@
       const trimmed=trimHistory.length?` · trimmed to ${trimOrigin.toFixed(2)}–${(trimOrigin+next.duration).toFixed(2)} s of the original`:'';
       document.getElementById('referenceStatus').textContent=`${refFileName} · ${next.duration.toFixed(1)} s · ${next.sampleRate} Hz${trimmed} · clip remains local to this browser session`;
       document.getElementById('trimReference').disabled=false;document.getElementById('undoTrim').disabled=!trimHistory.length;
-      updateZoomControls();drawReferenceWave();
+      refPlayhead=clamp(refPlayhead,0,next.duration);
+      updateZoomControls();updateRefTransport();drawReferenceWave();
     }
     function trimReferenceToSelection(){
       if(!refBuffer)return;
@@ -931,6 +1038,7 @@
       const next=ctx.createBuffer(refBuffer.numberOfChannels,to-from,rate);
       for(let c=0;c<refBuffer.numberOfChannels;c++)next.copyToChannel(refBuffer.getChannelData(c).subarray(from,to),c);
       trimHistory.push({buffer:refBuffer,start:refStart,duration:refDuration,origin:trimOrigin});
+      refPlayhead=clamp(refPlayhead-from/rate,0,(to-from)/rate);
       trimOrigin+=from/rate;
       setReferenceBuffer(next,0,next.duration);
       clearPitchSuggestions('Clip trimmed. Detect notes again for the new clip.');
@@ -938,7 +1046,7 @@
     }
     function undoReferenceTrim(){
       const last=trimHistory.pop();if(!last)return;
-      halt();trimOrigin=last.origin;
+      halt();refPlayhead+=trimOrigin-last.origin;trimOrigin=last.origin;
       setReferenceBuffer(last.buffer,last.start,last.duration);
       clearPitchSuggestions('Trim undone. Detect notes again if needed.');
       notify('Trim undone');
@@ -949,7 +1057,7 @@
       try{
         await audioSetup();
         const next=await ctx.decodeAudioData(await file.arrayBuffer());
-        halt();refFileName=file.name;refOffset=0;trimHistory=[];trimOrigin=0;
+        halt();refFileName=file.name;refOffset=0;trimHistory=[];trimOrigin=0;refPlayhead=0;
         setReferenceBuffer(next,0,Math.min(8,next.duration));
         clearPitchSuggestions('Reference loaded. Choose a clip and click Detect notes.');
         referenceOffsetInput.value='0';
@@ -1097,7 +1205,7 @@
     });
     referenceWave.addEventListener('pointerup',e=>{
       if(!referenceDrag||e.pointerId!==referenceDrag.pointer)return;
-      if(!referenceDrag.moved&&!referenceDrag.edge){refStart=clamp(referenceDrag.at,0,refBuffer.duration-.05);refDuration=Math.min(refDuration,refBuffer.duration-refStart);}
+      if(!referenceDrag.moved&&!referenceDrag.edge){const at=referenceDrag.at;referenceDrag=false;seekScrub(at);return;}
       referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);
       referenceDrag=false;syncReferenceInputs();
     });
@@ -1306,7 +1414,8 @@
       pianoGrid.style.width=`${width}px`;pianoGrid.style.height=`${height}px`;
       pianoKeys.style.height=`${height}px`;pianoKeys.innerHTML=keys.join('');
       pianoBeats.style.width=`${width}px`;pianoBeats.innerHTML=Array.from({length:Math.ceil(maxBeat)},(_,beat)=>`<div class="beat-mark ${beat%bar===0?'bar':''}" style="left:${beat*beatPx}px">${beat%bar===0?`Bar ${Math.floor(beat/bar)+1}`:beat+1}</div>`).join('');
-      pianoGrid.innerHTML=background.join('')+notes.join('');
+      pianoGrid.innerHTML=background.join('')+notes.join('')+'<div class="piano-playhead" id="pianoPlayhead"></div>';
+      updatePianoTransport();
       document.getElementById('pianoReadout').textContent=`· ${events.length} notes · ${t.parsed.totalBeats.toFixed(2)} beats`;
       updateNoteInspector(events);
     }
@@ -1479,7 +1588,7 @@
     referenceFile.addEventListener('change',async()=>{await loadReferenceAudio(referenceFile.files?.[0]);referenceFile.value='';});
     document.getElementById('playReference').addEventListener('click',playReferenceOnly);
     document.getElementById('clearReference').addEventListener('click',()=>{
-      halt();refBuffer=null;refFileName='';wavePeaks=[];refChannel=null;refView=null;viewPeaks=null;trimHistory=[];trimOrigin=0;updateZoomControls();
+      halt();refBuffer=null;refFileName='';wavePeaks=[];refChannel=null;refView=null;viewPeaks=null;trimHistory=[];trimOrigin=0;refPlayhead=0;updateZoomControls();updateRefTransport();
       document.getElementById('trimReference').disabled=true;document.getElementById('undoTrim').disabled=true;
       detectButton.disabled=true;clearPitchSuggestions('Reference cleared. Load audio to analyse another clip.');
       document.getElementById('referenceStatus').textContent='Reference cleared. Load your own audio to compare it with the motor arrangement.';
@@ -1489,6 +1598,9 @@
     for(const input of [referenceStartInput,referenceDurationInput,referenceOffsetInput])input.addEventListener('change',syncReferenceInputs);
     referenceVolumeInput.addEventListener('input',()=>{if(refGain&&ctx)refGain.gain.setTargetAtTime(Number(referenceVolumeInput.value)/100,ctx.currentTime,.02);});
     referenceMixInput.addEventListener('change',drawReferenceWave);
+    document.getElementById('refPlayPause').addEventListener('click',()=>{scrubSource?pauseScrub():playScrub();});
+    document.getElementById('refSetStart').addEventListener('click',()=>setSelectionEdgeAtPlayhead('start'));
+    document.getElementById('refSetEnd').addEventListener('click',()=>setSelectionEdgeAtPlayhead('end'));
     document.getElementById('trimReference').addEventListener('click',trimReferenceToSelection);
     document.getElementById('undoTrim').addEventListener('click',undoReferenceTrim);
     document.getElementById('refZoomIn').addEventListener('click',()=>zoomReference(.5));
@@ -1534,7 +1646,10 @@
     document.getElementById('exportMidi').addEventListener('click',exportMidi);
 
     playButton.addEventListener('click',()=>play());
-    stopButton.addEventListener('click',halt);
+    stopButton.addEventListener('click',()=>{pianoPos=0;halt();});
+    document.getElementById('pianoPlay').addEventListener('click',pianoPlayPause);
+    document.getElementById('pianoRewind').addEventListener('click',()=>seekPiano(0));
+    pianoBeats.addEventListener('click',e=>{const bpm=tracks[editMotor]?.parsed?.bpm;if(!bpm)return;const rect=pianoBeats.getBoundingClientRect();seekPiano((e.clientX-rect.left)/beatPx*60/bpm);});
     function updateTimeGuide(){saveGuide();updateGuideInfo();drawTimeline();renderPiano();}
     showTimeGuide.addEventListener('change',updateTimeGuide);
     targetSeconds.addEventListener('input',updateTimeGuide);
@@ -1590,6 +1705,7 @@
       finally{projectFile.value='';}
     });
     window.addEventListener('resize',drawTimeline);
+    window.addEventListener('resize',()=>{viewPeaks=null;drawReferenceWave();});
     document.addEventListener('keydown',e=>{if(e.code==='Space' && !['TEXTAREA','INPUT','BUTTON'].includes(document.activeElement?.tagName)){e.preventDefault();startTime===null?play():halt();}});
     // Example songs: Bluejay's preset melodies from ESC Configurator, fetched on first open
     const examplesUrl='https://raw.githubusercontent.com/stylesuxx/esc-configurator/master/src/melodies.json';
@@ -1678,7 +1794,7 @@
       window.addEventListener('load',reportHeight);
     }
 
-    buildUI();
+    buildUI();drawReferenceWave();
   })();
   </script>
 </body>
