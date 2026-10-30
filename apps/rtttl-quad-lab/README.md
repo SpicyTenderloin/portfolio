@@ -21,7 +21,8 @@ The app stores edits, motor count and channel names in your browser's local stor
 
 - Set **Motors** to any number between 4 and 12, or use the **+ Motor** and **− Motor** buttons. The first four channels default to Higher melody, Lower melody, Harmony, Bass. Extra channels start as silent, editable tracks. Reducing the count asks for confirmation when removed tracks contain custom notes or names.
 - Rename any channel in its **Motor tracks** panel.
-- Change any motor's RTTTL directly, or edit its notes in the piano roll; the views synchronize.
+- Change any motor's RTTTL directly, or edit its notes in the piano roll; the views synchronize. Clicking a note in the piano roll plays it, dragging it up or down plays each new pitch, and clicking a key on the left plays that pitch.
+- When an RTTTL string has errors, every offending note (or header setting such as `b=960`) is highlighted in red inside the text box, and the message underneath explains the first one; click the message to select it.
 - Check **Show target-time bar** and enter a target in seconds to compare your arrangement against a duration.
 - Set a global **BPM** to change all four RTTTL tempos together; choose a time signature and enable a metronome during playback.
 - Turn **Ripple editing** on to push later notes, or leave it off to move/resize notes independently and encode gaps as RTTTL rests. Use Undo/Redo to reverse piano-roll edits.
@@ -31,7 +32,7 @@ The app stores edits, motor count and channel names in your browser's local stor
 - **Choose MIDI** to import type 0 or 1 Standard MIDI Files with PPQ timing, map MIDI voices to individual ESCs and quantise notes to the current snap grid; **Export MIDI** writes a four-track SMF.
 - Check **Bluejay preflight** for per-channel event count, frequency range, duration, BPM and warnings.
 - **Export project** downloads a JSON backup; **Import project** brings the arrangement into another device or browser.
-- **Example songs** opens Bluejay's preset melodies (the library ESC Configurator ships, about 100 songs, 1 to 4 tracks each) with a search box. Choosing one replaces the current arrangement after a confirmation. The list is fetched from ESC Configurator's GitHub on first use (AGPL-3.0, not bundled here) and cached in the browser for offline use afterwards. A handful of upstream presets contain typos; they are flagged in the list and their tracks show what needs fixing.
+- **Example songs** opens Bluejay's preset melodies (the library ESC Configurator ships, about 100 songs, 1 to 4 tracks each) with a search box. Choosing one replaces the current arrangement after a confirmation. The list is fetched from ESC Configurator's GitHub on first use (AGPL-3.0, not bundled here) and cached in the browser for offline use afterwards. A handful of upstream presets contain typos; they are flagged in the list, and the bad notes are highlighted in each track's text box.
 - **Full screen** in the top bar uses the browser's Fullscreen API, both standalone and when embedded in the portfolio page.
 - **Reset melodies** restores the original tune while preserving custom channel names and target-time settings.
 

@@ -148,6 +148,9 @@
     .piano-key { height:20px; display:flex; align-items:center; justify-content:end; padding-right:8px; border-bottom:1px solid #344257; color:#a9bece; font-size:10px; font-weight:700; }
     .piano-key.black { background:#131e2e; color:#6b8195; }
     .piano-key.tonic { color:#b9f9fa; }
+    .piano-key { cursor:pointer; }
+    .piano-key:hover { background:#2d3f57; }
+    .piano-key.black:hover { background:#1d2b40; }
     .piano-roll { position:relative; flex:none; cursor:crosshair; touch-action:pan-x pan-y; }
     .pitch-row { position:absolute; left:0; right:0; height:20px; border-bottom:1px solid #30415775; background:#19273a; pointer-events:none; }
     .pitch-row.black { background:#132033; }
@@ -188,6 +191,11 @@
     .track-stats { font-size:11px; color:#8193a6; font-variant-numeric:tabular-nums; }
     .copy { background:none; border:0; color:var(--cyan); font-size:11px; font-weight:800; padding:5px 0; }
     .copy:hover { text-decoration:underline; }
+    .rtttl-wrap { position:relative; }
+    .rtttl-wrap textarea { position:relative; z-index:1; background:transparent; }
+    .rtttl-backdrop { position:absolute; inset:0; z-index:0; overflow:hidden; background:#0e1521; border:1px solid transparent; border-radius:9px; padding:12px; color:transparent; font-size:12px; line-height:1.7; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; overflow-wrap:anywhere; pointer-events:none; }
+    .rtttl-backdrop mark { color:transparent; background:#ff5c5c55; border-radius:3px; box-shadow:0 0 0 1px #ff8a8a; }
+    .error.has-range { cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; }
     .error { color:#ffaaaa; font-size:12px; line-height:1.4; margin:8px 0 0; min-height:0; }
     .tips { display:flex; gap:10px; align-items:start; margin:25px 2px 0; color:#8da1b5; font-size:12px; line-height:1.6; }
     .tips span { color:var(--cyan); font-weight:900; }
@@ -337,7 +345,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -471,38 +479,59 @@
     let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
 
     function parseRTTTL(raw) {
+      // Errors carry err.range = [from, to] (offsets into raw) so the editor can highlight the culprit
+      const lead = raw.length - raw.trimStart().length;
+      const fail = (message, span) => { const err = new Error(message); if (span) err.range = [lead + span.from, lead + span.to]; throw err; };
+      const spans = (text, base) => {
+        const out = []; let pos = 0;
+        for (const part of text.split(',')) {
+          const value = part.trim(), skip = part.length - part.trimStart().length;
+          if (value) out.push({value, from: base + pos + skip, to: base + pos + skip + value.length});
+          pos += part.length + 1;
+        }
+        return out;
+      };
       const pieces = raw.trim().split(':');
-      if (pieces.length !== 3) throw new Error('Expected name:defaults:notes (two colons).');
-      const defaults = {d:4,o:5,b:120};
-      for (const item of pieces[1].split(',')) {
-        const bits = item.trim().toLowerCase().match(/^([a-z])\s*=\s*(\d+)$/);
-        if (!bits) throw new Error('Invalid default setting: ' + item.trim());
-        if ('dob'.includes(bits[1])) defaults[bits[1]] = Number(bits[2]);
+      if (pieces.length !== 3) fail('Expected name:defaults:notes (two colons).');
+      const headerAt = pieces[0].length + 1, notesAt = headerAt + pieces[1].length + 1;
+      const defaults = {d:4,o:5,b:120}, setting = {};
+      for (const item of spans(pieces[1], headerAt)) {
+        const bits = item.value.toLowerCase().match(/^([a-z])\s*=\s*(\d+)$/);
+        if (!bits) fail('Invalid default setting: ' + item.value, item);
+        if ('dob'.includes(bits[1])) { defaults[bits[1]] = Number(bits[2]); setting[bits[1]] = item; }
       }
-      if (![1,2,4,8,16,32,64].includes(defaults.d) || defaults.o < 1 || defaults.o > 8 || defaults.b < 20 || defaults.b > 900) throw new Error('Check d (note length), o (octave), or b (20–900 BPM).');
+      if (![1,2,4,8,16,32,64].includes(defaults.d)) fail(`Default note length d=${defaults.d} must be 1, 2, 4, 8, 16, 32 or 64.`, setting.d);
+      if (defaults.o < 1 || defaults.o > 8) fail(`Default octave o=${defaults.o} must be between 1 and 8.`, setting.o);
+      if (defaults.b < 20 || defaults.b > 900) fail(`Tempo b=${defaults.b} must be between 20 and 900 BPM.`, setting.b);
       const notes = [];
       let currentTime = 0;
-      const tokens = pieces[2].split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
-      if (!tokens.length) throw new Error('No notes after the second colon.');
-      if (tokens.length > 62) throw new Error('This track has more than 62 notes/rests (Bluejay melody limit).');
-      for (const token of tokens) {
+      const tokens = spans(pieces[2], notesAt);
+      if (!tokens.length) fail('No notes after the second colon.');
+      if (tokens.length > 62) fail(`This track has ${tokens.length} notes/rests; Bluejay allows 62 (extra ones highlighted).`, {from: tokens[62].from, to: tokens.at(-1).to});
+      const problems = [];
+      for (const span of tokens) try {
+        const token = span.value.toLowerCase();
         // Accept both common dotted forms: 8c#6. and 8c#.6
         // "h" is the German name for B, used by some Bluejay example songs
         const normal = token.replace(/^(\d*)h/, '$1b').replace(/^(\d*[a-g]#?)\.(\d)$/, '$1$2.');
-        const match = normal.match(/^(\d{0,2})([a-gp])(#?)([3-8]?)(\.)?$/);
-        if (!match) throw new Error('Invalid note: ' + token);
+        const match = normal.match(/^(\d{0,2})([a-gp])(#?)(\d?)(\.)?$/);
+        if (!match) fail('Invalid note: ' + token, span);
         const denom = match[1] ? Number(match[1]) : defaults.d;
-        if (![1,2,4,8,16,32,64].includes(denom)) throw new Error('Invalid duration in ' + token);
+        if (![1,2,4,8,16,32,64].includes(denom)) fail('Invalid duration in ' + token, span);
         const beatCount = (4 / denom) * (match[5] ? 1.5 : 1);
         const seconds = beatCount * 60 / defaults.b;
         const rest = match[2] === 'p';
         const octave = match[4] ? Number(match[4]) : defaults.o;
         // A low default octave is fine (some Bluejay examples use o=2) as long as no note actually lands there
-        if (!rest && (octave < 3 || octave > 8)) throw new Error('Note outside octaves 3 to 8: ' + token);
+        if (!rest && (octave < 3 || octave > 8)) fail('Note outside octaves 3 to 8: ' + token, span);
         const midi = rest ? null : ((octave + 1) * 12 + noteIndex[match[2]] + (match[3] ? 1 : 0));
         const hz = rest ? 0 : 440 * Math.pow(2, (midi - 69) / 12);
         notes.push({start:currentTime, seconds, beats:beatCount, hz, midi, rest, token});
         currentTime += seconds;
+      } catch (err) { if (!err.range) throw err; problems.push(err); } // keep scanning so every bad note can be highlighted
+      if (problems.length) {
+        const err = new Error(problems[0].message + (problems.length > 1 ? ` (and ${problems.length - 1} more)` : ''));
+        err.range = problems[0].range; err.ranges = problems.map(p => p.range); throw err;
       }
       return {name:pieces[0],defaults,notes, length:currentTime, totalBeats:currentTime*defaults.b/60, count:notes.length, bpm:defaults.b};
     }
@@ -531,12 +560,14 @@
         <div class="track-top"><div style="min-width:0;flex:1"><label class="track-number" for="track-name-${i}">ESC 0${i+1} · CHANNEL NAME</label><input id="track-name-${i}" class="track-name" type="text" maxlength="40" value="${escapeHTML(t.name)}" aria-label="Name for ESC ${i+1}"><div class="track-name-hint">Click to rename</div><p class="track-subtitle">${escapeHTML(t.subtitle)}</p></div>
         <div class="track-buttons"><button type="button" class="tiny" data-action="mute" aria-pressed="false" title="Toggle mute">Mute</button><button type="button" class="tiny" data-action="solo" aria-pressed="false" title="Play only soloed motors">Solo</button><button type="button" class="tiny" data-action="preview" title="Listen to this motor only">▶</button></div></div>
         <label class="editor-label" for="rtttl-${i}"><span>RTTTL STRING</span><span>EDITABLE</span></label>
-        <textarea id="rtttl-${i}" rows="3" spellcheck="false" aria-label="RTTTL for motor ${i+1}">${escapeHTML(t.value)}</textarea>
+        <div class="rtttl-wrap"><div class="rtttl-backdrop" id="rtttl-mark-${i}" aria-hidden="true"></div><textarea id="rtttl-${i}" rows="3" spellcheck="false" aria-label="RTTTL for motor ${i+1}">${escapeHTML(t.value)}</textarea></div>
         <div class="track-footer"><span class="track-stats" id="stats-${i}"></span><button class="copy" type="button" data-action="copy">Copy RTTTL ↗</button></div><p class="error" id="error-${i}" role="status"></p>
       </article>`).join('');
       refreshChannelLabels();
       for (let i=0;i<tracks.length;i++) {
         document.getElementById(`rtttl-${i}`).addEventListener('input',e=>{tracks[i].value=e.target.value; saveEdits(); updateParsed();});
+        document.getElementById(`rtttl-${i}`).addEventListener('scroll',e=>{document.getElementById(`rtttl-mark-${i}`).scrollTop=e.target.scrollTop;});
+        document.getElementById(`error-${i}`).addEventListener('click',()=>{const r=tracks[i].errorRange,box=document.getElementById(`rtttl-${i}`);if(r){box.focus();box.setSelectionRange(r[0],r[1]);}});
         const nameInput=document.getElementById(`track-name-${i}`);
         nameInput.addEventListener('input',e=>{tracks[i].name=e.target.value;saveNames();refreshChannelLabels();renderPiano();});
         nameInput.addEventListener('blur',e=>{if(!e.target.value.trim()){tracks[i].name=defaultMotor(i).name;e.target.value=tracks[i].name;saveNames();refreshChannelLabels();renderPiano();}});
@@ -595,11 +626,20 @@
     function updateParsed(renderEditor=true) {
       let maxLength=0; let valid=0;
       tracks.forEach((t,i)=>{
-        try {t.parsed=parseRTTTL(t.value); t.error=null; valid++; maxLength=Math.max(maxLength,t.parsed.length);}
-        catch(err){t.parsed=null; t.error=err.message;}
+        try {t.parsed=parseRTTTL(t.value); t.error=null; t.errorRange=null; valid++; maxLength=Math.max(maxLength,t.parsed.length);}
+        catch(err){t.parsed=null; t.error=err.message; t.errorRange=err.range||null; t.errorRanges=err.ranges||(err.range?[err.range]:[]);}
         const stats=document.getElementById(`stats-${i}`), error=document.getElementById(`error-${i}`);
         stats.textContent=t.parsed?`${t.parsed.count} notes/rests · ${t.parsed.length.toFixed(2)}s · ${t.parsed.bpm} BPM`:'Needs correction';
-        error.textContent=t.error||'';
+        const marks=t.parsed?[]:(t.errorRanges||[]);
+        error.textContent=t.error?(marks.length>1?`${t.error}. All highlighted above; click to select the first.`:marks.length?`${t.error} (highlighted above, click to select it)`:t.error):'';
+        error.classList.toggle('has-range',Boolean(t.errorRange));
+        const mark=document.getElementById(`rtttl-mark-${i}`);
+        if(mark){
+          const v=t.value;let html='',at=0;
+          for(const [from,to] of marks){html+=escapeHTML(v.slice(at,from))+`<mark>${escapeHTML(v.slice(from,to))}</mark>`;at=to;}
+          mark.innerHTML=marks.length?html+escapeHTML(v.slice(at))+'\n':'';
+          const box=document.getElementById(`rtttl-${i}`);if(box)mark.scrollTop=box.scrollTop;
+        }
       });
       length=maxLength;
       info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds`;
@@ -1322,12 +1362,28 @@
       selectedNote=clamp(selectedNote,0,next.length-1);saveHistory();halt();commitEvents(next,newTail);
     }
 
+    let previewVoice=null;
+    async function previewNote(midi,seconds){
+      try{await audioSetup();}catch(_){return;}
+      if(previewVoice){try{previewVoice.gain.gain.cancelScheduledValues(ctx.currentTime);previewVoice.gain.gain.setTargetAtTime(.0001,ctx.currentTime,.008);previewVoice.osc.stop(ctx.currentTime+.05);}catch(_){}}
+      const dur=clamp(seconds||.35,.12,.6),at=ctx.currentTime+.005;
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      if(soundModeInput.value==='motor')osc.setPeriodicWave(motorWave);else osc.type=soundModeInput.value==='sine'?'sine':'square';
+      osc.frequency.value=440*Math.pow(2,(midi-69)/12);
+      gain.gain.setValueAtTime(.0001,at);gain.gain.linearRampToValueAtTime(.16,at+.012);
+      gain.gain.setValueAtTime(.16,at+dur-.03);gain.gain.exponentialRampToValueAtTime(.0001,at+dur);
+      osc.connect(gain);gain.connect(panners[editMotor]||compressor);
+      osc.start(at);osc.stop(at+dur+.01);
+      previewVoice={osc,gain};osc.onended=()=>{if(previewVoice?.osc===osc)previewVoice=null;};
+    }
+    function noteSeconds(beats){return beats*60/(tracks[editMotor]?.parsed?.bpm||Number(bpmInput.value)||120);}
     function startNoteDrag(e){
       const node=e.target.closest('.midi-note');if(!node || e.button!==0)return;
       const {events,tail}=voiceEvents();const index=Number(node.dataset.note);
       selectedNote=index;const mode=e.target.closest('.resize-grip')?'resize':'move';
       dragState={node,pointerId:e.pointerId,originX:e.clientX,originY:e.clientY,index,mode,original:events.map(n=>({...n})),tail};
       saveHistory();halt();node.setPointerCapture(e.pointerId);
+      dragState.lastMidi=events[index].midi;previewNote(events[index].midi,noteSeconds(events[index].duration));
       node.classList.add('selected','dragging');
       pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('selected',Number(n.dataset.note)===index));
       updateNoteInspector(events);e.preventDefault();
@@ -1347,6 +1403,7 @@
         if(rippleInput.checked)for(let j=d.index+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
       }else{
         note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),48,107);
+        if(note.midi!==d.lastMidi){d.lastMidi=note.midi;previewNote(note.midi,Math.min(.3,noteSeconds(note.duration)));}
         const predecessor=next[d.index-1],following=next[d.index+1];
         const min=predecessor?predecessor.start+predecessor.duration:0;
         let desired=roundBeat(Math.max(min,d.original[d.index].start+snapValue(dx/beatPx)));
@@ -1372,6 +1429,7 @@
     motorTabs.addEventListener('click',e=>{const b=e.target.closest('[data-motor]');if(b)selectMotor(Number(b.dataset.motor));});
     timeline.addEventListener('click',e=>{const rect=timeline.getBoundingClientRect();selectMotor(clamp(Math.floor((e.clientY-rect.top)/45),0,tracks.length-1),true);});
     pianoGrid.addEventListener('pointerdown',startNoteDrag);
+    pianoKeys.addEventListener('pointerdown',e=>{if(!e.target.closest('.piano-key')||e.button!==0)return;const rect=pianoKeys.getBoundingClientRect();previewNote(pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx),.4);});
     pianoGrid.addEventListener('pointermove',moveNoteDrag);
     pianoGrid.addEventListener('pointerup',endNoteDrag);
     pianoGrid.addEventListener('pointercancel',endNoteDrag);
