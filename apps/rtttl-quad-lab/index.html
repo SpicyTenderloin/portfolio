@@ -174,6 +174,8 @@
     .pitch-row.black.in-key { background:#162b27; }
     .pitch-row.key-root { background:#20403a; }
     .pitch-row.off-key { background:#131c29; }
+    .piano-key.out-of-range { color:#4a5868; background:repeating-linear-gradient(135deg,#1a2230 0 4px,#151c28 4px 8px); box-shadow:none; }
+    .pitch-row.out-of-range { background:repeating-linear-gradient(135deg,#121a26 0 6px,#0f1621 6px 12px); }
     .gridline { position:absolute; top:0; bottom:0; width:1px; background:#49607565; pointer-events:none; }
     .gridline.bar { width:2px; background:#7a96ae77; }
     .midi-note { position:absolute; z-index:3; height:17px; border:1px solid #ffffff55; border-radius:4px; background:var(--track-color); color:#102134; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px; font-weight:900; line-height:15px; padding:0 11px 0 5px; white-space:nowrap; overflow:hidden; cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 4px #0004; }
@@ -332,8 +334,8 @@
         </div>
         <div class="detect-controls">
           <label>Sensitivity <input id="pitchSensitivity" type="range" min="0" max="100" value="55" step="5"><output id="pitchSensitivityValue">55%</output></label>
-          <label>Lowest note <select id="pitchMin"><option value="48">C3</option><option value="55">G3</option><option value="60" selected>C4</option><option value="64">E4</option><option value="69">A4</option><option value="72">C5</option></select></label>
-          <label>Highest note <select id="pitchMax"><option value="72">C5</option><option value="83">B5</option><option value="95" selected>B6</option><option value="107">B7</option></select></label>
+          <label>Lowest note <select id="pitchMin"><option value="51">D#3</option><option value="55">G3</option><option value="60" selected>C4</option><option value="64">E4</option><option value="69">A4</option><option value="72">C5</option></select></label>
+          <label>Highest note <select id="pitchMax"><option value="72">C5</option><option value="83">B5</option><option value="95" selected>B6</option><option value="98">D7</option></select></label>
           <label>Min. note <input id="pitchMinMs" type="number" min="30" max="1000" step="10" value="110"> ms</label>
           <button class="tiny" id="applyDetected" type="button" disabled>↓ Apply to selected ESC</button>
         </div>
@@ -464,6 +466,9 @@
     const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
     const beatSnap = document.getElementById('snapGrid');
     const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale');
+    // Bluejay's playable range: pitch is stored as Temp3 = round(1e6/(f*24.72) - 16.15) and must be 1..255,
+    // which allows D#3 (MIDI 51) to D7 (MIDI 98). From C6 up the integer steps detune notes noticeably.
+    const BLUEJAY_MIN_MIDI = 51, BLUEJAY_MAX_MIDI = 98, DETUNE_FROM_MIDI = 84;
     const scaleSteps = {major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], majpent:[0,2,4,7,9], minpent:[0,3,5,7,10]};
     const pianoGrid = document.getElementById('pianoRoll');
     const pianoKeys = document.getElementById('pianoKeys');
@@ -537,7 +542,7 @@
         if (!bits) fail('Invalid default setting: ' + item.value, item);
         if ('dob'.includes(bits[1])) { defaults[bits[1]] = Number(bits[2]); setting[bits[1]] = item; }
       }
-      if (![1,2,4,8,16,32,64].includes(defaults.d)) fail(`Default note length d=${defaults.d} must be 1, 2, 4, 8, 16, 32 or 64.`, setting.d);
+      if (![1,2,4,8,16,32].includes(defaults.d)) fail(`Default note length d=${defaults.d} must be 1, 2, 4, 8, 16 or 32.`, setting.d);
       if (defaults.o < 1 || defaults.o > 8) fail(`Default octave o=${defaults.o} must be between 1 and 8.`, setting.o);
       if (defaults.b < 20 || defaults.b > 900) fail(`Tempo b=${defaults.b} must be between 20 and 900 BPM.`, setting.b);
       const notes = [];
@@ -559,9 +564,9 @@
         const seconds = beatCount * 60 / defaults.b;
         const rest = match[2] === 'p';
         const octave = match[4] ? Number(match[4]) : defaults.o;
-        // A low default octave is fine (some Bluejay examples use o=2) as long as no note actually lands there
-        if (!rest && (octave < 3 || octave > 8)) fail('Note outside octaves 3 to 8: ' + token, span);
         const midi = rest ? null : ((octave + 1) * 12 + noteIndex[match[2]] + (match[3] ? 1 : 0));
+        // A low default octave is fine (some Bluejay examples use o=2) as long as no note actually lands outside the range
+        if (!rest && (midi < BLUEJAY_MIN_MIDI || midi > BLUEJAY_MAX_MIDI)) fail(`Note ${token} (${pitchLabel(midi)}) is outside Bluejay's range, D#3 to D7`, span);
         const hz = rest ? 0 : 440 * Math.pow(2, (midi - 69) / 12);
         notes.push({start:currentTime, seconds, beats:beatCount, hz, midi, rest, token});
         currentTime += seconds;
@@ -698,18 +703,21 @@
         valid++;if(p.count>55)nearLimit++;
         const freqs=p.notes.filter(n=>!n.rest).map(n=>n.hz);
         const min=freqs.length?Math.min(...freqs).toFixed(0):'-',max=freqs.length?Math.max(...freqs).toFixed(0):'-';
+        const pitches=p.notes.filter(n=>!n.rest).map(n=>n.midi),high=pitches.filter(m=>m>=DETUNE_FROM_MIDI).length;
+        const span=pitches.length?`${pitchLabel(Math.min(...pitches))} to ${pitchLabel(Math.max(...pitches))}`:'no notes';
         const difference=maxDuration-p.length;
         return `<div class="validation-item" style="--track-color:${t.color}">
           <div class="heading" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name)}</div>
           <div class="metric ${p.count>55?'warn':'pass'}">${p.count}/62 events ${p.count>55?'· near limit':'· within limit'}</div>
           <div class="metric">${p.bpm} BPM · ${p.length.toFixed(2)} s</div>
-          <div class="metric">Frequency: ${min}–${max} Hz</div>
+          <div class="metric pass">Notes ${span} (${min}–${max} Hz) · within D#3 to D7</div>
+          <div class="metric ${high?'warn':''}">${high?`${high} note${high>1?'s':''} at C6 or above may sound up to 1/3 semitone off`:'No high notes to detune'}</div>
           <div class="metric ${difference>.05?'warn':''}">${difference>.005?`${difference.toFixed(2)} s shorter than longest`:'Matches longest duration'}</div>
         </div>`;
       });
       document.getElementById('validationGrid').innerHTML=out.join('');
       document.getElementById('validationSummary').textContent=`${valid}/${tracks.length} format-valid · ${nearLimit} near event limit`;
-      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding and the 62-event limit are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
+      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding, the 62-event limit and Bluejay\'s D#3 to D7 pitch range are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
     }
 
     function updateButtons() {
@@ -1267,8 +1275,8 @@
       const events=[];let cursor=0,shifted=0,transposed=0;
       for(const n of voice.notes){
         let pitch=n.midi;
-        while(pitch<48){pitch+=12;transposed++;}
-        while(pitch>107){pitch-=12;transposed++;}
+        while(pitch<BLUEJAY_MIN_MIDI){pitch+=12;transposed++;}
+        while(pitch>BLUEJAY_MAX_MIDI){pitch-=12;transposed++;}
         const requested=Math.max(0,Math.round((n.startTick/division)/step)*step);
         const start=roundBeat(Math.max(cursor,requested));
         if(start>requested+.001)shifted++;
@@ -1409,15 +1417,15 @@
       const maxBeat=Math.max(8,Math.ceil((Math.max(t.parsed.totalBeats,targetBeat,proposedEnd)+1)/bar)*bar);
       const minSound=Math.min(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
       const maxSound=Math.max(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
-      pianoMinPitch=clamp(Math.floor(minSound/12)*12,48,84);
-      pianoMaxPitch=Math.min(107,Math.max(pianoMinPitch+23,maxSound+3));
+      pianoMinPitch=clamp(Math.floor(minSound/12)*12,48,72);
+      pianoMaxPitch=Math.min(BLUEJAY_MAX_MIDI,Math.max(pianoMinPitch+23,maxSound+3));
       const rows=pianoMaxPitch-pianoMinPitch+1;
       const width=maxBeat*beatPx,height=rows*rowPx;
       const keys=[],background=[],notes=[];
       for(let midi=pianoMaxPitch;midi>=pianoMinPitch;midi--){
         const y=(pianoMaxPitch-midi)*rowPx;
         const kind=isBlack(midi)?'black':midi%12===0?'tonic':'';
-        const inKey=keyClass(midi);
+        const inKey=keyClass(midi)+(midi<BLUEJAY_MIN_MIDI||midi>BLUEJAY_MAX_MIDI?' out-of-range':'');
         keys.push(`<div class="piano-key ${kind} ${inKey}">${pitchLabel(midi)}</div>`);
         background.push(`<div class="pitch-row ${kind} ${inKey}" style="top:${y}px"></div>`);
       }
@@ -1444,7 +1452,7 @@
       const {events,tail}=voiceEvents(),n=events[selectedNote];if(!n)return;
       if(!Number.isFinite(Number(value))){renderPiano();return;}
       const next=events.map(e=>({...e}));const prev=next[selectedNote-1],following=next[selectedNote+1];
-      if(kind==='pitch')next[selectedNote].midi=clamp(Number(value),48,107);
+      if(kind==='pitch')next[selectedNote].midi=clamp(Number(value),BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
       if(kind==='duration'){
         const dur=Number(value),delta=dur-next[selectedNote].duration;
         if(!rippleInput.checked&&following&&next[selectedNote].start+dur>following.start+.0001){notify('Length overlaps the next note; enable Ripple editing to shift it');renderPiano();return;}
@@ -1471,7 +1479,7 @@
       let beat=start===null?(last?last.start+last.duration:0):Math.max(0,snapValue(start));
       beat=roundBeat(beat);
       const duration=.5;
-      const pitch=clamp(midi??last?.midi??69,48,107);
+      const pitch=clamp(midi??last?.midi??69,BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
       let insert=next.findIndex(e=>e.start>=beat);if(insert<0)insert=next.length;
       const prev=next[insert-1];if(prev)beat=Math.max(beat,prev.start+prev.duration);
       if(insert<next.length){
@@ -1531,7 +1539,7 @@
         const shift=roundBeat(candidate-note.duration);note.duration=candidate;
         if(rippleInput.checked)for(let j=d.index+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
       }else{
-        note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),48,107);
+        note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
         if(note.midi!==d.lastMidi){d.lastMidi=note.midi;previewNote(note.midi,Math.min(.3,noteSeconds(note.duration)));}
         const predecessor=next[d.index-1],following=next[d.index+1];
         const min=predecessor?predecessor.start+predecessor.duration:0;
@@ -1570,7 +1578,7 @@
     pianoGrid.addEventListener('dblclick',e=>{if(e.target.closest('.midi-note'))return;const rect=pianoGrid.getBoundingClientRect();addPianoNote((e.clientX-rect.left)/beatPx,pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx));});
     document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
     document.getElementById('deleteNote').addEventListener('click',deletePianoNote);
-    notePitchSelect.innerHTML=Array.from({length:60},(_,i)=>`<option value="${i+48}">${pitchLabel(i+48)}</option>`).join('');
+    notePitchSelect.innerHTML=Array.from({length:BLUEJAY_MAX_MIDI-BLUEJAY_MIN_MIDI+1},(_,i)=>`<option value="${i+BLUEJAY_MIN_MIDI}">${pitchLabel(i+BLUEJAY_MIN_MIDI)}</option>`).join('');
     noteDurationSelect.innerHTML=durationChoices.map(c=>`<option value="${c.beats}">${c.beats} beat${c.beats===1?'':'s'}</option>`).join('');
     notePitchSelect.addEventListener('change',e=>changeSelected('pitch',e.target.value));
     noteDurationSelect.addEventListener('change',e=>changeSelected('duration',e.target.value));
