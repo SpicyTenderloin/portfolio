@@ -259,7 +259,7 @@
       </div>
       <div class="examples" id="examples">
         <button class="examples-btn" id="examplesButton" type="button" aria-expanded="false" aria-controls="examplesPanel">♫ Example songs</button>
-        <div class="examples-loaded">Loaded:&nbsp; <strong id="loadedSong">Four-motor hook (demo)</strong></div>
+        <div class="examples-loaded">Loaded:&nbsp; <strong id="loadedSong">Owner of a Lonely Heart (riff)</strong></div>
         <div class="examples-panel" id="examplesPanel" hidden>
           <input class="examples-search" id="examplesSearch" type="search" placeholder="Search Bluejay example songs" aria-label="Search example songs">
           <ul class="examples-list" id="examplesList" aria-label="Example songs"></ul>
@@ -365,7 +365,7 @@
         <div class="motor-tabs" id="motorTabs" role="group" aria-label="Switch channels on or off in the piano roll"></div>
       </div>
       <div class="piano-toolbar">
-        <div class="hint"><strong id="selectedMotorName">ESC 1 · Higher melody</strong> <span id="pianoReadout">· 7 notes</span></div>
+        <div class="hint"><strong id="selectedMotorName">Editing ESC 1 · Root</strong> <span id="pianoReadout">· 7 notes</span></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <label>Key <select id="keyRoot" aria-label="Key root note"><option value="">None</option><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></label>
           <select id="keyScale" aria-label="Scale"><option value="major">Major</option><option value="minor">Minor</option><option value="majpent">Major pentatonic</option><option value="minpent">Minor pentatonic</option></select>
@@ -443,11 +443,13 @@
   <script>
   (() => {
     'use strict';
+    // Default arrangement: the Owner of a Lonely Heart riff, also listed first under Example songs
+    const defaultSongName = 'Owner of a Lonely Heart (riff)';
     const originals = [
-      { name:'Higher melody', subtitle:'Lead lifted one octave for clarity · E5–A5', color:'#ff8b78', value:'Lead:d=8,o=5,b=125:e,e,e,g,4g,a,4a,p' },
-      { name:'Lower melody', subtitle:'Reference vocal register · E4–A4', color:'#6ee2e3', value:'Octave:d=8,o=4,b=125:e,e,e,g,4g,a,4a,p' },
-      { name:'Harmony', subtitle:'A minor to C · sustained chord tones', color:'#bd9df8', value:'Harmony:d=8,o=5,b=125:2c,d,2e,p' },
-      { name:'Bass', subtitle:'A → B → C · follows chord roots', color:'#eecb7d', value:'Bass:d=8,o=4,b=125:2a,b,2c5,p' }
+      { name:'Root', subtitle:'Riff root notes · G3–D4', color:'#ff8b78', value:'Lead:d=8,o=5,b=125:4a3,8p,8b3,8c4,8p,8d4,8d4,2p,4g3,4g3,2p.,8p' },
+      { name:'Perfect Fifth', subtitle:'A fifth above the root · D4–A4', color:'#6ee2e3', value:'Octave:d=8,o=4,b=125:4e4,8p,8f#4,8g4,8p,8a4,8a4,2p,4d4,4d4,8p' },
+      { name:'Octave', subtitle:'Root an octave up · G4–D5', color:'#bd9df8', value:'Harmony:d=8,o=5,b=125:4a4,8p,8b4,8c5,8p,8d5,8d5,2p,4g4,4g4,8p' },
+      { name:'Percussion', subtitle:'Short G3 / A5 blips as a beat', color:'#eecb7d', value:'Bass:d=8,o=4,b=125:32g3,8p.,32p,64a5,16p.,64p,64a5,16p.,64p,32g3,8p.,32p.,64a5,8p.,32p,32g3,4p.,16p.,32g3,1p,4p.,16p,64p' }
     ];
     const storageKey = 'rtttl-quad-lab-v2';
     const namesKey = 'rtttl-quad-lab-channel-names-v1';
@@ -485,8 +487,8 @@
     const targetSeconds = document.getElementById('targetSeconds');
     const guideInfo = document.getElementById('guideInfo');
     const timelineRuler = document.getElementById('timelineRuler');
-    showTimeGuide.checked=Boolean(savedGuide?.enabled);
-    targetSeconds.value=String(Number.isFinite(savedGuide?.seconds)&&savedGuide.seconds>0?savedGuide.seconds:2.5);
+    showTimeGuide.checked=savedGuide?Boolean(savedGuide.enabled):true;
+    targetSeconds.value=String(Number.isFinite(savedGuide?.seconds)&&savedGuide.seconds>0?savedGuide.seconds:4);
     const noteIndex = {c:0,d:2,e:4,f:5,g:7,a:9,b:11};
     const pitchNames = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
     const rtttlPitchNames = ['c','c#','d','d#','e','f','f#','g','g#','a','a#','b'];
@@ -537,7 +539,7 @@
     let refPlayhead=0,scrubSource=null,scrubStartedAt=0,scrubFrom=0,scrubRaf=0; // whole-file play/pause transport
     let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
-    const settings={bpm:125,signature:'4/4',metronome:false,mode:'square',stereo:65,ripple:false,snap:.25,...savedSettings};
+    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
     if(settings.pianoZoom){beatPx=clamp(Number(settings.pianoZoom.x)||92,...PIANO_BEAT_PX);rowPx=clamp(Math.round(Number(settings.pianoZoom.y))||20,...PIANO_ROW_PX);}
     if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
@@ -1989,7 +1991,8 @@
     const examplesCacheKey='rtttl-quad-lab-examples-cache-v1';
     const examplesButton=document.getElementById('examplesButton'),examplesPanel=document.getElementById('examplesPanel');
     const examplesSearch=document.getElementById('examplesSearch'),examplesList=document.getElementById('examplesList'),examplesStatus=document.getElementById('examplesStatus');
-    let examples=null,examplesLoading=null;
+    let examples=null,examplesLoading=null,examplesOffline=false;
+    const builtInExamples=[{name:defaultSongName,tracks:originals.map(o=>o.value),names:originals.map(o=>o.name),builtIn:true}];
     const loadedSongKey='rtttl-quad-lab-loaded-song-v1',loadedSongEl=document.getElementById('loadedSong'),demoSongName=loadedSongEl.textContent;
     function setLoadedSong(name){loadedSongEl.textContent=name;try{localStorage.setItem(loadedSongKey,name);}catch(_){}}
     try{const savedSong=localStorage.getItem(loadedSongKey);if(savedSong)loadedSongEl.textContent=savedSong;}catch(_){}
@@ -1998,7 +2001,7 @@
       return Array.isArray(data)?data.filter(p=>p&&typeof p.name==='string'&&Array.isArray(p.tracks)&&p.tracks.length&&p.tracks.every(t=>typeof t==='string'&&t.length<5000)):[];
     }
     function loadExamples(){
-      if(examples)return Promise.resolve(examples);
+      if(examples&&!examplesOffline)return Promise.resolve(examples);
       if(examplesLoading)return examplesLoading;
       examplesStatus.textContent='Loading example songs…';
       examplesLoading=fetch(examplesUrl,{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json();}).then(data=>{
@@ -2007,10 +2010,10 @@
         return list;
       }).catch(err=>{
         let cached=[];try{cached=validPresets(JSON.parse(localStorage.getItem(examplesCacheKey)));}catch(_){}
-        if(cached.length)return cached;
-        throw err;
+        examplesOffline=!cached.length; // still show the built-in song, and try again next time
+        return cached;
       }).then(list=>{
-        examples=list.map(p=>({...p,broken:p.tracks.slice(0,maxMotors).filter(t=>{try{parseRTTTL(t);return false;}catch(_){return true;}}).length}));
+        examples=[...builtInExamples,...list].map(p=>({...p,broken:p.tracks.slice(0,maxMotors).filter(t=>{try{parseRTTTL(t);return false;}catch(_){return true;}}).length}));
         return examples;
       }).finally(()=>{examplesLoading=null;});
       return examplesLoading;
@@ -2019,10 +2022,10 @@
       const q=examplesSearch.value.trim().toLowerCase();
       const shown=(examples||[]).filter(p=>p.name.toLowerCase().includes(q));
       examplesList.innerHTML=shown.map(p=>{
-        const n=Math.min(p.tracks.length,maxMotors),meta=p.broken?`⚠ ${p.broken} track${p.broken>1?'s':''} need fixing`:(n===1?'1 track':`${n} motors`);
+        const n=Math.min(p.tracks.length,maxMotors),meta=p.broken?`⚠ ${p.broken} track${p.broken>1?'s':''} need fixing`:`${n===1?'1 track':`${n} motors`}${p.builtIn?' · made in Quad Lab':''}`;
         return `<li><button class="example-item" type="button" data-example="${examples.indexOf(p)}"><span>${escapeHTML(p.name)}</span><span class="example-meta${p.broken?' warn':''}">${meta}</span></button></li>`;
       }).join('');
-      examplesStatus.textContent=examples?(shown.length?`${shown.length} of ${examples.length} songs`:'No matching songs'):'';
+      examplesStatus.textContent=examples?(shown.length?`${shown.length} of ${examples.length} songs`:'No matching songs')+(examplesOffline?". Bluejay's examples couldn't be loaded; check your connection and reopen this list.":''):'';
     }
     function setExamplesOpen(open){
       examplesPanel.hidden=!open;examplesButton.setAttribute('aria-expanded',String(open));
@@ -2038,7 +2041,7 @@
       const count=Math.max(4,parts.length);
       tracks.splice(0,tracks.length,...Array.from({length:count},(_,i)=>{
         const own=i<parts.length;
-        return {...defaultMotor(i),name:own?(parts.length===1?'Melody':`Part ${i+1}`):'Unused',subtitle:own?preset.name:'Not used by this example',value:own?parts[i]:`Unused:d=4,o=5,b=${bpm||125}:4p`,muted:false,solo:false,parsed:null,error:null};
+        return {...defaultMotor(i),name:own?(preset.names?.[i]||(parts.length===1?'Melody':`Part ${i+1}`)):'Unused',subtitle:own?preset.name:'Not used by this example',value:own?parts[i]:`Unused:d=4,o=5,b=${bpm||125}:4p`,muted:false,solo:false,parsed:null,error:null};
       }));
       try{localStorage.setItem(motorCountKey,String(tracks.length));}catch(_){}
       editMotor=0;selectOnly(0);buildUI();ensureAudioChannels();

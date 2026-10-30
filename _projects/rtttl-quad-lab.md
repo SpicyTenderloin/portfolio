@@ -38,9 +38,9 @@ Everything runs client-side. The browser's Web Audio API turns each note into an
 
 ## Getting the rhythm right
 
-The first four-part arrangement repeated the chorus several times and spaced the notes evenly, and it did not sound like the song. Referencing a published chorus transcription showed why: the seven-note hook (E E E G G A A) has an uneven rhythm, not a run of equal eighth notes. I cut the arrangement back to a single phrase with the corrected durations, and all four channels now finish together at 2.4 seconds.
+The first four-part arrangement repeated the chorus several times and spaced the notes evenly, and it did not sound like the song. Referencing a published chorus transcription showed why: the seven-note hook (E E E G G A A) has an uneven rhythm, not a run of equal eighth notes. I cut the arrangement back to a single phrase with the corrected durations, and all four channels finished together at 2.4 seconds.
 
-That episode set the direction for the editor. Typing durations into RTTTL text is a slow way to fine-tune timing, so the app gained a piano roll where notes can be dragged for pitch and start time and resized for length, kept in two-way sync with each motor's RTTTL string. A target-time marker shows how an arrangement compares against a set duration.
+That episode set the direction for the editor. Typing durations into RTTTL text is a slow way to fine-tune timing, so the app gained a piano roll where notes can be dragged for pitch and start time and resized for length, kept in two-way sync with each motor's RTTTL string. A target-time marker shows how an arrangement compares against a set duration. The app's current default song, an Owner of a Lonely Heart riff with root, fifth and octave channels plus a fourth channel of short blips used as percussion, was arranged in that piano roll.
 
 ## Designing around Bluejay's limits
 
