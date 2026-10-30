@@ -371,7 +371,7 @@
           <select id="keyScale" aria-label="Scale"><option value="major">Major</option><option value="minor">Minor</option><option value="majpent">Major pentatonic</option><option value="minpent">Minor pentatonic</option></select>
           <label>Snap <select id="snapGrid"><option value="1">1/4 note</option><option value="0.5">1/8 note</option><option value="0.25" selected>1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></label>
           <label><input id="rippleEdit" type="checkbox"> Ripple editing</label>
-          <button class="tiny" id="addNote" type="button">+ Add note</button>
+          <button class="tiny" id="addNote" type="button" title="Adds an identical note right after the selected one, or a 1/8 note at the end">+ Add note</button>
           <button class="tiny" id="undoEdit" type="button" disabled>↶ Undo</button>
           <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
         </div>
@@ -402,10 +402,13 @@
           <label>Pitch <select id="pitchSelect" aria-label="Selected note pitch"></select></label>
           <label>Start beat <input id="noteStart" type="number" min="0" step="0.125" aria-label="Selected note start beat"></label>
           <label title="Fraction of a whole note: 1/4 is one beat">Length <select id="noteDuration" aria-label="Selected note length, as a fraction of a whole note"></select></label>
+          <button class="tiny" id="copyNotes" type="button" title="Copy the selected notes (Ctrl + C)">Copy</button>
+          <button class="tiny" id="cutNotes" type="button" title="Cut the selected notes (Ctrl + X)">Cut</button>
+          <button class="tiny" id="pasteNotes" type="button" title="Paste at the white playhead (Ctrl + V)" disabled>Paste</button>
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note; select a note and press Delete to remove it. Choose a Key to highlight its notes on the keyboard and grid. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Choose a Key to highlight its notes on the keyboard and grid. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -543,7 +546,7 @@
     metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
     stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
     keyRootInput.value=/^(\d|1[01])$/.test(String(settings.keyRoot))?String(settings.keyRoot):'';keyScaleInput.value=scaleSteps[settings.keyScale]?settings.keyScale:'major';
-    let editMotor = 0, selectedNote = 0, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
+    let editMotor = 0, selectedNote = 0, pianoSelection = new Set([0]), pianoClipboard = null, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
     const editHistory = [],redoHistory=[];
     let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
 
@@ -678,7 +681,7 @@
       halt();
       while(tracks.length<requested){const i=tracks.length;const item=defaultMotor(i);tracks.push({...item,value:item.value.replace('b=125',`b=${Number(bpmInput.value)||125}`),muted:false,solo:false,parsed:null,error:null});}
       tracks.splice(requested);
-      editMotor=Math.min(editMotor,requested-1);selectedNote=0;
+      editMotor=Math.min(editMotor,requested-1);selectOnly(0);
       editHistory.length=0;redoHistory.length=0;
       document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;
       try{localStorage.setItem(motorCountKey,String(requested));}catch(_){}
@@ -1229,7 +1232,7 @@
         parseRTTTL(encoded);
         const warning=skipped?` ${skipped} overlapping suggestion(s) will be skipped because one ESC can play only one tone at a time.`:'';
         if(!window.confirm(`Replace ESC ${editMotor+1} (${tracks[editMotor].name}) with ${result.length} detected notes? This preserves the other three ESCs.${warning}\n\nYou can undo this change.`))return;
-        halt();saveHistory();commitEvents(result,0);selectedNote=0;renderPiano();
+        halt();saveHistory();commitEvents(result,0);selectOnly(0);renderPiano();
         detectStatus.textContent=`Applied ${result.length} notes to ESC ${editMotor+1}; ${skipped} overlapping suggestions skipped. All other ESCs are unchanged. You can still refine pitch and timing by hand.`;
         notify(`ESC ${editMotor+1}: ${result.length} notes applied`);
       }catch(err){detectStatus.textContent=`Could not apply notes: ${err.message}. Try narrowing the clip or increasing minimum note length.`;notify('Suggestions exceed RTTTL limits');}
@@ -1444,13 +1447,13 @@
     function snapshot(motor=editMotor){const t=tracks[motor],d=liveDraft(t);return {motor,text:t.value,draft:d?JSON.parse(JSON.stringify(d)):null};}
     function restoreSnapshot(item){
       editMotor=item.motor;const t=tracks[editMotor];
-      t.value=item.text;t.draft=item.draft;document.getElementById(`rtttl-${editMotor}`).value=item.text;
+      t.value=item.text;t.draft=item.draft;pianoSelection=new Set();document.getElementById(`rtttl-${editMotor}`).value=item.text;
       saveEdits();updateParsed();
     }
     function saveHistory(){editHistory.push(snapshot());if(editHistory.length>45)editHistory.shift();redoHistory.length=0;document.getElementById('undoEdit').disabled=false;document.getElementById('redoEdit').disabled=true;}
     // Returns the events in start order (selectedNote follows the note at selIndex), or false if they can't be encoded
-    function commitEvents(events,tail,render=true,selIndex=selectedNote){
-      const t=tracks[editMotor],sel=events[selIndex];
+    function commitEvents(events,tail,render=true,selIndex=selectedNote,selection=pianoSelection){
+      const t=tracks[editMotor],sel=events[selIndex],picked=[...selection].map(i=>events[i]).filter(Boolean);
       const sorted=[...events].sort((a,b)=>a.start-b.start||b.midi-a.midi);
       try{
         if(overlapIndices(sorted).size)t.draft={events:sorted.map(e=>({...e})),tail,text:t.value};
@@ -1462,18 +1465,22 @@
         }
       }catch(err){if(render)notify(err.message);return false;}
       if(sel)selectedNote=sorted.indexOf(sel);
+      pianoSelection=new Set(picked.map(e=>sorted.indexOf(e)));
       updateParsed(render);
       return sorted;
     }
     function selectMotor(index,scroll=false){
-      editMotor=index;selectedNote=0;pianoShown.add(index);renderPiano();
+      editMotor=index;selectOnly(0);pianoShown.add(index);renderPiano();
       if(scroll)document.getElementById('pianoPanel').scrollIntoView({behavior:'smooth',block:'start'});
     }
     function updateNoteInspector(events){
       const note=events[selectedNote];const enabled=!!note;
       const title=document.getElementById('selectedNoteTitle');
-      title.textContent=note?`Note ${selectedNote+1} of ${events.length} · ${pitchLabel(note.midi)} · ${durationLabel(note.duration)}`:'Select a note';
-      [notePitchSelect,noteDurationSelect,noteStartInput,document.getElementById('deleteNote')].forEach(x=>x.disabled=!enabled);
+      const count=selectedIndices(events).length;
+      title.textContent=note?`${count>1?`${count} notes selected · editing `:''}Note ${selectedNote+1} of ${events.length} · ${pitchLabel(note.midi)} · ${durationLabel(note.duration)}`:'Select a note';
+      [notePitchSelect,noteDurationSelect,noteStartInput,document.getElementById('deleteNote'),document.getElementById('copyNotes'),document.getElementById('cutNotes')].forEach(x=>x.disabled=!enabled);
+      document.getElementById('deleteNote').textContent=count>1?`Delete ${count} notes`:'Delete note';
+      document.getElementById('pasteNotes').disabled=!pianoClipboard;
       if(note){notePitchSelect.value=String(note.midi);noteDurationSelect.value=String(note.duration);noteStartInput.value=String(roundBeat(note.start));}
     }
     function renderPiano(){
@@ -1483,6 +1490,8 @@
       const t=tracks[editMotor];document.getElementById('selectedMotorName').textContent=`Editing ESC ${editMotor+1} · ${t.name}`;
       if(!t.parsed){pianoGrid.innerHTML='<p style="padding:20px;color:#ffaaaa">Correct this motor’s RTTTL string below to enable visual editing.</p>';pianoKeys.innerHTML='';pianoBeats.innerHTML='';updateNoteInspector([]);return;}
       const {events,tail}=voiceEvents();selectedNote=events.length?clamp(selectedNote,0,events.length-1):-1;
+      pianoSelection=new Set([...pianoSelection].filter(i=>i>=0&&i<events.length));
+      if(selectedNote>=0&&!pianoSelection.has(selectedNote))pianoSelection=new Set([selectedNote]);
       const targetBeat=showTimeGuide.checked?guideSeconds()*t.parsed.bpm/60:0;
       const proposals=suggestionNotes.map(n=>({start:(refOffset+n.start)*t.parsed.bpm/60,duration:n.duration*t.parsed.bpm/60,midi:n.midi}));
       const proposedEnd=proposals.length?Math.max(...proposals.map(n=>n.start+n.duration)):0;
@@ -1517,7 +1526,7 @@
       for(let i=0;i<events.length;i++){
         const n=events[i],x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(10,n.duration*beatPx-2);
         const clash=overlaps.has(i);
-        notes.push(`<div class="midi-note ${i===selectedNote?'selected':''} ${clash?'overlap':''}" style="--track-color:${t.color};left:${x}px;top:${y}px;width:${w}px" data-note="${i}" role="button" tabindex="0"${clash?' title="Overlaps another note: a motor plays one note at a time"':''} aria-label="Note ${i+1}: ${pitchLabel(n.midi)}, starts at beat ${n.start}, length ${durationLabel(n.duration)}${clash?', overlaps another note':''}"><span>${pitchLabel(n.midi)}</span><span class="resize-grip" title="Drag to change length"></span></div>`);
+        notes.push(`<div class="midi-note ${pianoSelection.has(i)?'selected':''} ${clash?'overlap':''}" style="--track-color:${t.color};left:${x}px;top:${y}px;width:${w}px" data-note="${i}" role="button" tabindex="0"${clash?' title="Overlaps another note: a motor plays one note at a time"':''} aria-label="Note ${i+1}: ${pitchLabel(n.midi)}, starts at beat ${n.start}, length ${durationLabel(n.duration)}${clash?', overlaps another note':''}"><span>${pitchLabel(n.midi)}</span><span class="resize-grip" title="Drag to change length"></span></div>`);
       }
       pianoGrid.style.width=`${width}px`;pianoGrid.style.height=`${height}px`;
       pianoKeys.style.height=`${height}px`;pianoKeys.innerHTML=keys.join('');
@@ -1534,8 +1543,8 @@
       if(pianoShown.has(index)){
         if(pianoShown.size===1){notify('Keep at least one channel switched on');return;}
         pianoShown.delete(index);
-        if(index===editMotor){editMotor=[...pianoShown].at(-1);selectedNote=0;}
-      }else{pianoShown.add(index);editMotor=index;selectedNote=0;}
+        if(index===editMotor){editMotor=[...pianoShown].at(-1);selectOnly(0);}
+      }else{pianoShown.add(index);editMotor=index;selectOnly(0);}
       pianoViewMotor=editMotor;renderPiano();
     }
     // Scroll the notes into view vertically: always when switching motor, otherwise only if none are visible
@@ -1596,9 +1605,11 @@
       if(events.length>=58){notify('Too many notes for Bluejay');return;}
       const next=events.map(e=>({...e}));
       const last=next.at(-1);
-      let beat=roundBeat(start===null?eventsEnd(next):Math.max(0,snapValue(start)));
-      const duration=.5;
-      const pitch=clamp(midi??last?.midi??69,BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
+      // The Add note button with a note selected places an identical note straight after it; otherwise a 1/8 note at the end
+      const source=start===null?events[selectedNote]:null;
+      let beat=roundBeat(source?source.start+source.duration:start===null?eventsEnd(next):Math.max(0,snapValue(start)));
+      const duration=source?source.duration:.5;
+      const pitch=clamp(midi??source?.midi??last?.midi??69,BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
       let insert=next.findIndex(e=>e.start>=beat);if(insert<0)insert=next.length;
       if(rippleInput.checked){
         // Ripple: start after the previous note and push later notes along to make room
@@ -1607,15 +1618,51 @@
         for(let j=insert;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
       }
       next.splice(insert,0,{start:beat,duration,midi:pitch});
-      selectedNote=insert;saveHistory();halt();commitEvents(next,tail);
+      saveHistory();halt();commitEvents(next,tail,true,insert,new Set([insert]));
     }
+    function selectOnly(index){selectedNote=index;pianoSelection=new Set([index]);}
+    function selectedIndices(events){return [...new Set([...pianoSelection,selectedNote])].filter(i=>i>=0&&i<events.length).sort((a,b)=>a-b);}
     function deletePianoNote(){
-      const {events,tail}=voiceEvents();if(!events[selectedNote])return;
+      const {events,tail}=voiceEvents(),doomed=selectedIndices(events);if(!doomed.length)return;
       const total=eventsEnd(events)+tail;
-      const next=events.map(e=>({...e}));const removed=next.splice(selectedNote,1)[0];
-      if(rippleInput.checked)for(let i=selectedNote;i<next.length;i++)next[i].start=roundBeat(next[i].start-removed.duration);
+      const next=events.map(e=>({...e}));
+      for(const index of [...doomed].reverse()){
+        const removed=next.splice(index,1)[0];
+        if(rippleInput.checked)for(let i=index;i<next.length;i++)next[i].start=roundBeat(next[i].start-removed.duration);
+      }
       const newTail=rippleInput.checked?tail:roundBeat(Math.max(0,total-eventsEnd(next)));
-      selectedNote=clamp(selectedNote,0,next.length-1);saveHistory();halt();commitEvents(next,newTail);
+      const keep=clamp(doomed[0],0,next.length-1);selectedNote=keep;saveHistory();halt();commitEvents(next,newTail,true,keep,new Set([keep]));
+    }
+    // Copied notes keep their pitch, length and spacing (in beats), so they can be pasted into any channel
+    function copyPianoNotes(cut=false){
+      const {events,parsed}=voiceEvents(),picked=selectedIndices(events).map(i=>events[i]);if(!picked.length)return false;
+      const from=Math.min(...picked.map(n=>n.start)),span=roundBeat(eventsEnd(picked)-from);
+      pianoClipboard={notes:picked.map(n=>({offset:roundBeat(n.start-from),duration:n.duration,midi:n.midi})),span};
+      // Park the playhead so an immediate paste lands right after the copy (or back in place after a cut)
+      if(!motorsPlaying()){pianoPos=(cut?from:from+span)*60/parsed.bpm;updatePianoTransport();}
+      if(cut)deletePianoNote();else updateNoteInspector(events);
+      notify(`${cut?'Cut':'Copied'} ${picked.length} note${picked.length>1?'s':''}. Ctrl + V pastes at the playhead`);
+      return true;
+    }
+    function pastePianoNotes(){
+      if(!pianoClipboard){notify('Copy some notes first');return;}
+      const {events,tail,parsed}=voiceEvents();if(!parsed)return;
+      if(events.length+pianoClipboard.notes.length>58){notify('Too many notes for Bluejay');return;}
+      const at=roundBeat(Math.max(0,snapValue(pianoPosition()*parsed.bpm/60))),span=pianoClipboard.span;
+      const total=eventsEnd(events)+tail,next=events.map(e=>({...e}));
+      if(rippleInput.checked)for(const e of next)if(e.start>=at-.0001)e.start=roundBeat(e.start+span);
+      const first=next.length;
+      next.push(...pianoClipboard.notes.map(n=>({start:roundBeat(at+n.offset),duration:n.duration,midi:n.midi})));
+      const newTail=roundBeat(Math.max(0,total+(rippleInput.checked?span:0)-eventsEnd(next)));
+      saveHistory();halt();
+      if(!commitEvents(next,newTail,true,first,new Set(Array.from({length:next.length-first},(_,k)=>first+k))))return;
+      pianoPos=(at+span)*60/parsed.bpm;updatePianoTransport(); // repeated pastes follow on
+      notify(`Pasted ${pianoClipboard.notes.length} note${pianoClipboard.notes.length>1?'s':''}`);
+    }
+    function selectAllPianoNotes(){
+      const {events}=voiceEvents();if(!events.length)return;
+      if(selectedNote<0)selectedNote=0;
+      pianoSelection=new Set(events.keys());renderPiano();
     }
 
     let previewVoice=null;
@@ -1633,22 +1680,32 @@
       previewVoice={osc,gain};osc.onended=()=>{if(previewVoice?.osc===osc)previewVoice=null;};
     }
     function noteSeconds(beats){return beats*60/(tracks[editMotor]?.parsed?.bpm||Number(bpmInput.value)||120);}
+    let pianoDragChanged=false; // a real drag just ended, so the click that follows shouldn't collapse the selection
     function startNoteDrag(e){
       const ghost=e.target.closest('.ghost-note');
       if(ghost&&e.button===0){
         const original=e;
-        editMotor=Number(ghost.dataset.motor);selectedNote=Number(ghost.dataset.note);pianoViewMotor=editMotor;renderPiano();
+        editMotor=Number(ghost.dataset.motor);selectOnly(Number(ghost.dataset.note));pianoViewMotor=editMotor;renderPiano();
         const target=pianoGrid.querySelector(`.midi-note[data-note="${selectedNote}"]`);if(!target)return;
         e={target,button:0,pointerId:original.pointerId,clientX:original.clientX,clientY:original.clientY,preventDefault:()=>original.preventDefault()};
       }
       const node=e.target.closest('.midi-note');if(!node || e.button!==0)return;
       const {events,tail}=voiceEvents();const index=Number(node.dataset.note);
+      pianoDragChanged=false;
+      if(e.shiftKey||e.ctrlKey||e.metaKey){
+        // Add the note to the selection, or take it out again
+        if(pianoSelection.has(index)&&pianoSelection.size>1){pianoSelection.delete(index);if(selectedNote===index)selectedNote=Math.min(...pianoSelection);}
+        else{pianoSelection.add(index);selectedNote=index;previewNote(events[index].midi,noteSeconds(events[index].duration));}
+        renderPiano();e.preventDefault();return;
+      }
+      if(!pianoSelection.has(index))pianoSelection=new Set([index]);
       selectedNote=index;const mode=e.target.closest('.resize-grip')?'resize':'move';
-      dragState={node,pointerId:e.pointerId,originX:e.clientX,originY:e.clientY,index,mode,original:events.map(n=>({...n})),tail};
+      const group=mode==='move'&&!rippleInput.checked&&pianoSelection.size>1?[...pianoSelection]:null;
+      dragState={node,pointerId:e.pointerId,originX:e.clientX,originY:e.clientY,index,mode,group,original:events.map(n=>({...n})),tail};
       dragState.redo=redoHistory.slice();saveHistory();halt();node.setPointerCapture(e.pointerId);
       dragState.lastMidi=events[index].midi;previewNote(events[index].midi,noteSeconds(events[index].duration));
       node.classList.add('selected','dragging');
-      pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('selected',Number(n.dataset.note)===index));
+      pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('selected',pianoSelection.has(Number(n.dataset.note))));
       updateNoteInspector(events);e.preventDefault();
     }
     function moveNoteDrag(e){
@@ -1659,6 +1716,13 @@
         const candidate=closestDuration(Math.max(.0625,note.duration+dx/beatPx));
         const shift=roundBeat(candidate-note.duration);note.duration=candidate;
         if(rippleInput.checked)for(let j=d.index+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
+      }else if(d.group){
+        // Move the whole selection together, stopping at beat 0 and at the ends of Bluejay's range
+        const orig=d.group.map(i=>d.original[i]);
+        const shiftBeats=roundBeat(Math.max(snapValue(dx/beatPx),-Math.min(...orig.map(n=>n.start))));
+        const shiftPitch=clamp(-Math.round(dy/rowPx),BLUEJAY_MIN_MIDI-Math.min(...orig.map(n=>n.midi)),BLUEJAY_MAX_MIDI-Math.max(...orig.map(n=>n.midi)));
+        for(const i of d.group){next[i].start=roundBeat(d.original[i].start+shiftBeats);next[i].midi=d.original[i].midi+shiftPitch;}
+        if(note.midi!==d.lastMidi){d.lastMidi=note.midi;previewNote(note.midi,Math.min(.3,noteSeconds(note.duration)));}
       }else{
         note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),BLUEJAY_MIN_MIDI,BLUEJAY_MAX_MIDI);
         if(note.midi!==d.lastMidi){d.lastMidi=note.midi;previewNote(note.midi,Math.min(.3,noteSeconds(note.duration)));}
@@ -1670,12 +1734,15 @@
         if(rippleInput.checked)for(let j=d.index;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
         else note.start=roundBeat(desired);
       }
-      const sorted=commitEvents(next,d.tail,false,d.index);if(!sorted)return;
-      d.node.style.left=`${note.start*beatPx}px`;
-      d.node.style.width=`${Math.max(10,note.duration*beatPx-2)}px`;
-      d.node.style.top=`${(pianoMaxPitch-note.midi)*rowPx+1}px`;
+      const sorted=commitEvents(next,d.tail,false,d.index,new Set(d.group||[d.index]));if(!sorted)return;
+      for(const i of d.group||[d.index]){
+        const n=next[i],el=i===d.index?d.node:pianoGrid.querySelector(`.midi-note[data-note="${i}"]`);if(!el)continue;
+        el.style.left=`${n.start*beatPx}px`;
+        el.style.width=`${Math.max(10,n.duration*beatPx-2)}px`;
+        el.style.top=`${(pianoMaxPitch-n.midi)*rowPx+1}px`;
+        el.firstElementChild.textContent=pitchLabel(n.midi);
+      }
       d.node.setAttribute('aria-label',`Note ${d.index+1}: ${pitchLabel(note.midi)}, length ${durationLabel(note.duration)}`);
-      d.node.firstElementChild.textContent=pitchLabel(note.midi);
       const hits=overlapIndices(next);
       pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('overlap',hits.has(Number(n.dataset.note))));
       updateNoteInspector(sorted);
@@ -1685,7 +1752,8 @@
       try{d.node.releasePointerCapture(e.pointerId);}catch(_){}
       // A click that changed nothing shouldn't leave an empty undo step behind
       const top=editHistory.at(-1);
-      if(top&&top.motor===editMotor&&top.text===tracks[editMotor].value&&JSON.stringify(top.draft)===JSON.stringify(liveDraft(tracks[editMotor]))){editHistory.pop();redoHistory.push(...d.redo);document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=!redoHistory.length;}
+      pianoDragChanged=true;
+      if(top&&top.motor===editMotor&&top.text===tracks[editMotor].value&&JSON.stringify(top.draft)===JSON.stringify(liveDraft(tracks[editMotor]))){pianoDragChanged=false;editHistory.pop();redoHistory.push(...d.redo);document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=!redoHistory.length;}
       dragState=null;renderPiano();
     }
 
@@ -1720,7 +1788,18 @@
     pianoGrid.addEventListener('pointermove',moveNoteDrag);
     pianoGrid.addEventListener('pointerup',endNoteDrag);
     pianoGrid.addEventListener('pointercancel',endNoteDrag);
-    pianoGrid.addEventListener('click',e=>{const n=e.target.closest('.midi-note');if(n&&!dragState){selectedNote=Number(n.dataset.note);renderPiano();}});
+    pianoGrid.addEventListener('click',e=>{
+      if(dragState||e.shiftKey||e.ctrlKey||e.metaKey)return;
+      const n=e.target.closest('.midi-note');
+      if(n){if(pianoDragChanged){pianoDragChanged=false;return;}selectOnly(Number(n.dataset.note));renderPiano();return;}
+      if(e.target.closest('.ghost-note,.detected-note'))return;
+      // Clicking empty grid places the playhead (where Paste lands)
+      const bpm=tracks[editMotor]?.parsed?.bpm;if(!bpm)return;
+      seekPiano(Math.max(0,snapValue((e.clientX-pianoGrid.getBoundingClientRect().left)/beatPx))*60/bpm);
+    });
+    document.getElementById('copyNotes').addEventListener('click',()=>copyPianoNotes());
+    document.getElementById('cutNotes').addEventListener('click',()=>copyPianoNotes(true));
+    document.getElementById('pasteNotes').addEventListener('click',pastePianoNotes);
     pianoGrid.addEventListener('dblclick',e=>{if(e.target.closest('.midi-note'))return;const rect=pianoGrid.getBoundingClientRect();addPianoNote((e.clientX-rect.left)/beatPx,pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx));});
     document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
     document.getElementById('deleteNote').addEventListener('click',deletePianoNote);
@@ -1763,8 +1842,17 @@
     let pianoActive=false;
     document.addEventListener('pointerdown',e=>{pianoActive=Boolean(e.target.closest('#pianoPanel'));},true);
     document.addEventListener('keydown',e=>{
-      if((e.key!=='Delete'&&e.key!=='Backspace')||!pianoActive||e.ctrlKey||e.metaKey||e.altKey)return;
+      if(!pianoActive||e.altKey)return;
       const el=document.activeElement;if(el&&(['TEXTAREA','INPUT','SELECT'].includes(el.tagName)||el.isContentEditable))return;
+      if(e.ctrlKey||e.metaKey){
+        const key=e.key.toLowerCase();
+        if((key==='c'||key==='x')&&String(window.getSelection()))return; // let the browser copy selected text
+        if(key==='c'||key==='x'){if(copyPianoNotes(key==='x'))e.preventDefault();}
+        else if(key==='v'){e.preventDefault();pastePianoNotes();}
+        else if(key==='a'){e.preventDefault();selectAllPianoNotes();}
+        return;
+      }
+      if(e.key!=='Delete'&&e.key!=='Backspace')return;
       if(!voiceEvents().events[selectedNote])return;
       e.preventDefault();deletePianoNote();
     });
@@ -1953,7 +2041,7 @@
         return {...defaultMotor(i),name:own?(parts.length===1?'Melody':`Part ${i+1}`):'Unused',subtitle:own?preset.name:'Not used by this example',value:own?parts[i]:`Unused:d=4,o=5,b=${bpm||125}:4p`,muted:false,solo:false,parsed:null,error:null};
       }));
       try{localStorage.setItem(motorCountKey,String(tracks.length));}catch(_){}
-      editMotor=0;selectedNote=0;buildUI();ensureAudioChannels();
+      editMotor=0;selectOnly(0);buildUI();ensureAudioChannels();
       if(bpm>=20&&bpm<=900)bpmInput.value=String(bpm);
       saveEdits();saveNames();saveSettings();refreshChannelLabels();updateParsed();updateButtons();
       setLoadedSong(preset.name);
