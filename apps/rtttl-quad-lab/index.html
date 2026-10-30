@@ -118,7 +118,8 @@
     .detect-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
     .detect-progress { width:100%; height:5px; border-radius:20px; overflow:hidden; accent-color:#7ee4c9; }
     .detect-status { margin-top:8px; color:#a6c7d0; font-size:11px; line-height:1.6; }
-    .detected-note { position:absolute; z-index:2; height:17px; border:1px dashed #aaffdf; border-radius:4px; background:#44ebbb55; color:#d4fff3; font:700 10px/15px ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; pointer-events:none; box-shadow:0 0 5px #5be9c755; }
+    .detected-note { position:absolute; z-index:2; height:17px; border:1px dashed #aaffdf; border-radius:4px; background:#44ebbb55; color:#d4fff3; font:700 10px/15px ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; cursor:pointer; box-shadow:0 0 5px #5be9c755; }
+    .detected-note:hover { background:#44ebbb88; box-shadow:0 0 9px #5be9c7aa; }
     .midi-mapping { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 15px; margin:13px 0; }
     .midi-mapping label { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
     .midi-mapping select { min-width:0; max-width:75%; flex:1; }
@@ -367,7 +368,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -1405,7 +1406,7 @@
       if(showTimeGuide.checked){background.push(`<div class="guide-marker" style="left:${targetBeat*beatPx}px"><span>${guideSeconds().toFixed(2)}s</span></div>`);}
       for(const n of proposals){
         const x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(7,n.duration*beatPx-2);
-        notes.push(`<div class="detected-note" style="left:${x}px;top:${y}px;width:${w}px" title="Suggested ${pitchLabel(n.midi)}"></div>`);
+        notes.push(`<div class="detected-note" data-midi="${n.midi}" data-seconds="${(n.duration*60/t.parsed.bpm).toFixed(3)}" style="left:${x}px;top:${y}px;width:${w}px" title="Suggested ${pitchLabel(n.midi)} (click to hear it)"></div>`);
       }
       for(let i=0;i<events.length;i++){
         const n=events[i],x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(10,n.duration*beatPx-2);
@@ -1538,6 +1539,7 @@
     motorTabs.addEventListener('click',e=>{const b=e.target.closest('[data-motor]');if(b)selectMotor(Number(b.dataset.motor));});
     timeline.addEventListener('click',e=>{const rect=timeline.getBoundingClientRect();selectMotor(clamp(Math.floor((e.clientY-rect.top)/45),0,tracks.length-1),true);});
     pianoGrid.addEventListener('pointerdown',startNoteDrag);
+    pianoGrid.addEventListener('pointerdown',e=>{const n=e.target.closest('.detected-note');if(n&&e.button===0)previewNote(Number(n.dataset.midi),Number(n.dataset.seconds));});
     pianoKeys.addEventListener('pointerdown',e=>{if(!e.target.closest('.piano-key')||e.button!==0)return;const rect=pianoKeys.getBoundingClientRect();previewNote(pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx),.4);});
     pianoGrid.addEventListener('pointermove',moveNoteDrag);
     pianoGrid.addEventListener('pointerup',endNoteDrag);
