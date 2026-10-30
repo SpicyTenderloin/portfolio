@@ -1,0 +1,14 @@
+{
+  "name": "rtttl-quad-lab",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Static offline-capable Bluejay ESC melody studio",
+  "scripts": {
+    "build:pitch": "node scripts/embed-pitch-model.mjs && esbuild src/pitch-model.js --bundle --format=iife --target=es2020 --minify --outfile=pitch-model.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "@spotify/basic-pitch": "1.0.1",
+    "esbuild": "^0.25.12"
+  }
+}

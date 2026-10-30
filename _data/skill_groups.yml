@@ -37,6 +37,9 @@
 - name: Software & Embedded
   skills:
     - Python
+    - JavaScript
+    - Web Audio API
+    - MIDI
     - Embedded C
     - MATLAB
     - PlatformIO
@@ -59,6 +62,7 @@
     - FPV
     - FPV Acro Mode
     - Drone Building
+    - ESC Configuration
     - RC Aircraft
     - Flight Testing
     - Autonomous Systems

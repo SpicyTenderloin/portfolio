@@ -18,3 +18,15 @@ defaults:
       path: ""
     values:
       layout: default
+
+# Developer-only files for in-browser apps under apps/ (served apps need only
+# their runtime HTML/JS; the build source, tests and npm files stay in the repo).
+exclude:
+  - apps/*/README.md
+  - apps/*/package.json
+  - apps/*/package-lock.json
+  - apps/*/src
+  - apps/*/scripts
+  - apps/*/tests
+  - node_modules
+  - "**/node_modules"

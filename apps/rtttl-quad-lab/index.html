@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101522" />
+  <meta name="description" content="Preview and edit 4–12 synchronised Bluejay ESC startup melodies directly in your browser." />
+  <title>RTTTL Quad Lab | Multi-motor melody studio</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --bg:#0e1320; --panel:#171e2c; --panel2:#1b2434; --border:#2d3949; --muted:#9dabbd; --white:#f5f7fa; --cyan:#6ee2e3; --coral:#ff8b78; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:var(--white); background:radial-gradient(circle at 87% -10%, #233747 0, transparent 34%), radial-gradient(circle at -10% 20%, #22203f 0, transparent 27%), var(--bg); }
+    button, textarea, input { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible, textarea:focus-visible, input:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
+    .shell { max-width:1230px; margin:auto; padding:29px 28px 52px; }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:51px; }
+    .brand { display:flex; align-items:center; gap:11px; font-size:13px; letter-spacing:.18em; font-weight:800; }
+    .brand-mark { height:36px; width:36px; display:grid; place-items:center; border:1px solid #4b8794; border-radius:10px; color:var(--cyan); background:#193039; box-shadow:0 0 18px #58ced022; font-size:22px; }
+    .top-note { color:var(--muted); font-size:12px; display:flex; align-items:center; gap:9px; }
+    .live-dot { background:#76dfb1; height:7px; width:7px; border-radius:50%; box-shadow:0 0 12px #76dfb1aa; }
+    .intro { display:flex; justify-content:space-between; align-items:end; gap:28px; margin-bottom:32px; }
+    .eyebrow { color:var(--cyan); font-size:11px; letter-spacing:.17em; font-weight:800; text-transform:uppercase; margin:0 0 12px; }
+    h1 { margin:0; font-size:clamp(37px,5vw,61px); line-height:1.07; letter-spacing:-.055em; font-weight:770; }
+    h1 em { font-style:normal; color:var(--coral); }
+    .subtitle { margin:15px 0 0; color:#abb9ca; font-size:15px; line-height:1.65; max-width:690px; }
+    .song-pill { flex:none; color:#b4c5d4; font-size:12px; background:#1c2b39; border:1px solid #334b55; border-radius:100px; padding:11px 15px; }
+    .song-pill strong { color:#ebf8f8; font-weight:700; }
+    .panel { background:linear-gradient(155deg, #1c2433 0%, #161e2c 75%); border:1px solid var(--border); border-radius:18px; box-shadow:0 20px 45px #05081230; }
+    .transport { display:flex; gap:20px; flex-wrap:wrap; align-items:center; padding:19px 21px; }
+    .transport-actions { display:flex; gap:9px; align-items:center; }
+    .primary { border:0; border-radius:10px; background:var(--cyan); color:#0b2830; font-size:14px; font-weight:800; padding:13px 21px; display:inline-flex; align-items:center; gap:10px; box-shadow:0 0 22px #64dadd26; }
+    .primary:hover { background:#9bf4ef; }
+    .secondary { border:1px solid #435065; background:#242e3e; color:#ebf1f8; border-radius:10px; padding:12px 18px; font-size:13px; font-weight:700; }
+    .secondary:hover { background:#303e51; }
+    .secondary:disabled { opacity:.45; cursor:not-allowed; }
+    .transport-amount { margin-left:auto; display:flex; align-items:center; gap:25px; flex-wrap:wrap; }
+    .setting { display:flex; align-items:center; gap:13px; color:#c3cddd; font-size:12px; white-space:nowrap; }
+    input[type="range"] { width:96px; accent-color:var(--cyan); cursor:pointer; }
+    output { font-size:12px; color:var(--white); font-variant-numeric:tabular-nums; min-width:32px; }
+    .time-readout { border-left:1px solid #3a4655; padding-left:22px; font-variant-numeric:tabular-nums; font-size:15px; font-weight:700; letter-spacing:.04em; white-space:nowrap; }
+    .time-readout span { color:#8194a8; }
+    .overview { margin-top:16px; padding:21px 23px 24px; }
+    .panel-header { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:20px; }
+    .panel-title { color:#eff5fb; font-size:12px; font-weight:800; letter-spacing:.115em; text-transform:uppercase; }
+    .panel-meta { font-size:12px; font-variant-numeric:tabular-nums; color:#91a4b8; }
+    .timeline { display:flex; gap:15px; width:100%; }
+    .timeline-labels { width:155px; flex:none; display:grid; grid-template-rows:repeat(4,45px); }
+    .timeline-label { min-width:0; font-size:11px; font-weight:700; display:flex; align-items:center; gap:9px; }
+    .timeline-label .label-text { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .timeline-label .label-text small { display:block; font-size:9px; font-weight:800; letter-spacing:.1em; color:#8498ac; margin-bottom:3px; }
+    .swatch { height:8px; width:8px; border-radius:50%; flex:none; }
+    .timeline-wrap { flex:1; min-width:0; position:relative; border-radius:7px; overflow:hidden; }
+    #timeline { display:block; width:100%; height:180px; }
+    .ruler { display:flex; justify-content:space-between; margin:7px 1px 0 170px; color:#7c91a6; font-size:10px; font-variant-numeric:tabular-nums; }
+    .guide-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin:-4px 0 14px; font-size:12px; color:#b6c8d8; }
+    .guide-controls .guide-toggle { display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .guide-controls input[type="checkbox"] { accent-color:#ffd36b; width:15px; height:15px; }
+    .guide-controls input[type="number"] { width:80px; background:#0e1929; color:#f1f6fb; border:1px solid #4b6076; border-radius:7px; padding:7px 8px; font-variant-numeric:tabular-nums; }
+    .guide-info { color:#e7c17c; font-size:11px; font-variant-numeric:tabular-nums; }
+    .guide-marker { position:absolute; top:0; bottom:0; border-left:2px dashed #ffd36b; z-index:2; pointer-events:none; filter:drop-shadow(0 0 3px #ffd36b55); }
+    .guide-marker span { position:absolute; top:3px; left:4px; border-radius:4px; background:#ffd36b; color:#253041; padding:2px 5px; font-size:10px; font-weight:800; white-space:nowrap; }
+    .studio-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-top:16px; padding:17px 20px; }
+    .studio-group { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .studio-group label,.reference-fields label,.midi-mapping label { color:#b8c9da; font-size:12px; display:flex; align-items:center; gap:7px; }
+    .studio-group input[type="number"],.studio-group select,.reference-fields input[type="number"],.reference-fields input[type="range"],.midi-mapping select { border:1px solid #465870; border-radius:7px; background:#101a2a; color:#eef7fb; padding:8px 9px; font-size:12px; }
+    .studio-group input[type="number"] { width:77px; }
+    .studio-group input[type="checkbox"],.reference-fields input[type="checkbox"] { accent-color:var(--cyan); }
+    .studio-group select { max-width:145px; }
+    .reference-panel,.midi-panel,.validation-panel { margin-top:16px; padding:20px 23px; }
+    .reference-head,.midi-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:13px; margin-bottom:14px; }
+    .reference-buttons { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+    .reference-fields { display:flex; flex-wrap:wrap; align-items:center; gap:13px; margin:10px 0 13px; }
+    .reference-fields input[type="number"] { width:74px; }
+    .reference-fields input[type="range"] { width:95px; padding:0; }
+    .reference-note { color:#90a5b9; font-size:11px; line-height:1.5; margin:5px 0 0; }
+    .reference-wave { height:116px; width:100%; background:#0d1a2a; border:1px solid #38516a; border-radius:8px; display:block; touch-action:none; cursor:crosshair; }
+    .reference-wave.empty { cursor:default; }
+    .detect-box { margin-top:15px; padding:14px; border:1px solid #3a6470; border-radius:11px; background:linear-gradient(100deg,#17313b,#152335); }
+    .detect-head { display:flex; align-items:center; justify-content:space-between; gap:13px; flex-wrap:wrap; }
+    .detect-head .panel-title { color:#a9f4ec; }
+    .detect-controls { display:flex; gap:11px 16px; flex-wrap:wrap; align-items:center; margin:13px 0 10px; }
+    .detect-controls label { display:flex; gap:7px; align-items:center; font-size:12px; color:#c3dce3; }
+    .detect-controls input[type="number"],.detect-controls select { color:#eef7fb; background:#101e2a; border:1px solid #54737d; border-radius:7px; padding:8px; font-size:12px; }
+    .detect-controls input[type="number"] { width:66px; }
+    .detect-controls input[type="range"] { width:94px; }
+    .detect-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+    .detect-progress { width:100%; height:5px; border-radius:20px; overflow:hidden; accent-color:#7ee4c9; }
+    .detect-status { margin-top:8px; color:#a6c7d0; font-size:11px; line-height:1.6; }
+    .detected-note { position:absolute; z-index:2; height:17px; border:1px dashed #aaffdf; border-radius:4px; background:#44ebbb55; color:#d4fff3; font:700 10px/15px ui-monospace,monospace; padding-left:4px; overflow:hidden; white-space:nowrap; pointer-events:none; box-shadow:0 0 5px #5be9c755; }
+    .midi-mapping { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 15px; margin:13px 0; }
+    .midi-mapping label { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
+    .midi-mapping select { min-width:0; max-width:75%; flex:1; }
+    .midi-status { color:#91b4c6; font-size:12px; line-height:1.5; }
+    .validation-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:15px; }
+    .validation-item { background:#111c2c; border:1px solid #384d63; border-top:2px solid var(--track-color); padding:14px; border-radius:9px; min-width:0; }
+    .validation-item .heading { font-weight:800; font-size:12px; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .validation-item .metric { color:#a5b8cb; font-size:11px; line-height:1.6; }
+    .validation-item .pass { color:#8bdfbf; }
+    .validation-item .warn { color:#ffd082; }
+    .validation-item .fail { color:#ff9fa0; }
+    .validation-overall { margin-top:12px; color:#a7b8c9; font-size:12px; line-height:1.5; }
+    .piano-panel { margin-top:16px; padding:22px; }
+    .piano-intro { display:flex; flex-wrap:wrap; align-items:start; justify-content:space-between; gap:16px; margin-bottom:17px; }
+    .piano-intro p { margin:6px 0 0; color:#9bafc3; font-size:12px; line-height:1.5; }
+    .motor-tabs { display:flex; gap:6px; flex-wrap:wrap; }
+    .motor-tab { border:1px solid #425064; background:#233044; color:#aebfd2; border-radius:9px; padding:10px 13px; font-weight:800; font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .motor-tab.active { color:#fff; border-color:var(--track-color); background:#344154; box-shadow:inset 0 -2px var(--track-color); }
+    .piano-toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .piano-toolbar .hint { color:#94a8bb; font-size:12px; }
+    .piano-toolbar .hint strong { color:#e6f3f7; }
+    .piano-toolbar label { display:flex; gap:9px; align-items:center; color:#b3c1d1; font-size:12px; }
+    .piano-toolbar select, .note-inspector select, .note-inspector input { color:#e6f2f8; background:#111a29; border:1px solid #415166; border-radius:7px; padding:8px; }
+    .piano-scroll { border:1px solid #33455b; border-radius:10px; overflow:auto; max-height:515px; background:#152031; }
+    .piano-header { display:flex; position:sticky; top:0; z-index:8; height:29px; width:max-content; background:#1b293c; }
+    .piano-corner { position:sticky; left:0; z-index:9; width:70px; flex:none; background:#24354a; border-right:1px solid #4b6276; display:grid; place-items:center; font-weight:800; font-size:10px; color:#b3ccdf; }
+    .piano-beats { position:relative; height:29px; flex:none; }
+    .beat-mark { position:absolute; top:0; height:29px; padding:6px 0 0 7px; color:#99b6cd; border-left:1px solid #466178; font-size:11px; font-variant-numeric:tabular-nums; }
+    .beat-mark.bar { color:#e4f3fd; font-weight:800; border-left:2px solid #7091a9; }
+    .piano-stage { display:flex; width:max-content; }
+    .piano-keys { width:70px; flex:none; position:sticky; left:0; z-index:5; background:#223045; border-right:1px solid #52667a; }
+    .piano-key { height:20px; display:flex; align-items:center; justify-content:end; padding-right:8px; border-bottom:1px solid #344257; color:#a9bece; font-size:10px; font-weight:700; }
+    .piano-key.black { background:#131e2e; color:#6b8195; }
+    .piano-key.tonic { color:#b9f9fa; }
+    .piano-roll { position:relative; flex:none; cursor:crosshair; touch-action:pan-x pan-y; }
+    .pitch-row { position:absolute; left:0; right:0; height:20px; border-bottom:1px solid #30415775; background:#19273a; pointer-events:none; }
+    .pitch-row.black { background:#132033; }
+    .pitch-row.tonic { background:#1d3546; }
+    .gridline { position:absolute; top:0; bottom:0; width:1px; background:#49607565; pointer-events:none; }
+    .gridline.bar { width:2px; background:#7a96ae77; }
+    .midi-note { position:absolute; z-index:3; height:17px; border:1px solid #ffffff55; border-radius:4px; background:var(--track-color); color:#102134; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px; font-weight:900; line-height:15px; padding:0 11px 0 5px; white-space:nowrap; overflow:hidden; cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 4px #0004; }
+    .midi-note.selected { outline:2px solid #fff; outline-offset:1px; z-index:4; }
+    .midi-note.dragging { cursor:grabbing; opacity:.84; }
+    .midi-note .resize-grip { position:absolute; right:0; top:0; bottom:0; width:10px; cursor:ew-resize; background:#ffffff55; border-left:1px solid #26374666; }
+    .piano-inspector { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:14px; background:#111b2a; border:1px solid #354357; border-radius:10px; padding:13px 14px; }
+    .piano-inspector .note-title { font-size:13px; font-weight:800; color:#e8f3fa; min-width:128px; }
+    .note-inspector { display:flex; flex-wrap:wrap; align-items:center; gap:13px; }
+    .note-inspector label { display:flex; align-items:center; gap:7px; color:#95aabe; font-size:12px; }
+    .note-inspector input { width:75px; }
+    .piano-help { color:#8197ad; font-size:11px; margin:12px 0 0; line-height:1.6; }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap:15px; flex-wrap:wrap; margin:35px 0 16px; }
+    h2 { font-size:20px; margin:0; letter-spacing:-.02em; }
+    .section-head p { margin:5px 0 0; font-size:13px; color:#9fb0c2; }
+    .reset { border:0; background:none; color:var(--cyan); font-size:12px; font-weight:800; padding:8px 0; }
+    .reset:hover { text-decoration:underline; }
+    .tracks { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
+    .track { padding:21px; min-width:0; border-top:2px solid var(--track-color); }
+    .track-top { display:flex; align-items:start; justify-content:space-between; gap:14px; margin-bottom:19px; }
+    .track-number { color:var(--track-color); font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+    .track-name { display:block; width:min(280px,100%); margin:5px 0 0 -6px; padding:4px 5px; font-size:21px; line-height:1.2; letter-spacing:-.03em; font-weight:750; color:var(--white); background:transparent; border:1px solid transparent; border-radius:6px; }
+    .track-name:hover,.track-name:focus { background:#101a29; border-color:#476175; }
+    .track-name-hint { margin:1px 0 0; font-size:10px; color:#6fa9b7; }
+    .track-subtitle { color:#889aae; font-size:11px; margin:5px 0 0; }
+    .track-buttons { display:flex; gap:5px; flex:none; }
+    .tiny { color:#bdc9d8; background:#273144; border:1px solid #3a495a; border-radius:8px; padding:8px 9px; font-size:11px; font-weight:800; min-width:41px; }
+    .tiny:hover { background:#35445a; }
+    .tiny.active { background:#36595e; border-color:var(--cyan); color:#d9ffff; }
+    .tiny.muted { background:#4b2b32; border-color:#8b424c; color:#ffafb2; }
+    .editor-label { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; gap:10px; font-size:11px; color:#9cabbb; font-weight:700; letter-spacing:.05em; }
+    textarea { display:block; resize:vertical; width:100%; min-height:110px; background:#0e1521; border:1px solid #354254; border-radius:9px; padding:12px; color:#d8edf2; font-size:12px; line-height:1.7; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap:anywhere; }
+    .track-footer { display:flex; justify-content:space-between; align-items:center; margin-top:11px; gap:8px; flex-wrap:wrap; }
+    .track-stats { font-size:11px; color:#8193a6; font-variant-numeric:tabular-nums; }
+    .copy { background:none; border:0; color:var(--cyan); font-size:11px; font-weight:800; padding:5px 0; }
+    .copy:hover { text-decoration:underline; }
+    .error { color:#ffaaaa; font-size:12px; line-height:1.4; margin:8px 0 0; min-height:0; }
+    .tips { display:flex; gap:10px; align-items:start; margin:25px 2px 0; color:#8da1b5; font-size:12px; line-height:1.6; }
+    .tips span { color:var(--cyan); font-weight:900; }
+    .toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,15px); z-index:20; background:#def7ef; border:1px solid #b1ebdc; color:#153b3b; font-size:13px; font-weight:700; border-radius:10px; padding:11px 16px; opacity:0; pointer-events:none; transition:opacity .15s,transform .15s; box-shadow:0 15px 40px #0005; }
+    .toast.visible { opacity:1; transform:translate(-50%,0); }
+    @media(max-width:900px) { .tracks { grid-template-columns:1fr; } .validation-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro { align-items:start; } .song-pill { display:none; } .transport-amount { margin-left:0; width:100%; justify-content:space-between; } }
+    @media(max-width:620px) { .shell { padding:20px 14px 35px; } .top { margin-bottom:37px; } .top-note { font-size:10px; } .intro { margin-bottom:24px; } .subtitle { font-size:13px; } .transport { padding:15px; gap:16px; } .transport-actions { width:100%; } .primary,.secondary { flex:1; justify-content:center; } .transport-amount { gap:10px; } .setting { gap:7px; } input[type="range"] { width:70px; } .time-readout { padding-left:10px; font-size:12px; } .overview { padding:17px 12px; } .timeline-labels { width:92px; } .timeline-label { font-size:10px; gap:5px; } .timeline { gap:8px; } .ruler { margin-left:100px; } .guide-controls { justify-content:flex-start; } .guide-info { width:100%; } .track { padding:16px; } .track-top { flex-wrap:wrap; } .track-buttons { margin-left:auto; } .piano-panel { padding:16px 11px; } .piano-intro { gap:10px; } .motor-tab { padding:9px 11px; max-width:150px; } .piano-help { font-size:10px; } .studio-controls { padding:15px; } .reference-panel,.midi-panel,.validation-panel { padding:16px 13px; } .validation-grid,.midi-mapping { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">≋</div><span>RTTTL / QUAD LAB</span></div>
+      <div class="top-note"><span class="live-dot" aria-hidden="true"></span> Browser audio · No ESC connection needed</div>
+    </header>
+
+    <section class="intro">
+      <div>
+        <p class="eyebrow">Bluejay startup melody studio</p>
+        <h1><span id="motorHeadline">Four motors.</span><br><em>One melody.</em></h1>
+        <p class="subtitle">An expandable multi-channel startup melody studio: edit RTTTL and MIDI-style notes, compare a reference audio clip, and preview the result before programming Bluejay ESCs.</p>
+      </div>
+      <div class="song-pill">Demo loaded&nbsp; <strong>Four-motor hook</strong></div>
+    </section>
+
+    <section class="panel transport" aria-label="Playback controls">
+      <div class="transport-actions">
+        <button class="primary" id="playAll" type="button"><span aria-hidden="true">▶</span><span>Play all motors</span></button>
+        <button class="secondary" id="stop" type="button" disabled>■ &nbsp; Stop</button>
+      </div>
+      <div class="transport-amount">
+        <label class="setting">Speed <input id="speed" type="range" min="0.5" max="1.5" step="0.05" value="1" aria-label="Playback speed"><output id="speedValue">1.00×</output></label>
+        <label class="setting">Volume <input id="volume" type="range" min="0" max="100" step="1" value="55" aria-label="Master volume"><output id="volumeValue">55%</output></label>
+        <div class="time-readout" id="clock" aria-live="off">0:00.0 <span>/ 0:02.4</span></div>
+      </div>
+    </section>
+
+    <section class="panel studio-controls" aria-label="Music and sound settings">
+      <div class="studio-group">
+        <span class="panel-title">Music</span>
+        <label>Motors <input type="number" id="motorCount" min="4" max="12" step="1" value="4" aria-label="Number of ESC motor channels, 4 to 12"></label>
+        <button class="tiny" id="addMotor" type="button" title="Add an ESC motor channel">+ Motor</button><button class="tiny" id="removeMotor" type="button" title="Remove the last ESC motor channel" disabled>− Motor</button>
+        <label>BPM <input type="number" id="globalBpm" min="20" max="900" step="1" value="125" aria-label="Global tempo in BPM"></label>
+        <label>Time <select id="timeSignature" aria-label="Time signature"><option>4/4</option><option>3/4</option><option>6/8</option><option>2/4</option></select></label>
+        <label><input id="metronome" type="checkbox"> Metronome</label>
+      </div>
+      <div class="studio-group">
+        <span class="panel-title">Sound</span>
+        <label>Timbre <select id="soundMode" aria-label="Synthesizer waveform"><option value="square">Square</option><option value="sine">Sine</option><option value="motor">Motor-like</option></select></label>
+        <label>Stereo <input id="stereoWidth" type="range" min="0" max="100" step="5" value="65" aria-label="Stereo separation"></label>
+      </div>
+    </section>
+
+    <section class="panel overview" aria-label="Arrangement overview">
+      <div class="panel-header"><div class="panel-title">Arrangement timeline</div><div class="panel-meta" id="arrangementInfo">4 channels · 2.4 seconds</div></div>
+      <div class="guide-controls">
+        <label class="guide-toggle"><input id="showTimeGuide" type="checkbox"> Show target-time bar</label>
+        <label for="targetSeconds">At <input id="targetSeconds" type="number" min="0.05" max="600" step="0.05" value="2.50"> seconds</label>
+        <span class="guide-info" id="guideInfo" aria-live="polite"></span>
+      </div>
+      <div class="timeline"><div class="timeline-labels" id="timelineLabels"></div><div class="timeline-wrap" style="cursor:pointer" title="Click a lane to edit its notes"><canvas id="timeline" role="img" aria-label="Motor note lanes with a synchronized playback head; click a lane to open its note editor"></canvas></div></div>
+      <div class="ruler" id="timelineRuler"><span>0:00</span><span>25%</span><span>50%</span><span>75%</span><span>END</span></div>
+    </section>
+
+    <section class="panel reference-panel" aria-label="Reference audio track">
+      <div class="reference-head">
+        <div><div class="panel-title">Reference audio <span style="color:#6ee2e3">↔ Multi-motor mix</span></div><p class="reference-note" id="referenceStatus">Import your own MP3 or WAV to see its waveform and align the motor arrangement against it. Audio stays on this device.</p></div>
+        <div class="reference-buttons">
+          <button class="tiny" id="loadReference" type="button">↑ Load audio</button><input id="referenceFile" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" hidden>
+          <button class="tiny" id="playReference" type="button" disabled>▶ Clip only</button>
+          <button class="tiny" id="clearReference" type="button" disabled>Clear</button>
+        </div>
+      </div>
+      <div class="reference-fields">
+        <label>Clip start <input id="referenceStart" type="number" value="0" min="0" step="0.05"> s</label>
+        <label>Clip length <input id="referenceDuration" type="number" value="4" min="0.05" step="0.05"> s</label>
+        <label>Alignment <input id="referenceOffset" type="number" value="0" min="0" step="0.05"> s</label>
+        <label>Level <input id="referenceVolume" type="range" min="0" max="100" value="45" aria-label="Reference audio level"></label>
+        <label><input id="referenceMix" type="checkbox" checked> Play with motors</label>
+        <label><input id="referenceZoom" type="checkbox"> Zoom around clip</label>
+      </div>
+      <canvas class="reference-wave empty" id="referenceWave" height="116" aria-label="Audio waveform with highlighted selected clip"></canvas>
+      <p class="reference-note">Click or drag the waveform to choose where the clip starts. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
+      <div class="detect-box" aria-label="Automatic pitch detection">
+        <div class="detect-head">
+          <div><div class="panel-title">✧ Automatic pitch detection <span style="color:#89afbd">· Basic Pitch</span></div><p class="reference-note">Analyse the selected clip locally. Suggested notes appear as mint-green outlines on the piano roll; your RTTTL is unchanged until you apply them.</p></div>
+          <div class="detect-actions"><button class="secondary" id="detectPitch" type="button" disabled>✧ Detect notes</button><button class="tiny" id="clearDetected" type="button" disabled>Clear suggestions</button></div>
+        </div>
+        <div class="detect-controls">
+          <label>Sensitivity <input id="pitchSensitivity" type="range" min="0" max="100" value="55" step="5"><output id="pitchSensitivityValue">55%</output></label>
+          <label>Lowest note <select id="pitchMin"><option value="48">C3</option><option value="55">G3</option><option value="60" selected>C4</option><option value="64">E4</option><option value="69">A4</option><option value="72">C5</option></select></label>
+          <label>Highest note <select id="pitchMax"><option value="72">C5</option><option value="83">B5</option><option value="95" selected>B6</option><option value="107">B7</option></select></label>
+          <label>Min. note <input id="pitchMinMs" type="number" min="30" max="1000" step="10" value="110"> ms</label>
+          <button class="tiny" id="applyDetected" type="button" disabled>↓ Apply to selected ESC</button>
+        </div>
+        <progress id="detectProgress" class="detect-progress" max="100" value="0" hidden></progress>
+        <div class="detect-status" id="detectStatus" role="status" aria-live="polite">Load audio, select a short clip, then click Detect notes. Full songs and dense mixes may yield extra notes; inspect before applying.</div>
+      </div>
+    </section>
+
+    <section class="panel piano-panel" id="pianoPanel" aria-label="Piano roll note editor">
+      <div class="piano-intro">
+        <div><div class="panel-title">Piano-roll editor <span style="color:#6ee2e3">↔ RTTTL</span></div><p>Move notes to change pitch or timing; drag their right edge to change duration.</p></div>
+        <div class="motor-tabs" id="motorTabs" role="group" aria-label="Select motor to edit"></div>
+      </div>
+      <div class="piano-toolbar">
+        <div class="hint"><strong id="selectedMotorName">ESC 1 · Higher melody</strong> <span id="pianoReadout">· 7 notes</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label>Snap <select id="snapGrid"><option value="1">1/4 note</option><option value="0.5">1/8 note</option><option value="0.25" selected>1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></label>
+          <label><input id="rippleEdit" type="checkbox"> Ripple editing</label>
+          <button class="tiny" id="addNote" type="button">+ Add note</button>
+          <button class="tiny" id="undoEdit" type="button" disabled>↶ Undo</button>
+          <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
+        </div>
+      </div>
+      <div class="piano-scroll" id="pianoScroll" aria-label="Scrollable interactive MIDI note grid">
+        <div class="piano-header"><div class="piano-corner">PITCH</div><div class="piano-beats" id="pianoBeats"></div></div>
+        <div class="piano-stage"><div class="piano-keys" id="pianoKeys"></div><div class="piano-roll" id="pianoRoll" aria-label="Drag notes vertically for pitch, horizontally for start time, or resize the right edge"></div></div>
+      </div>
+      <div class="piano-inspector">
+        <div class="note-title" id="selectedNoteTitle">Select a note</div>
+        <div class="note-inspector">
+          <label>Pitch <select id="pitchSelect" aria-label="Selected note pitch"></select></label>
+          <label>Start beat <input id="noteStart" type="number" min="0" step="0.125" aria-label="Selected note start beat"></label>
+          <label>Length <select id="noteDuration" aria-label="Selected note duration"></select></label>
+          <button class="tiny" id="deleteNote" type="button">Delete note</button>
+        </div>
+      </div>
+      <p class="piano-help">Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, surrounding notes stay fixed and empty space becomes rests. Enable Ripple editing to shift later notes when adjusting the timing. Double-click to insert a note. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied). The RTTTL below stays synchronised.</p>
+    </section>
+
+    <section class="panel midi-panel" aria-label="MIDI import and export">
+      <div class="midi-head">
+        <div><div class="panel-title">MIDI interchange</div><p class="reference-note">Import a standard .mid file, assign a MIDI voice to each ESC, or export the current multi-channel arrangement.</p></div>
+        <div class="reference-buttons"><button class="tiny" id="loadMidi" type="button">↑ Choose MIDI</button><input id="midiFile" type="file" accept=".mid,.midi,audio/midi" hidden><button class="tiny" id="exportMidi" type="button">↓ Export MIDI</button></div>
+      </div>
+      <div class="midi-status" id="midiStatus">No MIDI file selected. Import is quantised to the current piano-roll snap resolution; each motor remains monophonic.</div>
+      <div class="midi-mapping" id="midiMapping" hidden></div>
+      <button class="secondary" type="button" id="importMidi" disabled>Import selected voices into motor tracks</button>
+    </section>
+
+    <section class="section-head">
+      <div><h2>Motor tracks</h2><p>Edit the RTTTL directly or use the piano roll above; both stay in sync.</p></div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:16px">
+        <button class="reset" id="exportProject" type="button">↓ Export project</button>
+        <button class="reset" id="importProject" type="button">↑ Import project</button>
+        <input type="file" id="projectFile" accept=".json,application/json" hidden>
+        <button class="reset" id="reset" type="button">↺ Reset melodies</button>
+      </div>
+    </section>
+    <section class="tracks" id="trackGrid" aria-label="Editable motor tracks"></section>
+    <section class="panel validation-panel" aria-label="Bluejay compatibility checks">
+      <div class="panel-header"><div class="panel-title">Bluejay preflight</div><div class="panel-meta" id="validationSummary">Checking motors…</div></div>
+      <div class="validation-grid" id="validationGrid"></div>
+      <div class="validation-overall" id="validationNote">This is a format and timing check, not a guarantee of compatibility with every ESC hardware target.</div>
+    </section>
+    <div class="tips"><span>ⓘ</span><div>The included short demonstration melody is an approximation, and the three supporting voices are not an official transcription. Imported audio stays local and is never uploaded to this site. Sound synthesis approximates ESC tones; real motors will differ. Disable “Sync Startup Music to Multiple ESCs” when writing distinct melodies, and remove all propellers before bench testing.</div></div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="midi.js"></script>
+  <script>
+  (() => {
+    'use strict';
+    const originals = [
+      { name:'Higher melody', subtitle:'Lead lifted one octave for clarity · E5–A5', color:'#ff8b78', value:'Lead:d=8,o=5,b=125:e,e,e,g,4g,a,4a,p' },
+      { name:'Lower melody', subtitle:'Reference vocal register · E4–A4', color:'#6ee2e3', value:'Octave:d=8,o=4,b=125:e,e,e,g,4g,a,4a,p' },
+      { name:'Harmony', subtitle:'A minor to C · sustained chord tones', color:'#bd9df8', value:'Harmony:d=8,o=5,b=125:2c,d,2e,p' },
+      { name:'Bass', subtitle:'A → B → C · follows chord roots', color:'#eecb7d', value:'Bass:d=8,o=4,b=125:2a,b,2c5,p' }
+    ];
+    const storageKey = 'rtttl-quad-lab-v2';
+    const namesKey = 'rtttl-quad-lab-channel-names-v1';
+    const guideKey = 'rtttl-quad-lab-target-time-v1';
+    const settingsKey = 'rtttl-quad-lab-studio-settings-v1';
+    const motorCountKey = 'rtttl-quad-lab-motor-count-v1';
+    const maxMotors=12;
+    const motorColors=['#ff8b78','#6ee2e3','#bd9df8','#eecb7d','#8cf5b4','#93b5ff','#ffb2e2','#f4a66a','#9beab9','#b5cff8','#e9b2ff','#f3da95'];
+    function defaultMotor(i){
+      return originals[i]||{name:`Motor ${i+1}`,subtitle:'Additional ESC · ready for your own melody',color:motorColors[i%motorColors.length],value:`Motor${i+1}:d=8,o=5,b=125:4p`};
+    }
+    let saved = null, savedNames = null, savedGuide = null, savedSettings = null;
+    try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch (_) {}
+    try { savedNames = JSON.parse(localStorage.getItem(namesKey)); } catch (_) {}
+    try { savedGuide = JSON.parse(localStorage.getItem(guideKey)); } catch (_) {}
+    try { savedSettings = JSON.parse(localStorage.getItem(settingsKey)); } catch (_) {}
+    let initialMotorCount=4;
+    try{initialMotorCount=Math.max(4,Math.min(maxMotors,Number(localStorage.getItem(motorCountKey))||saved?.length||4));}catch(_){}
+    const tracks=Array.from({length:initialMotorCount},(_,i)=>{
+      const item=defaultMotor(i);
+      return {...item,name:typeof savedNames?.[i]==='string'&&savedNames[i].trim()?savedNames[i].slice(0,40):item.name,value:typeof saved?.[i]==='string'?saved[i]:item.value,muted:false,solo:false,parsed:null,error:null};
+    });
+    const grid = document.getElementById('trackGrid');
+    const playButton = document.getElementById('playAll');
+    const stopButton = document.getElementById('stop');
+    const speedInput = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+    const volumeInput = document.getElementById('volume');
+    const volumeValue = document.getElementById('volumeValue');
+    const timeline = document.getElementById('timeline');
+    const clock = document.getElementById('clock');
+    const info = document.getElementById('arrangementInfo');
+    const labels = document.getElementById('timelineLabels');
+    const showTimeGuide = document.getElementById('showTimeGuide');
+    const targetSeconds = document.getElementById('targetSeconds');
+    const guideInfo = document.getElementById('guideInfo');
+    const timelineRuler = document.getElementById('timelineRuler');
+    showTimeGuide.checked=Boolean(savedGuide?.enabled);
+    targetSeconds.value=String(Number.isFinite(savedGuide?.seconds)&&savedGuide.seconds>0?savedGuide.seconds:2.5);
+    const noteIndex = {c:0,d:2,e:4,f:5,g:7,a:9,b:11};
+    const pitchNames = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+    const rtttlPitchNames = ['c','c#','d','d#','e','f','f#','g','g#','a','a#','b'];
+    const beatPx = 92, rowPx = 20;
+    const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
+    const beatSnap = document.getElementById('snapGrid');
+    const pianoGrid = document.getElementById('pianoRoll');
+    const pianoKeys = document.getElementById('pianoKeys');
+    const pianoBeats = document.getElementById('pianoBeats');
+    const motorTabs = document.getElementById('motorTabs');
+    const notePitchSelect = document.getElementById('pitchSelect');
+    const noteDurationSelect = document.getElementById('noteDuration');
+    const noteStartInput = document.getElementById('noteStart');
+    const bpmInput=document.getElementById('globalBpm');
+    const motorCountInput=document.getElementById('motorCount');
+    const timeSignatureInput=document.getElementById('timeSignature');
+    const metronomeInput=document.getElementById('metronome');
+    const soundModeInput=document.getElementById('soundMode');
+    const stereoWidthInput=document.getElementById('stereoWidth');
+    const rippleInput=document.getElementById('rippleEdit');
+    const referenceWave=document.getElementById('referenceWave');
+    const referenceFile=document.getElementById('referenceFile');
+    const referenceStartInput=document.getElementById('referenceStart');
+    const referenceDurationInput=document.getElementById('referenceDuration');
+    const referenceOffsetInput=document.getElementById('referenceOffset');
+    const referenceVolumeInput=document.getElementById('referenceVolume');
+    const referenceMixInput=document.getElementById('referenceMix');
+    const referenceZoomInput=document.getElementById('referenceZoom');
+    const pitchSensitivity=document.getElementById('pitchSensitivity');
+    const pitchMin=document.getElementById('pitchMin');
+    const pitchMax=document.getElementById('pitchMax');
+    const pitchMinMs=document.getElementById('pitchMinMs');
+    const detectButton=document.getElementById('detectPitch');
+    const detectStatus=document.getElementById('detectStatus');
+    const detectProgress=document.getElementById('detectProgress');
+    const applyDetectedButton=document.getElementById('applyDetected');
+    const midiFile=document.getElementById('midiFile');
+    const midiMapping=document.getElementById('midiMapping');
+    let pendingMidi=null,refBuffer=null,refFileName='',referencePreview=false,referenceDrag=false;
+    let refStart=0,refDuration=4,refOffset=0,refSource=null,refGain=null,motorWave=null,panners=[],wavePeaks=[];
+    let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
+    const settings={bpm:125,signature:'4/4',metronome:false,mode:'square',stereo:65,ripple:false,snap:.25,...savedSettings};
+    if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
+    if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
+    bpmInput.value=String(settings.bpm);timeSignatureInput.value=settings.signature;
+    motorCountInput.value=String(tracks.length);
+    metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
+    stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
+    let editMotor = 0, selectedNote = 0, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
+    const editHistory = [],redoHistory=[];
+    let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
+
+    function parseRTTTL(raw) {
+      const pieces = raw.trim().split(':');
+      if (pieces.length !== 3) throw new Error('Expected name:defaults:notes (two colons).');
+      const defaults = {d:4,o:5,b:120};
+      for (const item of pieces[1].split(',')) {
+        const bits = item.trim().toLowerCase().match(/^([dob])\s*=\s*(\d+)$/);
+        if (!bits) throw new Error('Invalid default setting: ' + item.trim());
+        defaults[bits[1]] = Number(bits[2]);
+      }
+      if (![1,2,4,8,16,32,64].includes(defaults.d) || defaults.o < 3 || defaults.o > 8 || defaults.b < 20 || defaults.b > 900) throw new Error('Check d (note length), o (octave), or b (20–900 BPM).');
+      const notes = [];
+      let currentTime = 0;
+      const tokens = pieces[2].split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+      if (!tokens.length) throw new Error('No notes after the second colon.');
+      if (tokens.length > 62) throw new Error('This track has more than 62 notes/rests (Bluejay melody limit).');
+      for (const token of tokens) {
+        // Accept both common dotted forms: 8c#6. and 8c#.6
+        const normal = token.replace(/^(\d*[a-g]#?)\.(\d)$/, '$1$2.');
+        const match = normal.match(/^(\d{0,2})([a-gp])(#?)([3-8]?)(\.)?$/);
+        if (!match) throw new Error('Invalid note: ' + token);
+        const denom = match[1] ? Number(match[1]) : defaults.d;
+        if (![1,2,4,8,16,32,64].includes(denom)) throw new Error('Invalid duration in ' + token);
+        const beatCount = (4 / denom) * (match[5] ? 1.5 : 1);
+        const seconds = beatCount * 60 / defaults.b;
+        const rest = match[2] === 'p';
+        const octave = match[4] ? Number(match[4]) : defaults.o;
+        const midi = rest ? null : ((octave + 1) * 12 + noteIndex[match[2]] + (match[3] ? 1 : 0));
+        const hz = rest ? 0 : 440 * Math.pow(2, (midi - 69) / 12);
+        notes.push({start:currentTime, seconds, beats:beatCount, hz, midi, rest, token});
+        currentTime += seconds;
+      }
+      return {name:pieces[0],defaults,notes, length:currentTime, totalBeats:currentTime*defaults.b/60, count:notes.length, bpm:defaults.b};
+    }
+
+    function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
+    function saveNames() { try { localStorage.setItem(namesKey, JSON.stringify(tracks.map(t=>t.name))); } catch (_) {} }
+    function saveSettings(){
+      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value)});
+      try{localStorage.setItem(settingsKey,JSON.stringify(settings));}catch(_){}
+    }
+    function barBeats(){const [n,d]=timeSignatureInput.value.split('/').map(Number);return n*4/d;}
+    function guideSeconds() { return Math.min(600,Math.max(.05,Number(targetSeconds.value)||2.5)); }
+    function saveGuide() { try { localStorage.setItem(guideKey, JSON.stringify({enabled:showTimeGuide.checked,seconds:guideSeconds()})); } catch (_) {} }
+    function formatTime(value) { const min=Math.floor(value/60); const sec=Math.floor(value%60).toString().padStart(2,'0'); const dec=Math.floor((value%1)*10); return `${min}:${sec}.${dec}`; }
+    function notify(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('visible'); clearTimeout(toastTimeout); toastTimeout=setTimeout(()=>el.classList.remove('visible'),2400); }
+    function escapeHTML(s) { return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function buildUI() {
+      grid.innerHTML = tracks.map((t,i)=>`<article class="panel track" style="--track-color:${t.color}" data-track="${i}">
+        <div class="track-top"><div style="min-width:0;flex:1"><label class="track-number" for="track-name-${i}">ESC 0${i+1} · CHANNEL NAME</label><input id="track-name-${i}" class="track-name" type="text" maxlength="40" value="${escapeHTML(t.name)}" aria-label="Name for ESC ${i+1}"><div class="track-name-hint">Click to rename</div><p class="track-subtitle">${escapeHTML(t.subtitle)}</p></div>
+        <div class="track-buttons"><button type="button" class="tiny" data-action="mute" aria-pressed="false" title="Toggle mute">Mute</button><button type="button" class="tiny" data-action="solo" aria-pressed="false" title="Play only soloed motors">Solo</button><button type="button" class="tiny" data-action="preview" title="Listen to this motor only">▶</button></div></div>
+        <label class="editor-label" for="rtttl-${i}"><span>RTTTL STRING</span><span>EDITABLE</span></label>
+        <textarea id="rtttl-${i}" rows="3" spellcheck="false" aria-label="RTTTL for motor ${i+1}">${escapeHTML(t.value)}</textarea>
+        <div class="track-footer"><span class="track-stats" id="stats-${i}"></span><button class="copy" type="button" data-action="copy">Copy RTTTL ↗</button></div><p class="error" id="error-${i}" role="status"></p>
+      </article>`).join('');
+      refreshChannelLabels();
+      for (let i=0;i<tracks.length;i++) {
+        document.getElementById(`rtttl-${i}`).addEventListener('input',e=>{tracks[i].value=e.target.value; saveEdits(); updateParsed();});
+        const nameInput=document.getElementById(`track-name-${i}`);
+        nameInput.addEventListener('input',e=>{tracks[i].name=e.target.value;saveNames();refreshChannelLabels();renderPiano();});
+        nameInput.addEventListener('blur',e=>{if(!e.target.value.trim()){tracks[i].name=defaultMotor(i).name;e.target.value=tracks[i].name;saveNames();refreshChannelLabels();renderPiano();}});
+      }
+      grid.onclick=async e=>{
+        const button=e.target.closest('button[data-action]'); if(!button)return;
+        const article=button.closest('[data-track]'); const i=Number(article.dataset.track); const action=button.dataset.action;
+        if(action==='mute'){ tracks[i].muted=!tracks[i].muted; updateButtons(); updateGains(); }
+        if(action==='solo'){ tracks[i].solo=!tracks[i].solo; updateButtons(); updateGains(); }
+        if(action==='preview'){ await play(i); }
+        if(action==='copy'){
+          try { await navigator.clipboard.writeText(tracks[i].value); notify(`ESC ${i+1} melody copied`); }
+          catch(_){ document.getElementById(`rtttl-${i}`).focus(); document.getElementById(`rtttl-${i}`).select(); notify('Select and copy the highlighted melody'); }
+        }
+      };
+      updateParsed(); updateButtons();
+      if(!savedSettings&&tracks[0].parsed)bpmInput.value=String(tracks[0].parsed.bpm);
+    }
+
+    function refreshChannelLabels(){
+      document.getElementById('motorHeadline').textContent=tracks.length===4?'Four motors.':`${tracks.length} motors.`;
+      motorCountInput.value=String(tracks.length);
+      document.getElementById('addMotor').disabled=tracks.length>=maxMotors;
+      document.getElementById('removeMotor').disabled=tracks.length<=4;
+      labels.innerHTML=tracks.map((t,i)=>`<div class="timeline-label" title="ESC ${i+1} · ${escapeHTML(t.name)}"><span class="swatch" style="background:${t.color}"></span><span class="label-text"><small>ESC ${i+1}</small>${escapeHTML(t.name||'Unnamed channel')}</span></div>`).join('');
+      labels.style.gridTemplateRows=`repeat(${tracks.length},45px)`;
+    }
+
+    function resizeMotorCount(count){
+      const requested=Math.max(4,Math.min(maxMotors,Math.round(Number(count)||4)));
+      if(requested===tracks.length){motorCountInput.value=String(tracks.length);return;}
+      if(requested<tracks.length){
+        const removed=tracks.slice(requested),custom=removed.some((t,i)=>t.value!==defaultMotor(requested+i).value||t.name!==defaultMotor(requested+i).name);
+        if(custom&&!window.confirm(`Reducing to ${requested} motors will remove ${removed.length} channel(s) and their RTTTL. Export the project first if you want to keep them. Continue?`)){
+          motorCountInput.value=String(tracks.length);return;
+        }
+      }
+      halt();
+      while(tracks.length<requested){const i=tracks.length;const item=defaultMotor(i);tracks.push({...item,value:item.value.replace('b=125',`b=${Number(bpmInput.value)||125}`),muted:false,solo:false,parsed:null,error:null});}
+      tracks.splice(requested);
+      editMotor=Math.min(editMotor,requested-1);selectedNote=0;
+      editHistory.length=0;redoHistory.length=0;
+      document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;
+      try{localStorage.setItem(motorCountKey,String(requested));}catch(_){}
+      saveEdits();saveNames();buildUI();ensureAudioChannels();
+      if(pendingMidi)populateMidiMapping();
+      notify(`${requested} motor channels ready`);
+    }
+
+    function updateGuideInfo(){
+      if(!showTimeGuide.checked){guideInfo.textContent='';return;}
+      const remaining=guideSeconds()-Math.max(...tracks.map(t=>t.parsed?.length||0));
+      guideInfo.textContent=`${guideSeconds().toFixed(2)}s target · ${Math.abs(remaining).toFixed(2)}s ${remaining>=0?'remaining':'over target'}`;
+    }
+
+    function updateParsed(renderEditor=true) {
+      let maxLength=0; let valid=0;
+      tracks.forEach((t,i)=>{
+        try {t.parsed=parseRTTTL(t.value); t.error=null; valid++; maxLength=Math.max(maxLength,t.parsed.length);}
+        catch(err){t.parsed=null; t.error=err.message;}
+        const stats=document.getElementById(`stats-${i}`), error=document.getElementById(`error-${i}`);
+        stats.textContent=t.parsed?`${t.parsed.count} notes/rests · ${t.parsed.length.toFixed(2)}s · ${t.parsed.bpm} BPM`:'Needs correction';
+        error.textContent=t.error||'';
+      });
+      length=maxLength;
+      info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds`;
+      updateGuideInfo();
+      playButton.disabled=valid!==tracks.length;
+      if(valid!==tracks.length)playButton.title='Correct the invalid RTTTL string first'; else playButton.removeAttribute('title');
+      if(startTime===null)renderClock(0);
+      drawTimeline();
+      if(renderEditor && !dragState)renderPiano();
+      renderValidation();
+    }
+
+    function renderValidation(){
+      let valid=0,nearLimit=0;
+      const maxDuration=Math.max(...tracks.map(t=>t.parsed?.length||0));
+      const bpms=[...new Set(tracks.filter(t=>t.parsed).map(t=>t.parsed.bpm))];
+      const out=tracks.map((t,i)=>{
+        const p=t.parsed;if(!p)return `<div class="validation-item" style="--track-color:${t.color}"><div class="heading">ESC ${i+1} · ${escapeHTML(t.name)}</div><div class="metric fail">Invalid RTTTL</div><div class="metric">${escapeHTML(t.error||'Check the track')}</div></div>`;
+        valid++;if(p.count>55)nearLimit++;
+        const freqs=p.notes.filter(n=>!n.rest).map(n=>n.hz);
+        const min=freqs.length?Math.min(...freqs).toFixed(0):'-',max=freqs.length?Math.max(...freqs).toFixed(0):'-';
+        const difference=maxDuration-p.length;
+        return `<div class="validation-item" style="--track-color:${t.color}">
+          <div class="heading" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name)}</div>
+          <div class="metric ${p.count>55?'warn':'pass'}">${p.count}/62 events ${p.count>55?'· near limit':'· within limit'}</div>
+          <div class="metric">${p.bpm} BPM · ${p.length.toFixed(2)} s</div>
+          <div class="metric">Frequency: ${min}–${max} Hz</div>
+          <div class="metric ${difference>.05?'warn':''}">${difference>.005?`${difference.toFixed(2)} s shorter than longest`:'Matches longest duration'}</div>
+        </div>`;
+      });
+      document.getElementById('validationGrid').innerHTML=out.join('');
+      document.getElementById('validationSummary').textContent=`${valid}/${tracks.length} format-valid · ${nearLimit} near event limit`;
+      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding and the 62-event limit are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
+    }
+
+    function updateButtons() {
+      tracks.forEach((t,i)=>{
+        const article=grid.querySelector(`[data-track="${i}"]`);
+        const mute=article.querySelector('[data-action="mute"]'); const solo=article.querySelector('[data-action="solo"]');
+        mute.classList.toggle('muted',t.muted); mute.setAttribute('aria-pressed',String(t.muted)); mute.textContent=t.muted?'Muted':'Mute';
+        solo.classList.toggle('active',t.solo); solo.setAttribute('aria-pressed',String(t.solo));
+      });
+    }
+
+    function currentLevel(i) {
+      if(audition!==null)return i===audition ? 1 : 0;
+      const anySolo=tracks.some(t=>t.solo);
+      return !tracks[i].muted && (!anySolo || tracks[i].solo) ? 1 : 0;
+    }
+    function updateGains() {
+      if(!ctx)return;
+      channelGains.forEach((gain,i)=>gain.gain.setTargetAtTime(currentLevel(i),ctx.currentTime,.015));
+      drawTimeline();
+    }
+
+    function ensureAudioChannels(){
+      if(!ctx||!compressor)return;
+      while(channelGains.length>tracks.length){channelGains.pop().disconnect();panners.pop().disconnect();}
+      while(channelGains.length<tracks.length){
+        const g=ctx.createGain(),pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
+        g.connect(pan);pan.connect(compressor);channelGains.push(g);panners.push(pan);
+      }
+      updateStereo();
+    }
+    async function audioSetup() {
+      if(!ctx){
+        const AudioClass=window.AudioContext||window.webkitAudioContext;
+        if(!AudioClass)throw new Error('This browser does not support Web Audio.');
+        ctx=new AudioClass();
+        compressor=ctx.createDynamicsCompressor(); compressor.threshold.value=-22; compressor.knee.value=18; compressor.ratio.value=5; compressor.attack.value=.003; compressor.release.value=.15;
+        masterGain=ctx.createGain(); masterGain.gain.value=(Number(volumeInput.value)/100)*.25;
+        compressor.connect(masterGain); masterGain.connect(ctx.destination);
+        panners=[];channelGains=[];
+        refGain=ctx.createGain();refGain.connect(masterGain);
+        const real=new Float32Array(8),imag=new Float32Array([0,1,.32,.19,.10,.075,.04,.025]);
+        motorWave=ctx.createPeriodicWave(real,imag);
+      }
+      if(ctx.state==='suspended')await ctx.resume();
+      ensureAudioChannels();
+    }
+
+    function updateStereo(){
+      if(!ctx)return;
+      const width=Number(stereoWidthInput.value)/100;
+      const placement=[-.9,.9,-.45,.45,-.7,.7,-.2,.2,-.6,.6,-.35,.35];
+      panners.forEach((p,i)=>{if(p.pan)p.pan.setTargetAtTime(placement[i%placement.length]*width,ctx.currentTime,.02);});
+    }
+    function scheduleMetronome(){
+      if(!metronomeInput.checked)return;
+      const [num,den]=timeSignatureInput.value.split('/').map(Number);
+      const beatSeconds=60/Number(bpmInput.value),step=4/den,beats=Math.min(1024,Math.ceil(length/(beatSeconds*step))),bar=barBeats();
+      for(let b=0;b<=beats;b++){
+        const beatPosition=b*step,at=startTime+beatPosition*beatSeconds/speedAtStart;
+        const sound=ctx.createOscillator(),gain=ctx.createGain();
+        const downbeat=Math.abs(beatPosition/bar-Math.round(beatPosition/bar))<.001;
+        const subgroup=den===8&&num%3===0&&b%3===0;
+        sound.type='sine';sound.frequency.value=downbeat?1100:subgroup?930:760;
+        gain.gain.setValueAtTime(.0001,at);
+        gain.gain.exponentialRampToValueAtTime(.075,at+.003);
+        gain.gain.exponentialRampToValueAtTime(.0001,at+.065);
+        sound.connect(gain);gain.connect(compressor);sound.start(at);sound.stop(at+.068);sources.push(sound);
+      }
+    }
+    function scheduleReference(){
+      if(!refBuffer)return;
+      const start=Math.min(refStart,Math.max(0,refBuffer.duration-.01));
+      const duration=Math.min(refDuration,refBuffer.duration-start);
+      if(duration<=0)return;
+      const at=startTime+refOffset/speedAtStart;
+      const source=ctx.createBufferSource();source.buffer=refBuffer;source.playbackRate.value=speedAtStart;
+      refGain.gain.value=Number(referenceVolumeInput.value)/100;
+      source.connect(refGain);source.start(at,start,duration);sources.push(source);refSource=source;
+      length=Math.max(length,refOffset+duration);
+    }
+
+    function halt() {
+      cancelAnimationFrame(raf); raf=0;
+      if(ctx)for(const source of sources){try{source.stop(ctx.currentTime);}catch(_){} }
+      sources=[]; startTime=null; audition=null;
+      refSource=null;referencePreview=false;
+      playButton.innerHTML='<span aria-hidden="true">▶</span><span>Play all motors</span>';
+      stopButton.disabled=true;
+      renderClock(0); drawTimeline();drawReferenceWave();
+    }
+
+    async function play(index=null) {
+      if(tracks.some(t=>!t.parsed)){notify('Fix the highlighted RTTTL error first');return;}
+      halt();
+      try {await audioSetup();}catch(err){notify(err.message);return;}
+      audition=index; speedAtStart=Number(speedInput.value);
+      updateGains();
+      startTime=ctx.currentTime+.065;
+      const activeTracks=index===null?tracks.map((_,i)=>i):[index];
+      length=Math.max(...activeTracks.map(i=>tracks[i].parsed.length));
+      if(referenceMixInput.checked)scheduleReference();
+      scheduleMetronome();
+      for(const i of activeTracks){
+        const voice=tracks[i].parsed;
+        for(const note of voice.notes){
+          if(note.rest)continue;
+          const start=startTime+note.start/speedAtStart;
+          const dur=note.seconds/speedAtStart;
+          const oscillator=ctx.createOscillator();
+          if(soundModeInput.value==='motor')oscillator.setPeriodicWave(motorWave);
+          else oscillator.type=soundModeInput.value==='sine'?'sine':'square';
+          oscillator.frequency.value=note.hz;
+          const noteGain=ctx.createGain(); noteGain.gain.setValueAtTime(.0001,start);
+          const peak=.16;
+          noteGain.gain.linearRampToValueAtTime(peak,start+Math.min(.012,dur*.12));
+          noteGain.gain.setValueAtTime(peak,start+Math.max(.015,dur-.028));
+          noteGain.gain.exponentialRampToValueAtTime(.0001,start+dur-.003);
+          oscillator.connect(noteGain); noteGain.connect(channelGains[i]);
+          oscillator.start(start); oscillator.stop(start+dur+.005);
+          sources.push(oscillator);
+        }
+      }
+      stopButton.disabled=false;
+      playButton.innerHTML='<span aria-hidden="true">↻</span><span>Restart all</span>';
+      tick();
+    }
+
+    async function playReferenceOnly(){
+      if(!refBuffer)return;
+      halt();try{await audioSetup();}catch(err){notify(err.message);return;}
+      referencePreview=true;audition=-1;updateGains();speedAtStart=Number(speedInput.value);
+      startTime=ctx.currentTime+.065;length=0;scheduleReference();
+      stopButton.disabled=false;tick();
+    }
+
+    function elapsed() {return startTime===null || !ctx ? 0 : Math.max(0,(ctx.currentTime-startTime)*speedAtStart);}
+    function renderClock(t){clock.innerHTML=`${formatTime(t)} <span>/ ${formatTime(length)}</span>`;}
+    function tick(){const e=elapsed();renderClock(Math.min(e,length));drawTimeline();drawReferenceWave();if(e>length+.08){halt();return;}raf=requestAnimationFrame(tick);}
+
+    function syncReferenceInputs(){
+      const previousStart=refStart,previousDuration=refDuration;
+      const limit=refBuffer?.duration||600;
+      refStart=clamp(Number(referenceStartInput.value)||0,0,Math.max(0,limit-.05));
+      refDuration=clamp(Number(referenceDurationInput.value)||.05,.05,Math.max(.05,limit-refStart));
+      refOffset=clamp(Number(referenceOffsetInput.value)||0,0,600);
+      referenceStartInput.value=refStart.toFixed(2);
+      referenceDurationInput.value=refDuration.toFixed(2);
+      referenceOffsetInput.value=refOffset.toFixed(2);
+      if(Math.abs(refStart-previousStart)>.01||Math.abs(refDuration-previousDuration)>.01)clearPitchSuggestions('Clip selection changed. Detect notes again for the new selection.');
+      drawReferenceWave();
+      renderPiano();
+    }
+    function drawReferenceWave(){
+      const rect=referenceWave.getBoundingClientRect();if(!rect.width)return;
+      const dpr=Math.min(window.devicePixelRatio||1,2),W=rect.width,H=116;
+      const width=Math.round(W*dpr),height=Math.round(H*dpr);
+      if(referenceWave.width!==width||referenceWave.height!==height){referenceWave.width=width;referenceWave.height=height;}
+      const g=referenceWave.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+      g.fillStyle='#0d1a2a';g.fillRect(0,0,W,H);
+      g.strokeStyle='#30485e';g.lineWidth=1;g.beginPath();g.moveTo(0,H/2);g.lineTo(W,H/2);g.stroke();
+      if(!refBuffer){g.fillStyle='#8198ac';g.font='12px system-ui';g.fillText('Import an audio file to display its waveform',17,59);return;}
+      const {start:viewStart,end:viewEnd}=referenceViewRange(),duration=viewEnd-viewStart;
+      const startX=W*(refStart-viewStart)/duration,endX=W*(refStart+refDuration-viewStart)/duration;
+      g.fillStyle='#30556690';g.fillRect(startX,0,Math.max(1,endX-startX),H);
+      g.strokeStyle='#74dee0';g.lineWidth=1;g.beginPath();
+      wavePeaks.forEach((p,i)=>{
+        const audioTime=i*refBuffer.duration/wavePeaks.length;
+        if(audioTime<viewStart||audioTime>viewEnd)return;
+        const x=(audioTime-viewStart)*W/duration;
+        g.moveTo(x,H/2-p[1]*(H*.42));g.lineTo(x,H/2-p[0]*(H*.42));
+      });g.stroke();
+      g.strokeStyle='#ffd36b';g.lineWidth=2;
+      for(const x of [startX,endX]){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+      if(showTimeGuide.checked){
+        const markerTime=refStart+guideSeconds()-refOffset;
+        if(markerTime>=viewStart&&markerTime<=viewEnd){
+          const x=W*(markerTime-viewStart)/duration;g.strokeStyle='#fff4b1';g.setLineDash([5,4]);g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.setLineDash([]);
+        }
+      }
+      if(startTime!==null && (referencePreview||referenceMixInput.checked)){
+        const t=elapsed()-refOffset;
+        if(t>=0&&t<=refDuration){const x=W*(refStart+t-viewStart)/duration;g.strokeStyle='#fff';g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+      }
+      g.fillStyle='#b6ccde';g.font='11px system-ui';
+      g.fillText(`${viewStart.toFixed(1)} s`,6,H-9);const end=`${viewEnd.toFixed(1)} s`;
+      g.fillText(end,Math.max(6,W-g.measureText(end).width-8),H-9);
+    }
+    function referenceViewRange(){
+      if(!refBuffer)return {start:0,end:1};
+      if(!referenceZoomInput.checked)return {start:0,end:refBuffer.duration};
+      const margin=Math.max(.5,refDuration*.25);
+      return {start:Math.max(0,refStart-margin),end:Math.min(refBuffer.duration,refStart+refDuration+margin)};
+    }
+
+    async function loadReferenceAudio(file){
+      if(!file)return;
+      if(file.size>30000000){notify('Reference audio must be under 30 MB');return;}
+      try{
+        await audioSetup();
+        const next=await ctx.decodeAudioData(await file.arrayBuffer());
+        halt();refBuffer=next;refFileName=file.name;refStart=0;refDuration=Math.min(8,next.duration);refOffset=0;
+        clearPitchSuggestions('Reference loaded. Choose a clip and click Detect notes.');
+        referenceStartInput.value='0';referenceDurationInput.value=refDuration.toFixed(2);referenceOffsetInput.value='0';
+        wavePeaks=[];const data=next.getChannelData(0),bins=2000;
+        const samplesPerBin=Math.max(1,Math.ceil(data.length/bins));
+        for(let i=0;i<bins;i++){
+          let min=1,max=-1;const from=i*samplesPerBin,to=Math.min(data.length,from+samplesPerBin);
+          const stride=Math.max(1,Math.floor((to-from)/80));
+          for(let j=from;j<to;j+=stride){min=Math.min(min,data[j]);max=Math.max(max,data[j]);}
+          wavePeaks.push([min===1?0:min,max===-1?0:max]);
+        }
+        document.getElementById('referenceStatus').textContent=`${file.name} · ${next.duration.toFixed(1)} s · ${next.sampleRate} Hz · clip remains local to this browser session`;
+        document.getElementById('playReference').disabled=false;document.getElementById('clearReference').disabled=false;
+        detectButton.disabled=false;
+        referenceWave.classList.remove('empty');drawReferenceWave();notify('Reference audio loaded');
+      }catch(err){notify('Could not decode audio: '+(err.message||'unsupported format'));}
+    }
+
+    // Basic Pitch runs entirely in this browser. The bundled JS embeds the
+    // model weights, allowing both a hosted static Site and local file:// use.
+    let pitchRequestId=0;
+    function clearPitchSuggestions(message='Suggestions cleared. Your RTTTL melodies were not changed.'){
+      pitchRequestId++;
+      pitchRaw=null;pitchSelection=null;suggestionNotes=[];
+      applyDetectedButton.disabled=true;document.getElementById('clearDetected').disabled=true;
+      detectStatus.textContent=message;
+      if(tracks[editMotor]?.parsed)renderPiano();
+    }
+    function loadPitchScript(){
+      if(window.QuadPitch)return Promise.resolve(window.QuadPitch);
+      if(!pitchScriptPromise){
+        pitchScriptPromise=new Promise((resolve,reject)=>{
+          const script=document.createElement('script');script.src='pitch-model.js';
+          script.onload=()=>window.QuadPitch?resolve(window.QuadPitch):reject(Error('Pitch analyser did not initialise'));
+          script.onerror=()=>reject(Error('Could not load the bundled pitch analyser'));
+          document.head.append(script);
+        }).catch(err=>{pitchScriptPromise=null;throw err;});
+      }
+      return pitchScriptPromise;
+    }
+    async function monoReferenceClip(){
+      // Spotify's model expects mono, 22050 Hz PCM; mix channels then resample.
+      const sampleRate=refBuffer.sampleRate;
+      const offset=Math.floor(refStart*sampleRate);
+      const frames=Math.min(refBuffer.length-offset,Math.ceil(refDuration*sampleRate));
+      if(frames<=0)throw Error('Select a non-empty audio clip.');
+      const mono=new Float32Array(frames);
+      for(let channel=0;channel<refBuffer.numberOfChannels;channel++){
+        const data=refBuffer.getChannelData(channel),gain=1/refBuffer.numberOfChannels;
+        for(let i=0;i<frames;i++)mono[i]+=data[offset+i]*gain;
+      }
+      if(sampleRate===22050)return mono;
+      const offline=new OfflineAudioContext(1,Math.ceil(frames*22050/sampleRate),22050);
+      const buffer=offline.createBuffer(1,frames,sampleRate);
+      buffer.copyToChannel(mono,0);
+      const source=offline.createBufferSource();source.buffer=buffer;source.connect(offline.destination);source.start();
+      const rendered=await offline.startRendering();
+      return rendered.getChannelData(0).slice();
+    }
+    function refreshPitchSuggestions(){
+      if(!pitchRaw||!window.QuadPitch)return;
+      const lowest=Number(pitchMin.value),highest=Number(pitchMax.value);
+      if(lowest>highest){suggestionNotes=[];detectStatus.textContent='Lowest note must be below highest note.';applyDetectedButton.disabled=true;renderPiano();return;}
+      const minMs=clamp(Number(pitchMinMs.value)||110,30,1000);
+      pitchMinMs.value=String(minMs);
+      suggestionNotes=window.QuadPitch.transcribe(pitchRaw,{sensitivity:Number(pitchSensitivity.value),minMidi:lowest,maxMidi:highest,minMs});
+      document.getElementById('clearDetected').disabled=false;
+      applyDetectedButton.disabled=!suggestionNotes.length;
+      detectStatus.textContent=`${suggestionNotes.length} suggested note${suggestionNotes.length===1?'':'s'} from a ${pitchSelection.duration.toFixed(2)} s clip. Mint outlines are suggestions; they may include accompaniment and harmonics. Apply to replace only the selected ESC, or adjust the filters.`;
+      renderPiano();
+    }
+    async function detectReferencePitch(){
+      if(pitchBusy||!refBuffer)return;
+      if(refDuration>20){detectStatus.textContent='Select a clip of 20 seconds or less for responsive browser analysis.';return;}
+      const request=++pitchRequestId;
+      pitchBusy=true;detectButton.disabled=true;detectProgress.hidden=false;detectProgress.value=0;
+      detectStatus.textContent='Preparing audio and loading the local pitch model (first run may take a moment)…';
+      try{
+        const api=await loadPitchScript();
+        if(request!==pitchRequestId)return;
+        const samples=await monoReferenceClip();
+        if(request!==pitchRequestId)return;
+        detectStatus.textContent=`Analysing ${refDuration.toFixed(2)} s of audio on this device…`;
+        const result=await api.detect(samples,percent=>{
+          if(request!==pitchRequestId)return;
+          detectProgress.value=percent;detectStatus.textContent=`Pitch analysis ${percent}% · audio stays on your device`;
+        });
+        if(request!==pitchRequestId)return;
+        pitchRaw=result;pitchSelection={buffer:refBuffer,start:refStart,duration:refDuration};
+        refreshPitchSuggestions();
+        notify(`Found ${suggestionNotes.length} possible notes`);
+      }catch(err){
+        if(request===pitchRequestId){
+          detectStatus.textContent=`Pitch detection failed: ${err.message||'Unknown error'}. Try a shorter clip or a desktop browser.`;
+          notify('Pitch detection failed');
+        }
+        console.error('Basic Pitch analysis failed',err);
+      }finally{pitchBusy=false;detectButton.disabled=!refBuffer;detectProgress.hidden=true;}
+    }
+    function applyPitchSuggestions(){
+      const parsed=tracks[editMotor].parsed;
+      if(!parsed||!suggestionNotes.length)return;
+      const raw=suggestionNotes.map(n=>({
+        start:Math.max(0,snapValue((refOffset+n.start)*parsed.bpm/60)),
+        duration:closestDuration(Math.max(.0625,n.duration*parsed.bpm/60)),
+        midi:n.midi,confidence:n.confidence
+      })).sort((a,b)=>a.start-b.start||b.confidence-a.confidence);
+      const result=[];let end=0,skipped=0;
+      for(const n of raw){
+        if(n.start<end-.00001){skipped++;continue;}
+        result.push({start:roundBeat(n.start),duration:n.duration,midi:n.midi});
+        end=roundBeat(n.start+n.duration);
+      }
+      if(!result.length){notify('No non-overlapping notes found');return;}
+      try{
+        // Validate every rest and note before changing any user data.
+        const encoded=serializeEvents(result,0,parsed);
+        parseRTTTL(encoded);
+        const warning=skipped?` ${skipped} overlapping suggestion(s) will be skipped because one ESC can play only one tone at a time.`:'';
+        if(!window.confirm(`Replace ESC ${editMotor+1} (${tracks[editMotor].name}) with ${result.length} detected notes? This preserves the other three ESCs.${warning}\n\nYou can undo this change.`))return;
+        halt();saveHistory();commitEvents(result,0);selectedNote=0;renderPiano();
+        detectStatus.textContent=`Applied ${result.length} notes to ESC ${editMotor+1}; ${skipped} overlapping suggestions skipped. All other ESCs are unchanged. You can still refine pitch and timing by hand.`;
+        notify(`ESC ${editMotor+1}: ${result.length} notes applied`);
+      }catch(err){detectStatus.textContent=`Could not apply notes: ${err.message}. Try narrowing the clip or increasing minimum note length.`;notify('Suggestions exceed RTTTL limits');}
+    }
+
+    function selectionAtPointer(e){
+      const rect=referenceWave.getBoundingClientRect(),range=referenceViewRange();
+      return range.start+clamp((e.clientX-rect.left)/rect.width,0,1)*(range.end-range.start);
+    }
+    referenceWave.addEventListener('pointerdown',e=>{
+      if(!refBuffer||e.button!==0)return;
+      referenceDrag={pointer:e.pointerId,at:selectionAtPointer(e),moved:false};referenceWave.setPointerCapture(e.pointerId);e.preventDefault();
+    });
+    referenceWave.addEventListener('pointermove',e=>{
+      if(!referenceDrag||!refBuffer||e.pointerId!==referenceDrag.pointer)return;
+      const end=selectionAtPointer(e);if(Math.abs(end-referenceDrag.at)<.05)return;
+      referenceDrag.moved=true;refStart=Math.min(referenceDrag.at,end);refDuration=Math.max(.05,Math.abs(end-referenceDrag.at));
+      referenceStartInput.value=refStart.toFixed(2);referenceDurationInput.value=refDuration.toFixed(2);drawReferenceWave();
+    });
+    referenceWave.addEventListener('pointerup',e=>{
+      if(!referenceDrag||e.pointerId!==referenceDrag.pointer)return;
+      if(!referenceDrag.moved){refStart=clamp(referenceDrag.at,0,refBuffer.duration-.05);refDuration=Math.min(refDuration,refBuffer.duration-refStart);}
+      referenceDrag=false;syncReferenceInputs();
+    });
+    referenceWave.addEventListener('pointercancel',()=>{referenceDrag=false;});
+
+    function drawTimeline(){
+      if(!timeline.getContext)return;
+      const rect=timeline.getBoundingClientRect(); if(!rect.width)return;
+      const rowH=45,H=tracks.length*rowH;
+      timeline.style.height=`${H}px`;
+      const dpr=Math.min(window.devicePixelRatio||1,2); const w=Math.round(rect.width*dpr),h=Math.round(H*dpr);
+      if(timeline.width!==w||timeline.height!==h){timeline.width=w;timeline.height=h;}
+      const g=timeline.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+      const W=rect.width;g.clearRect(0,0,W,H);
+      const total=Math.max(...tracks.map(t=>t.parsed?.length||0),showTimeGuide.checked?guideSeconds()*1.06:0,.1);
+      timelineRuler.innerHTML=Array.from({length:5},(_,i)=>`<span>${(total*i/4).toFixed(2)}s</span>`).join('');
+      for(let i=0;i<tracks.length;i++){
+        const y=i*rowH;
+        g.fillStyle=i%2===0?'#121d2d':'#172130';g.fillRect(0,y,W,rowH-3);
+        g.strokeStyle='#283547';g.lineWidth=1;
+        for(let j=0;j<=8;j++){const x=W*j/8;g.beginPath();g.moveTo(x,y);g.lineTo(x,y+rowH-3);g.stroke();}
+        const notes=tracks[i].parsed?.notes||[];const pitches=notes.filter(n=>!n.rest).map(n=>n.midi);
+        const min=Math.min(...pitches,48),max=Math.max(...pitches,84);
+        for(const n of notes){if(n.rest)continue;
+          const x=(n.start/total)*W, width=Math.max((n.seconds/total)*W-2,2);
+          const pitch=max===min?.5:(n.midi-min)/(max-min);
+          const boxY=y+31-pitch*20;
+          g.globalAlpha=currentLevel(i)===0 && startTime!==null?.23:1;
+          g.fillStyle=tracks[i].color;g.beginPath();g.roundRect(x+1,boxY,width,8,2);g.fill();g.globalAlpha=1;
+        }
+      }
+      if(showTimeGuide.checked){
+        const x=(guideSeconds()/total)*W;
+        g.save();g.strokeStyle='#ffd36b';g.lineWidth=2;g.setLineDash([7,5]);g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.restore();
+        const label=`${guideSeconds().toFixed(2)} s`;
+        g.font='bold 11px system-ui';const tw=g.measureText(label).width+12;
+        const lx=Math.max(2,Math.min(x+5,W-tw-2));g.fillStyle='#ffd36b';g.fillRect(lx,2,tw,17);g.fillStyle='#253041';g.fillText(label,lx+6,14);
+      }
+      if(startTime!==null){const x=(Math.min(elapsed(),length)/total)*W;g.strokeStyle='#fafafa';g.lineWidth=1.6;g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(x,4,3.4,0,Math.PI*2);g.fill();}
+    }
+
+    function midiToRtttl(voice,division,bpm,motor){
+      const step=Number(beatSnap.value);
+      const events=[];let cursor=0,shifted=0,transposed=0;
+      for(const n of voice.notes){
+        let pitch=n.midi;
+        while(pitch<48){pitch+=12;transposed++;}
+        while(pitch>107){pitch-=12;transposed++;}
+        const requested=Math.max(0,Math.round((n.startTick/division)/step)*step);
+        const start=roundBeat(Math.max(cursor,requested));
+        if(start>requested+.001)shifted++;
+        const quantisedDuration=Math.max(step,Math.round(((n.endTick-n.startTick)/division)/step)*step);
+        const duration=closestDuration(Math.max(.0625,quantisedDuration));
+        events.push({start,duration,midi:pitch});cursor=roundBeat(start+duration);
+      }
+      const parsed={name:`ESC${motor+1}`,defaults:{d:8,o:5,b:bpm}};
+      return {text:serializeEvents(events,0,parsed),shifted,transposed};
+    }
+    function downloadFile(bytes,mime,filename){
+      const blob=new Blob([bytes],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+    function populateMidiMapping(){
+      const voices=pendingMidi.voices;
+      midiMapping.innerHTML=tracks.map((t,i)=>`<label>ESC ${i+1} · ${escapeHTML(t.name)} <select data-midi-map="${i}" aria-label="MIDI voice for ESC ${i+1}">
+        <option value="-1">Keep existing track</option>
+        ${voices.map((v,j)=>`<option value="${j}" ${i===j?'selected':''}>${escapeHTML(v.name)} (${v.notes.length} notes)</option>`).join('')}
+      </select></label>`).join('');
+      midiMapping.hidden=false;document.getElementById('importMidi').disabled=false;
+    }
+    function importSelectedMidi(){
+      if(!pendingMidi)return;
+      const bpm=clamp(Math.round(pendingMidi.bpm),20,900),updates=[],warnings=[];
+      try{
+        [...midiMapping.querySelectorAll('select')].forEach((select,i)=>{
+          const idx=Number(select.value);if(idx<0)return;
+          const result=midiToRtttl(pendingMidi.voices[idx],pendingMidi.division,bpm,i);
+          parseRTTTL(result.text);updates.push({index:i,text:result.text});
+          if(result.shifted)warnings.push(`ESC ${i+1}: ${result.shifted} overlapping notes delayed`);
+          if(result.transposed)warnings.push(`ESC ${i+1}: ${result.transposed} pitches moved by octaves`);
+        });
+      }catch(err){notify(`MIDI import: ${err.message}`);return;}
+      if(!updates.length){notify('Assign at least one MIDI voice to an ESC');return;}
+      if(!window.confirm(`Import ${updates.length} MIDI voice(s)? Selected ESC melodies will be replaced. Export your project first if needed.`))return;
+      halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;
+      updates.forEach(u=>{tracks[u.index].value=u.text;document.getElementById(`rtttl-${u.index}`).value=u.text;});
+      bpmInput.value=String(bpm);
+      const midiMeter=`${pendingMidi.signature.num}/${pendingMidi.signature.den}`;
+      if(['4/4','3/4','6/8','2/4'].includes(midiMeter))timeSignatureInput.value=midiMeter;
+      saveSettings();saveEdits();updateParsed();
+      const tempoWarning=pendingMidi.hasTempoChanges?' Tempo changes were flattened to the initial BPM.':'';
+      const warning=warnings.length?` ${warnings.join('; ')}.`:'';
+      document.getElementById('midiStatus').textContent=`Imported ${updates.length} voice(s) at ${bpm} BPM.${tempoWarning}${warning} Mono RTTTL duration and event limits apply.`;
+      notify('MIDI voices imported');
+    }
+    function exportMidi(){
+      if(tracks.some(t=>!t.parsed)){notify('Fix RTTTL errors before MIDI export');return;}
+      const bpm=Number(bpmInput.value);
+      const voices=tracks.map((t)=>({name:t.name,notes:t.parsed.notes.filter(n=>!n.rest).map(n=>({start:n.start*bpm/60,duration:n.seconds*bpm/60,midi:n.midi}))}));
+      const [num,den]=timeSignatureInput.value.split('/').map(Number);
+      const bytes=window.QuadMidi.write(voices,bpm,{num,den});
+      downloadFile(bytes,'audio/midi','rtttl-quad-lab.mid');notify(`${tracks.length}-track MIDI exported`);
+    }
+
+    // The visual editor operates on absolute beat positions. RTTTL is a sequential
+    // format, so gaps are serialized as rests and all notes remain monophonic.
+    function pitchLabel(midi){return `${pitchNames[midi%12]}${Math.floor(midi/12)-1}`;}
+    function isBlack(midi){return [1,3,6,8,10].includes(midi%12);}
+    function roundBeat(beats){return Math.round(beats*64)/64;}
+    function clamp(value,lo,hi){return Math.min(hi,Math.max(lo,value));}
+    function snapValue(beats){const step=Number(beatSnap.value);return Math.round(beats/step)*step;}
+    function closestDuration(beats){return durationChoices.reduce((best,c)=>Math.abs(c.beats-beats)<Math.abs(best.beats-beats)?c:best,durationChoices[0]).beats;}
+    function durationCode(beats){return durationChoices.find(c=>Math.abs(c.beats-beats)<.00001);}
+    function tokenFor(beats,pitch){
+      const d=durationCode(beats);if(!d)throw Error(`Cannot encode ${beats.toFixed(3)} beats in RTTTL`);
+      const suffix=pitch===null?'p':`${rtttlPitchNames[pitch%12]}${Math.floor(pitch/12)-1}`;
+      return d.token.endsWith('.')?`${d.token.slice(0,-1)}${suffix}.`:`${d.token}${suffix}`;
+    }
+    function voiceEvents(){
+      const parsed=tracks[editMotor].parsed;if(!parsed)return {events:[],tail:.5,parsed:null};
+      let beat=0;const events=[];
+      for(const n of parsed.notes){if(!n.rest)events.push({start:roundBeat(beat),duration:n.beats,midi:n.midi});beat+=n.beats;}
+      const last=events.at(-1);const end=last?last.start+last.duration:0;
+      return {events,tail:roundBeat(Math.max(0,beat-end)),parsed};
+    }
+    function gapTokens(beats){
+      const result=[];let remainder=roundBeat(beats);let guard=0;
+      while(remainder>.00001 && guard++<100){
+        const d=durationChoices.find(c=>c.beats<=remainder+.00001);
+        if(!d)throw Error('Gap is smaller than RTTTL timing resolution');
+        result.push(tokenFor(d.beats,null));remainder=roundBeat(remainder-d.beats);
+      }
+      if(guard>=100)throw Error('Gap is too long to encode');
+      return result;
+    }
+    function serializeEvents(events,tail,parsed){
+      const sorted=[...events].sort((a,b)=>a.start-b.start);
+      const parts=[];let cursor=0;
+      for(const e of sorted){
+        if(e.start<cursor-.00001)throw Error('Notes on one motor cannot overlap');
+        parts.push(...gapTokens(e.start-cursor));
+        parts.push(tokenFor(e.duration,e.midi));cursor=roundBeat(e.start+e.duration);
+      }
+      parts.push(...gapTokens(tail));
+      if(!parts.length)parts.push('4p');
+      if(parts.length>62)throw Error('Melody exceeds the 62-event Bluejay limit');
+      const {d,o,b}=parsed.defaults;
+      return `${parsed.name}:d=${d},o=${o},b=${b}:${parts.join(',')}`;
+    }
+    function saveHistory(){editHistory.push({motor:editMotor,text:tracks[editMotor].value});if(editHistory.length>45)editHistory.shift();redoHistory.length=0;document.getElementById('undoEdit').disabled=false;document.getElementById('redoEdit').disabled=true;}
+    function commitEvents(events,tail,render=true){
+      const parsed=tracks[editMotor].parsed;
+      try{
+        const next=serializeEvents(events,tail,parsed);
+        tracks[editMotor].value=next;
+        document.getElementById(`rtttl-${editMotor}`).value=next;
+        saveEdits();updateParsed(render);
+        return true;
+      }catch(err){if(render)notify(err.message);return false;}
+    }
+    function selectMotor(index,scroll=false){
+      editMotor=index;selectedNote=0;renderPiano();
+      if(scroll)document.getElementById('pianoPanel').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    function updateNoteInspector(events){
+      const note=events[selectedNote];const enabled=!!note;
+      const title=document.getElementById('selectedNoteTitle');
+      title.textContent=note?`Note ${selectedNote+1} of ${events.length} · ${pitchLabel(note.midi)}`:'Select a note';
+      [notePitchSelect,noteDurationSelect,noteStartInput,document.getElementById('deleteNote')].forEach(x=>x.disabled=!enabled);
+      if(note){notePitchSelect.value=String(note.midi);noteDurationSelect.value=String(note.duration);noteStartInput.value=String(roundBeat(note.start));}
+    }
+    function renderPiano(){
+      motorTabs.innerHTML=tracks.map((t,i)=>`<button type="button" class="motor-tab ${i===editMotor?'active':''}" data-motor="${i}" aria-pressed="${i===editMotor}" style="--track-color:${t.color}" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name||'Unnamed')}</button>`).join('');
+      const t=tracks[editMotor];document.getElementById('selectedMotorName').textContent=`ESC ${editMotor+1} · ${t.name}`;
+      if(!t.parsed){pianoGrid.innerHTML='<p style="padding:20px;color:#ffaaaa">Correct this motor’s RTTTL string below to enable visual editing.</p>';pianoKeys.innerHTML='';pianoBeats.innerHTML='';updateNoteInspector([]);return;}
+      const {events,tail}=voiceEvents();selectedNote=events.length?clamp(selectedNote,0,events.length-1):-1;
+      const targetBeat=showTimeGuide.checked?guideSeconds()*t.parsed.bpm/60:0;
+      const proposals=suggestionNotes.map(n=>({start:(refOffset+n.start)*t.parsed.bpm/60,duration:n.duration*t.parsed.bpm/60,midi:n.midi}));
+      const proposedEnd=proposals.length?Math.max(...proposals.map(n=>n.start+n.duration)):0;
+      const bar=barBeats();
+      const maxBeat=Math.max(8,Math.ceil((Math.max(t.parsed.totalBeats,targetBeat,proposedEnd)+1)/bar)*bar);
+      const minSound=Math.min(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
+      const maxSound=Math.max(...events.map(n=>n.midi),...proposals.map(n=>n.midi),72);
+      pianoMinPitch=clamp(Math.floor(minSound/12)*12,48,84);
+      pianoMaxPitch=Math.min(107,Math.max(pianoMinPitch+23,maxSound+3));
+      const rows=pianoMaxPitch-pianoMinPitch+1;
+      const width=maxBeat*beatPx,height=rows*rowPx;
+      const keys=[],background=[],notes=[];
+      for(let midi=pianoMaxPitch;midi>=pianoMinPitch;midi--){
+        const y=(pianoMaxPitch-midi)*rowPx;
+        const kind=isBlack(midi)?'black':midi%12===0?'tonic':'';
+        keys.push(`<div class="piano-key ${kind}">${pitchLabel(midi)}</div>`);
+        background.push(`<div class="pitch-row ${kind}" style="top:${y}px"></div>`);
+      }
+      for(let beat=0;beat<=maxBeat;beat+=.5){const type=Math.abs(beat/bar-Math.round(beat/bar))<.001?'bar':'';background.push(`<div class="gridline ${type}" style="left:${beat*beatPx}px"></div>`);}
+      if(showTimeGuide.checked){background.push(`<div class="guide-marker" style="left:${targetBeat*beatPx}px"><span>${guideSeconds().toFixed(2)}s</span></div>`);}
+      for(const n of proposals){
+        const x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(7,n.duration*beatPx-2);
+        notes.push(`<div class="detected-note" style="left:${x}px;top:${y}px;width:${w}px" title="Suggested ${pitchLabel(n.midi)}"></div>`);
+      }
+      for(let i=0;i<events.length;i++){
+        const n=events[i],x=n.start*beatPx,y=(pianoMaxPitch-n.midi)*rowPx+1,w=Math.max(10,n.duration*beatPx-2);
+        notes.push(`<div class="midi-note ${i===selectedNote?'selected':''}" style="--track-color:${t.color};left:${x}px;top:${y}px;width:${w}px" data-note="${i}" role="button" tabindex="0" aria-label="Note ${i+1}: ${pitchLabel(n.midi)}, starts at beat ${n.start}, duration ${n.duration} beats"><span>${pitchLabel(n.midi)}</span><span class="resize-grip" title="Drag to change length"></span></div>`);
+      }
+      pianoGrid.style.width=`${width}px`;pianoGrid.style.height=`${height}px`;
+      pianoKeys.style.height=`${height}px`;pianoKeys.innerHTML=keys.join('');
+      pianoBeats.style.width=`${width}px`;pianoBeats.innerHTML=Array.from({length:Math.ceil(maxBeat)},(_,beat)=>`<div class="beat-mark ${beat%bar===0?'bar':''}" style="left:${beat*beatPx}px">${beat%bar===0?`Bar ${Math.floor(beat/bar)+1}`:beat+1}</div>`).join('');
+      pianoGrid.innerHTML=background.join('')+notes.join('');
+      document.getElementById('pianoReadout').textContent=`· ${events.length} notes · ${t.parsed.totalBeats.toFixed(2)} beats`;
+      updateNoteInspector(events);
+    }
+
+    function changeSelected(kind,value){
+      const {events,tail}=voiceEvents(),n=events[selectedNote];if(!n)return;
+      if(!Number.isFinite(Number(value))){renderPiano();return;}
+      const next=events.map(e=>({...e}));const prev=next[selectedNote-1],following=next[selectedNote+1];
+      if(kind==='pitch')next[selectedNote].midi=clamp(Number(value),48,107);
+      if(kind==='duration'){
+        const dur=Number(value),delta=dur-next[selectedNote].duration;
+        if(!rippleInput.checked&&following&&next[selectedNote].start+dur>following.start+.0001){notify('Length overlaps the next note; enable Ripple editing to shift it');renderPiano();return;}
+        next[selectedNote].duration=dur;
+        if(rippleInput.checked)for(let j=selectedNote+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+delta);
+      }
+      if(kind==='start'){
+        const min=prev?prev.start+prev.duration:0;
+        let target=Math.max(min,snapValue(Number(value)));
+        if(!rippleInput.checked&&following)target=Math.min(target,following.start-next[selectedNote].duration);
+        const delta=target-next[selectedNote].start;
+        if(rippleInput.checked)for(let j=selectedNote;j<next.length;j++)next[j].start=roundBeat(next[j].start+delta);
+        else next[selectedNote].start=roundBeat(target);
+      }
+      if(JSON.stringify(events)===JSON.stringify(next))return;
+      saveHistory();halt();commitEvents(next,tail);
+    }
+
+    function addPianoNote(start=null,midi=null){
+      const {events,tail,parsed}=voiceEvents();if(!parsed)return;
+      if(events.length>=58){notify('Too many notes for Bluejay');return;}
+      const next=events.map(e=>({...e}));
+      const last=next.at(-1);
+      let beat=start===null?(last?last.start+last.duration:0):Math.max(0,snapValue(start));
+      beat=roundBeat(beat);
+      const duration=.5;
+      const pitch=clamp(midi??last?.midi??69,48,107);
+      let insert=next.findIndex(e=>e.start>=beat);if(insert<0)insert=next.length;
+      const prev=next[insert-1];if(prev)beat=Math.max(beat,prev.start+prev.duration);
+      if(insert<next.length){
+        const shift=Math.max(0,beat+duration-next[insert].start);
+        if(!rippleInput.checked&&shift>.0001){notify('Not enough room; enable Ripple editing or select an empty gap');return;}
+        if(rippleInput.checked)for(let j=insert;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
+      }
+      next.splice(insert,0,{start:beat,duration,midi:pitch});
+      selectedNote=insert;saveHistory();halt();commitEvents(next,tail);
+    }
+    function deletePianoNote(){
+      const {events,tail}=voiceEvents();if(!events[selectedNote])return;
+      const next=events.map(e=>({...e}));const removed=next.splice(selectedNote,1)[0];
+      if(rippleInput.checked)for(let i=selectedNote;i<next.length;i++)next[i].start=roundBeat(next[i].start-removed.duration);
+      const total=tracks[editMotor].parsed.totalBeats;
+      const last=next.at(-1);const newTail=rippleInput.checked?tail:roundBeat(Math.max(0,total-(last?last.start+last.duration:0)));
+      selectedNote=clamp(selectedNote,0,next.length-1);saveHistory();halt();commitEvents(next,newTail);
+    }
+
+    function startNoteDrag(e){
+      const node=e.target.closest('.midi-note');if(!node || e.button!==0)return;
+      const {events,tail}=voiceEvents();const index=Number(node.dataset.note);
+      selectedNote=index;const mode=e.target.closest('.resize-grip')?'resize':'move';
+      dragState={node,pointerId:e.pointerId,originX:e.clientX,originY:e.clientY,index,mode,original:events.map(n=>({...n})),tail};
+      saveHistory();halt();node.setPointerCapture(e.pointerId);
+      node.classList.add('selected','dragging');
+      pianoGrid.querySelectorAll('.midi-note').forEach(n=>n.classList.toggle('selected',Number(n.dataset.note)===index));
+      updateNoteInspector(events);e.preventDefault();
+    }
+    function moveNoteDrag(e){
+      const d=dragState;if(!d||e.pointerId!==d.pointerId)return;
+      const next=d.original.map(n=>({...n}));const note=next[d.index];
+      const dx=e.clientX-d.originX,dy=e.clientY-d.originY;
+      if(d.mode==='resize'){
+        let candidate=closestDuration(Math.max(.0625,note.duration+dx/beatPx));
+        const following=next[d.index+1];
+        if(!rippleInput.checked&&following&&note.start+candidate>following.start+.00001){
+          const fitting=durationChoices.filter(c=>c.beats<=following.start-note.start+.00001);
+          candidate=fitting.length?fitting.reduce((best,c)=>Math.abs(candidate-c.beats)<Math.abs(candidate-best.beats)?c:best).beats:note.duration;
+        }
+        const shift=roundBeat(candidate-note.duration);note.duration=candidate;
+        if(rippleInput.checked)for(let j=d.index+1;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
+      }else{
+        note.midi=clamp(d.original[d.index].midi-Math.round(dy/rowPx),48,107);
+        const predecessor=next[d.index-1],following=next[d.index+1];
+        const min=predecessor?predecessor.start+predecessor.duration:0;
+        let desired=roundBeat(Math.max(min,d.original[d.index].start+snapValue(dx/beatPx)));
+        if(!rippleInput.checked&&following)desired=Math.min(desired,following.start-note.duration);
+        const shift=roundBeat(desired-note.start);
+        if(rippleInput.checked)for(let j=d.index;j<next.length;j++)next[j].start=roundBeat(next[j].start+shift);
+        else note.start=roundBeat(desired);
+      }
+      if(!commitEvents(next,d.tail,false))return;
+      d.node.style.left=`${note.start*beatPx}px`;
+      d.node.style.width=`${Math.max(10,note.duration*beatPx-2)}px`;
+      d.node.style.top=`${(pianoMaxPitch-note.midi)*rowPx+1}px`;
+      d.node.setAttribute('aria-label',`Note ${d.index+1}: ${pitchLabel(note.midi)}, ${note.duration} beats`);
+      d.node.firstElementChild.textContent=pitchLabel(note.midi);
+      updateNoteInspector(next);
+    }
+    function endNoteDrag(e){
+      const d=dragState;if(!d||e.pointerId!==d.pointerId)return;
+      try{d.node.releasePointerCapture(e.pointerId);}catch(_){}
+      dragState=null;renderPiano();
+    }
+
+    motorTabs.addEventListener('click',e=>{const b=e.target.closest('[data-motor]');if(b)selectMotor(Number(b.dataset.motor));});
+    timeline.addEventListener('click',e=>{const rect=timeline.getBoundingClientRect();selectMotor(clamp(Math.floor((e.clientY-rect.top)/45),0,tracks.length-1),true);});
+    pianoGrid.addEventListener('pointerdown',startNoteDrag);
+    pianoGrid.addEventListener('pointermove',moveNoteDrag);
+    pianoGrid.addEventListener('pointerup',endNoteDrag);
+    pianoGrid.addEventListener('pointercancel',endNoteDrag);
+    pianoGrid.addEventListener('click',e=>{const n=e.target.closest('.midi-note');if(n&&!dragState){selectedNote=Number(n.dataset.note);renderPiano();}});
+    pianoGrid.addEventListener('dblclick',e=>{if(e.target.closest('.midi-note'))return;const rect=pianoGrid.getBoundingClientRect();addPianoNote((e.clientX-rect.left)/beatPx,pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx));});
+    document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
+    document.getElementById('deleteNote').addEventListener('click',deletePianoNote);
+    notePitchSelect.innerHTML=Array.from({length:60},(_,i)=>`<option value="${i+48}">${pitchLabel(i+48)}</option>`).join('');
+    noteDurationSelect.innerHTML=durationChoices.map(c=>`<option value="${c.beats}">${c.beats} beat${c.beats===1?'':'s'}</option>`).join('');
+    notePitchSelect.addEventListener('change',e=>changeSelected('pitch',e.target.value));
+    noteDurationSelect.addEventListener('change',e=>changeSelected('duration',e.target.value));
+    noteStartInput.addEventListener('change',e=>changeSelected('start',e.target.value));
+    document.getElementById('undoEdit').addEventListener('click',()=>{
+      const item=editHistory.pop();if(!item)return;halt();editMotor=item.motor;
+      redoHistory.push({motor:editMotor,text:tracks[editMotor].value});
+      tracks[editMotor].value=item.text;document.getElementById(`rtttl-${editMotor}`).value=item.text;
+      saveEdits();updateParsed();document.getElementById('undoEdit').disabled=!editHistory.length;document.getElementById('redoEdit').disabled=false;
+    });
+    document.getElementById('redoEdit').addEventListener('click',()=>{
+      const item=redoHistory.pop();if(!item)return;halt();editMotor=item.motor;
+      editHistory.push({motor:editMotor,text:tracks[editMotor].value});
+      tracks[editMotor].value=item.text;document.getElementById(`rtttl-${editMotor}`).value=item.text;
+      saveEdits();updateParsed();document.getElementById('redoEdit').disabled=!redoHistory.length;document.getElementById('undoEdit').disabled=false;
+    });
+
+    motorCountInput.addEventListener('change',()=>resizeMotorCount(motorCountInput.value));
+    document.getElementById('addMotor').addEventListener('click',()=>resizeMotorCount(tracks.length+1));
+    document.getElementById('removeMotor').addEventListener('click',()=>resizeMotorCount(tracks.length-1));
+    bpmInput.addEventListener('change',()=>{
+      const bpm=clamp(Math.round(Number(bpmInput.value)||125),20,900);
+      bpmInput.value=String(bpm);halt();
+      tracks.forEach((t,i)=>{
+        if(!t.parsed)return;
+        const p=t.parsed;
+        t.value=`${p.name}:d=${p.defaults.d},o=${p.defaults.o},b=${bpm}:${t.value.split(':').slice(2).join(':')}`;
+        document.getElementById(`rtttl-${i}`).value=t.value;
+      });
+      saveEdits();saveSettings();updateParsed();notify(`All valid channels set to ${bpm} BPM`);
+    });
+    timeSignatureInput.addEventListener('change',()=>{saveSettings();renderPiano();});
+    for(const input of [metronomeInput,soundModeInput,rippleInput,stereoWidthInput]){
+      input.addEventListener('change',()=>{saveSettings();updateStereo();});
+    }
+    beatSnap.addEventListener('change',()=>{saveSettings();});
+
+    document.getElementById('loadReference').addEventListener('click',()=>referenceFile.click());
+    referenceFile.addEventListener('change',async()=>{await loadReferenceAudio(referenceFile.files?.[0]);referenceFile.value='';});
+    document.getElementById('playReference').addEventListener('click',playReferenceOnly);
+    document.getElementById('clearReference').addEventListener('click',()=>{
+      halt();refBuffer=null;refFileName='';wavePeaks=[];
+      detectButton.disabled=true;clearPitchSuggestions('Reference cleared. Load audio to analyse another clip.');
+      document.getElementById('referenceStatus').textContent='Reference cleared. Load your own audio to compare it with the motor arrangement.';
+      document.getElementById('playReference').disabled=true;document.getElementById('clearReference').disabled=true;
+      referenceWave.classList.add('empty');drawReferenceWave();
+    });
+    for(const input of [referenceStartInput,referenceDurationInput,referenceOffsetInput])input.addEventListener('change',syncReferenceInputs);
+    referenceVolumeInput.addEventListener('input',()=>{if(refGain&&ctx)refGain.gain.setTargetAtTime(Number(referenceVolumeInput.value)/100,ctx.currentTime,.02);});
+    referenceMixInput.addEventListener('change',drawReferenceWave);
+    referenceZoomInput.addEventListener('change',drawReferenceWave);
+    detectButton.addEventListener('click',detectReferencePitch);
+    document.getElementById('clearDetected').addEventListener('click',()=>clearPitchSuggestions());
+    applyDetectedButton.addEventListener('click',applyPitchSuggestions);
+    pitchSensitivity.addEventListener('input',()=>{
+      document.getElementById('pitchSensitivityValue').textContent=`${pitchSensitivity.value}%`;
+      if(pitchRaw)refreshPitchSuggestions();
+    });
+    for(const input of [pitchMin,pitchMax,pitchMinMs])input.addEventListener('change',refreshPitchSuggestions);
+
+    document.getElementById('loadMidi').addEventListener('click',()=>midiFile.click());
+    midiFile.addEventListener('change',async()=>{
+      const file=midiFile.files?.[0];if(!file)return;
+      try{
+        if(file.size>5000000)throw Error('MIDI file must be smaller than 5 MB');
+        const parsed=window.QuadMidi.read(await file.arrayBuffer());
+        if(!parsed.voices.length)throw Error('No MIDI note voices found in this file');
+        pendingMidi=parsed;populateMidiMapping();
+        document.getElementById('midiStatus').textContent=`${file.name} · ${parsed.voices.length} voices · ${parsed.bpm} BPM · ${parsed.signature.num}/${parsed.signature.den}${parsed.hasTempoChanges?' · tempo changes will be flattened':''}. Choose which voices to assign below.`;
+        notify('MIDI file analysed');
+      }catch(err){pendingMidi=null;midiMapping.hidden=true;document.getElementById('importMidi').disabled=true;document.getElementById('midiStatus').textContent=`MIDI error: ${err.message}`;notify(err.message);}
+      finally{midiFile.value='';}
+    });
+    document.getElementById('importMidi').addEventListener('click',importSelectedMidi);
+    document.getElementById('exportMidi').addEventListener('click',exportMidi);
+
+    playButton.addEventListener('click',()=>play());
+    stopButton.addEventListener('click',halt);
+    function updateTimeGuide(){saveGuide();updateGuideInfo();drawTimeline();renderPiano();}
+    showTimeGuide.addEventListener('change',updateTimeGuide);
+    targetSeconds.addEventListener('input',updateTimeGuide);
+    targetSeconds.addEventListener('blur',()=>{targetSeconds.value=guideSeconds().toFixed(2);updateTimeGuide();});
+    speedInput.addEventListener('input',()=>{speedValue.textContent=`${Number(speedInput.value).toFixed(2)}×`;});
+    volumeInput.addEventListener('input',()=>{volumeValue.textContent=`${volumeInput.value}%`;if(masterGain&&ctx)masterGain.gain.setTargetAtTime((Number(volumeInput.value)/100)*.25,ctx.currentTime,.02);});
+    document.getElementById('reset').addEventListener('click',()=>{halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;tracks.forEach((t,i)=>{t.value=defaultMotor(i).value;document.getElementById(`rtttl-${i}`).value=t.value;t.muted=false;t.solo=false;});saveEdits();updateParsed();updateButtons();notify(`Default arrangement restored across ${tracks.length} motors`);});
+    document.getElementById('exportProject').addEventListener('click',()=>{
+      saveSettings();
+      const project={format:'rtttl-quad-lab',version:3,exportedAt:new Date().toISOString(),tracks:tracks.map(t=>({name:t.name,rtttl:t.value})),targetTime:{enabled:showTimeGuide.checked,seconds:guideSeconds()},settings:{...settings},reference:{filename:refFileName||null,start:refStart,duration:refDuration,offset:refOffset,volume:Number(referenceVolumeInput.value),mix:referenceMixInput.checked,zoom:referenceZoomInput.checked}};
+      downloadFile(JSON.stringify(project,null,2),'application/json','rtttl-quad-project.json');notify('Project file downloaded');
+    });
+    const projectFile=document.getElementById('projectFile');
+    document.getElementById('importProject').addEventListener('click',()=>projectFile.click());
+    projectFile.addEventListener('change',async()=>{
+      const file=projectFile.files?.[0];if(!file)return;
+      try{
+        if(file.size>100000)throw Error('Project file is too large.');
+        const project=JSON.parse(await file.text());
+        if(project.format!=='rtttl-quad-lab'||!Array.isArray(project.tracks)||project.tracks.length<4||project.tracks.length>maxMotors)throw Error('Project must contain between 4 and 12 RTTTL motor channels.');
+        const incoming=project.tracks.map((t,i)=>{
+          if(typeof t.rtttl!=='string'||t.rtttl.length>5000)throw Error(`Invalid RTTTL on ESC ${i+1}.`);
+          parseRTTTL(t.rtttl);
+          return {name:typeof t.name==='string'&&t.name.trim()?t.name.trim().slice(0,40):defaultMotor(i).name,value:t.rtttl};
+        });
+        if(!window.confirm(`Import this ${incoming.length}-motor project? Your current melodies and channel names will be replaced. Export first if you want to keep a backup.`))return;
+        halt();editHistory.length=0;redoHistory.length=0;document.getElementById('undoEdit').disabled=true;document.getElementById('redoEdit').disabled=true;
+        tracks.splice(0,tracks.length,...incoming.map((t,i)=>({...defaultMotor(i),...t,muted:false,solo:false,parsed:null,error:null})));
+        try{localStorage.setItem(motorCountKey,String(tracks.length));}catch(_){}
+        editMotor=Math.min(editMotor,tracks.length-1);buildUI();ensureAudioChannels();
+        if(project.targetTime&&Number.isFinite(project.targetTime.seconds)&&project.targetTime.seconds>0){showTimeGuide.checked=Boolean(project.targetTime.enabled);targetSeconds.value=String(Math.min(600,project.targetTime.seconds));}
+        if(project.settings&&typeof project.settings==='object'){
+          const s=project.settings;
+          if(Number.isFinite(s.bpm)&&s.bpm>=20&&s.bpm<=900)bpmInput.value=String(s.bpm);
+          if(['4/4','3/4','6/8','2/4'].includes(s.signature))timeSignatureInput.value=s.signature;
+          if(['square','sine','motor'].includes(s.mode))soundModeInput.value=s.mode;
+          if(Number.isFinite(s.stereo))stereoWidthInput.value=String(clamp(s.stereo,0,100));
+          if([1,.5,.25,.125,.0625].includes(s.snap))beatSnap.value=String(s.snap);
+          metronomeInput.checked=Boolean(s.metronome);rippleInput.checked=Boolean(s.ripple);
+        }
+        if(project.reference){
+          const r=project.reference;
+          referenceStartInput.value=String(r.start||0);referenceDurationInput.value=String(r.duration||4);referenceOffsetInput.value=String(r.offset||0);
+          if(Number.isFinite(r.volume))referenceVolumeInput.value=String(clamp(r.volume,0,100));
+          referenceMixInput.checked=Boolean(r.mix);
+          referenceZoomInput.checked=Boolean(r.zoom);
+          syncReferenceInputs();
+          if(r.filename&&!refBuffer)document.getElementById('referenceStatus').textContent=`Reference file was ${r.filename}; reload that audio file to hear it. Project JSON does not embed audio.`;
+        }
+        saveEdits();saveNames();saveGuide();saveSettings();refreshChannelLabels();updateParsed();updateButtons();notify('Project imported successfully');
+      }catch(err){notify(err.message||'Could not import project');}
+      finally{projectFile.value='';}
+    });
+    window.addEventListener('resize',drawTimeline);
+    document.addEventListener('keydown',e=>{if(e.code==='Space' && !['TEXTAREA','INPUT','BUTTON'].includes(document.activeElement?.tagName)){e.preventDefault();startTime===null?play():halt();}});
+    buildUI();
+  })();
+  </script>
+</body>
+</html>
