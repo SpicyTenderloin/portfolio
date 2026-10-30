@@ -44,7 +44,7 @@ That episode set the direction for the editor. Typing durations into RTTTL text 
 
 ## Designing around Bluejay's limits
 
-Every feature has to respect what the ESC can actually play. A per-channel preflight check reports event count, frequency range, duration and tempo against Bluejay's limits. MIDI import maps each MIDI voice to one ESC and keeps it monophonic: overlapping notes are moved later, out-of-range notes are transposed by octaves, tempo changes are flattened to the single BPM an RTTTL string allows, and a voice that would exceed 62 events is rejected rather than silently truncated.
+Every feature has to respect what the ESC can actually play. A per-channel preflight check reports slot use, frequency range, duration and tempo against Bluejay's limits. The 62-note limit turned out to be 62 storage slots, where a long note or rest takes several, so the app now counts slots exactly as ESC Configurator's converter does, checked against every one of Bluejay's example songs. MIDI import maps each MIDI voice to one ESC and keeps it monophonic: overlapping notes are moved later, out-of-range notes are transposed by octaves, tempo changes are flattened to the single BPM an RTTTL string allows, and a voice that would not fit in the 62 slots is rejected rather than silently truncated.
 
 ## From a recording to RTTTL
 

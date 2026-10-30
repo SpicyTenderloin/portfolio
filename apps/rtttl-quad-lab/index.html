@@ -374,6 +374,7 @@
           <button class="tiny" id="addNote" type="button" title="Adds an identical note right after the selected one, or a 1/8 note at the end">+ Add note</button>
           <button class="tiny" id="undoEdit" type="button" disabled>↶ Undo</button>
           <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
+          <button class="tiny" id="trimEnd" type="button" title="Remove the rests after the last note of this channel">✂ Trim end</button>
         </div>
       </div>
       <div class="piano-transport" role="group" aria-label="Piano-roll playback">
@@ -446,10 +447,10 @@
     // Default arrangement: the Owner of a Lonely Heart riff, also listed first under Example songs
     const defaultSongName = 'Owner of a Lonely Heart (riff)';
     const originals = [
-      { name:'Root', subtitle:'Riff root notes · G3–D4', color:'#ff8b78', value:'Lead:d=8,o=5,b=125:4a3,8p,8b3,8c4,8p,8d4,8d4,2p,4g3,4g3,2p.,8p' },
-      { name:'Perfect Fifth', subtitle:'A fifth above the root · D4–A4', color:'#6ee2e3', value:'Octave:d=8,o=4,b=125:4e4,8p,8f#4,8g4,8p,8a4,8a4,2p,4d4,4d4,8p' },
-      { name:'Octave', subtitle:'Root an octave up · G4–D5', color:'#bd9df8', value:'Harmony:d=8,o=5,b=125:4a4,8p,8b4,8c5,8p,8d5,8d5,2p,4g4,4g4,8p' },
-      { name:'Percussion', subtitle:'Short G3 / A5 blips as a beat', color:'#eecb7d', value:'Bass:d=8,o=4,b=125:32g3,8p.,32p,64a5,16p.,64p,64a5,16p.,64p,32g3,8p.,32p.,64a5,8p.,32p,32g3,4p.,16p.,32g3,1p,4p.,16p,64p' }
+      { name:'Root', subtitle:'Riff root notes · G3–D4', color:'#ff8b78', value:'Lead:d=8,o=5,b=125:4a3,8p,8b3,8c4,8p,8d4,8d4,2p,4g3,4g3' },
+      { name:'Perfect Fifth', subtitle:'A fifth above the root · D4–A4', color:'#6ee2e3', value:'Octave:d=8,o=4,b=125:4e4,8p,8f#4,8g4,8p,8a4,8a4,2p,4d4,4d4' },
+      { name:'Octave', subtitle:'Root an octave up · G4–D5', color:'#bd9df8', value:'Harmony:d=8,o=5,b=125:4a4,8p,8b4,8c5,8p,8d5,8d5,2p,4g4,4g4' },
+      { name:'Percussion', subtitle:'Short G3 / A5 blips as a beat', color:'#eecb7d', value:'Bass:d=8,o=4,b=125:32g3,8p.,32p,64a5,16p.,64p,64a5,16p.,64p,32g3,8p.,32p.,64a5,8p.,32p,32g3,4p.,16p.,32g3' }
     ];
     const storageKey = 'rtttl-quad-lab-v2';
     const namesKey = 'rtttl-quad-lab-channel-names-v1';
@@ -552,6 +553,15 @@
     const editHistory = [],redoHistory=[];
     let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
 
+    // Bluejay stores a melody in 62 slots (128 bytes). As in bluejay-rtttl-parse, a note takes one slot per
+    // 255 wave cycles at its pitch and a rest one slot per 255 ms, so long notes and rests use several.
+    const BLUEJAY_SLOTS = 62;
+    function bluejaySlots(note){
+      const ms=note.seconds*1000;
+      if(note.rest)return Math.ceil(Math.round(ms)/255);
+      const hz=Math.round(261.63*Math.pow(2,(note.midi-60)/12)*10)/10; // Bluejay's own rounded frequency
+      return Math.ceil(Math.round(ms*hz/1000)/255);
+    }
     function parseRTTTL(raw) {
       // Errors carry err.range = [from, to] (offsets into raw) so the editor can highlight the culprit
       const lead = raw.length - raw.trimStart().length;
@@ -581,7 +591,6 @@
       let currentTime = 0;
       const tokens = spans(pieces[2], notesAt);
       if (!tokens.length) fail('No notes after the second colon.');
-      if (tokens.length > 62) fail(`This track has ${tokens.length} notes/rests; Bluejay allows 62 (extra ones highlighted).`, {from: tokens[62].from, to: tokens.at(-1).to});
       const problems = [];
       for (const span of tokens) try {
         const token = span.value.toLowerCase();
@@ -592,6 +601,8 @@
         if (!match) fail('Invalid note: ' + token, span);
         const denom = match[1] ? Number(match[1]) : defaults.d;
         if (![1,2,4,8,16,32,64].includes(denom)) fail('Invalid duration in ' + token, span);
+        // Bluejay's note table has no B# or E#: it would play them as the B below (b#5 sounds as B4), so ask for the real name
+        if (match[3] && (match[2] === 'b' || match[2] === 'e')) { const o = match[4] ? Number(match[4]) : defaults.o; fail(`Bluejay has no ${match[2].toUpperCase()}♯ and would play ${token} as B${o - 1}; write ${match[2] === 'b' ? `c${o + 1}` : `f${o}`} instead`, span); }
         const beatCount = (4 / denom) * (match[5] ? 1.5 : 1);
         const seconds = beatCount * 60 / defaults.b;
         const rest = match[2] === 'p';
@@ -607,7 +618,13 @@
         const err = new Error(problems[0].message + (problems.length > 1 ? ` (and ${problems.length - 1} more)` : ''));
         err.range = problems[0].range; err.ranges = problems.map(p => p.range); throw err;
       }
-      return {name:pieces[0],defaults,notes, length:currentTime, totalBeats:currentTime*defaults.b/60, count:notes.length, bpm:defaults.b};
+      let slots = 0, overflow = -1;
+      notes.forEach((n, i) => { n.slots = bluejaySlots(n); slots += n.slots; if (slots > BLUEJAY_SLOTS && overflow < 0) overflow = i; });
+      if (overflow >= 0) {
+        const err = new Error(`This track needs ${slots} of Bluejay's ${BLUEJAY_SLOTS} slots (long notes and rests take more than one); the highlighted notes wouldn't fit`);
+        err.range = [lead + tokens[overflow].from, lead + tokens.at(-1).to]; err.slots = slots; throw err;
+      }
+      return {name:pieces[0],defaults,notes, length:currentTime, totalBeats:currentTime*defaults.b/60, count:notes.length, slots, bpm:defaults.b};
     }
 
     function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
@@ -704,7 +721,7 @@
         try {t.parsed=parseRTTTL(t.value); t.error=null; t.errorRange=null; valid++; maxLength=Math.max(maxLength,t.parsed.length);}
         catch(err){t.parsed=null; t.error=err.message; t.errorRange=err.range||null; t.errorRanges=err.ranges||(err.range?[err.range]:[]);}
         const stats=document.getElementById(`stats-${i}`), error=document.getElementById(`error-${i}`);
-        stats.textContent=t.parsed?`${t.parsed.count} notes/rests · ${t.parsed.length.toFixed(2)}s · ${t.parsed.bpm} BPM`:'Needs correction';
+        stats.textContent=t.parsed?`${t.parsed.count} notes/rests · ${t.parsed.slots}/${BLUEJAY_SLOTS} slots · ${t.parsed.length.toFixed(2)}s · ${t.parsed.bpm} BPM`:'Needs correction';
         const marks=t.parsed?[]:(t.errorRanges||[]);
         error.textContent=t.error?(marks.length>1?`${t.error}. All highlighted above; click to select the first.`:marks.length?`${t.error} (highlighted above, click to select it)`:t.error):'';
         error.classList.toggle('has-range',Boolean(t.errorRange));
@@ -736,24 +753,29 @@
       const bpms=[...new Set(tracks.filter(t=>t.parsed).map(t=>t.parsed.bpm))];
       const out=tracks.map((t,i)=>{
         const p=t.parsed;if(!p)return `<div class="validation-item" style="--track-color:${t.color}"><div class="heading">ESC ${i+1} · ${escapeHTML(t.name)}</div><div class="metric fail">Invalid RTTTL</div><div class="metric">${escapeHTML(t.error||'Check the track')}</div></div>`;
-        valid++;if(p.count>55)nearLimit++;
+        valid++;if(p.slots>55)nearLimit++;
         const freqs=p.notes.filter(n=>!n.rest).map(n=>n.hz);
         const min=freqs.length?Math.min(...freqs).toFixed(0):'-',max=freqs.length?Math.max(...freqs).toFixed(0):'-';
         const pitches=p.notes.filter(n=>!n.rest).map(n=>n.midi),high=pitches.filter(m=>m>=DETUNE_FROM_MIDI).length;
         const span=pitches.length?`${pitchLabel(Math.min(...pitches))} to ${pitchLabel(Math.max(...pitches))}`:'no notes';
         const difference=maxDuration-p.length;
+        let lastSound=p.notes.length;while(lastSound>0&&p.notes[lastSound-1].rest)lastSound--;
+        const trailing=p.notes.slice(lastSound),trailSeconds=trailing.reduce((a,n)=>a+n.seconds,0),trailSlots=trailing.reduce((a,n)=>a+n.slots,0);
+        const sixtyFourths=p.notes.filter(n=>n.beats<.1).length;
         return `<div class="validation-item" style="--track-color:${t.color}">
           <div class="heading" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name)}</div>
-          <div class="metric ${p.count>55?'warn':'pass'}">${p.count}/62 events ${p.count>55?'· near limit':'· within limit'}</div>
+          <div class="metric ${p.slots>55?'warn':'pass'}" title="Long notes and rests take more than one slot">${p.slots}/${BLUEJAY_SLOTS} slots · ${p.count} notes/rests${p.slots>55?' · near limit':''}</div>
           <div class="metric">${p.bpm} BPM · ${p.length.toFixed(2)} s</div>
           <div class="metric pass">Notes ${span} (${min}–${max} Hz) · within D#3 to D7</div>
           <div class="metric ${high?'warn':''}">${high?`${high} note${high>1?'s':''} at C6 or above may sound up to 1/3 semitone off`:'No high notes to detune'}</div>
           <div class="metric ${difference>.05?'warn':''}">${difference>.005?`${difference.toFixed(2)} s shorter than longest`:'Matches longest duration'}</div>
+          ${trailing.length&&lastSound?`<div class="metric warn">Ends with ${trailSeconds.toFixed(2)} s of silence after the last note (${trailSlots} slot${trailSlots>1?'s':''}); ✂ Trim end in the piano roll removes it</div>`:''}
+          ${sixtyFourths?`<div class="metric warn">${sixtyFourths} 64th note${sixtyFourths>1?'s/rests play':'/rest plays'} fine but ESC Configurator drops ${sixtyFourths>1?'them':'it'} when it reads the melody back off the ESC</div>`:''}
         </div>`;
       });
       document.getElementById('validationGrid').innerHTML=out.join('');
-      document.getElementById('validationSummary').textContent=`${valid}/${tracks.length} format-valid · ${nearLimit} near event limit`;
-      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding, the 62-event limit and Bluejay\'s D#3 to D7 pitch range are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
+      document.getElementById('validationSummary').textContent=`${valid}/${tracks.length} format-valid · ${nearLimit} near slot limit`;
+      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding, Bluejay\'s 62-slot limit (long notes and rests use more than one slot) and Bluejay\'s D#3 to D7 pitch range are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
     }
 
     function updateButtons() {
@@ -1442,9 +1464,10 @@
       }
       parts.push(...gapTokens(tail));
       if(!parts.length)parts.push('4p');
-      if(parts.length>62)throw Error('Melody exceeds the 62-event Bluejay limit');
       const {d,o,b}=parsed.defaults;
-      return `${parsed.name}:d=${d},o=${o},b=${b}:${parts.join(',')}`;
+      const text=`${parsed.name}:d=${d},o=${o},b=${b}:${parts.join(',')}`;
+      try{parseRTTTL(text);}catch(err){if(err.slots)throw Error(`That needs ${err.slots} of Bluejay's ${BLUEJAY_SLOTS} slots (long notes and rests take more than one)`);}
+      return text;
     }
     function snapshot(motor=editMotor){const t=tracks[motor],d=liveDraft(t);return {motor,text:t.value,draft:d?JSON.parse(JSON.stringify(d)):null};}
     function restoreSnapshot(item){
@@ -1626,14 +1649,12 @@
     function selectedIndices(events){return [...new Set([...pianoSelection,selectedNote])].filter(i=>i>=0&&i<events.length).sort((a,b)=>a-b);}
     function deletePianoNote(){
       const {events,tail}=voiceEvents(),doomed=selectedIndices(events);if(!doomed.length)return;
-      const total=eventsEnd(events)+tail;
       const next=events.map(e=>({...e}));
       for(const index of [...doomed].reverse()){
         const removed=next.splice(index,1)[0];
         if(rippleInput.checked)for(let i=index;i<next.length;i++)next[i].start=roundBeat(next[i].start-removed.duration);
       }
-      const newTail=rippleInput.checked?tail:roundBeat(Math.max(0,total-eventsEnd(next)));
-      const keep=clamp(doomed[0],0,next.length-1);selectedNote=keep;saveHistory();halt();commitEvents(next,newTail,true,keep,new Set([keep]));
+      const keep=clamp(doomed[0],0,next.length-1);selectedNote=keep;saveHistory();halt();commitEvents(next,tail,true,keep,new Set([keep]));
     }
     // Copied notes keep their pitch, length and spacing (in beats), so they can be pasted into any channel
     function copyPianoNotes(cut=false){
@@ -1651,15 +1672,20 @@
       const {events,tail,parsed}=voiceEvents();if(!parsed)return;
       if(events.length+pianoClipboard.notes.length>58){notify('Too many notes for Bluejay');return;}
       const at=roundBeat(Math.max(0,snapValue(pianoPosition()*parsed.bpm/60))),span=pianoClipboard.span;
-      const total=eventsEnd(events)+tail,next=events.map(e=>({...e}));
+      const next=events.map(e=>({...e}));
       if(rippleInput.checked)for(const e of next)if(e.start>=at-.0001)e.start=roundBeat(e.start+span);
       const first=next.length;
       next.push(...pianoClipboard.notes.map(n=>({start:roundBeat(at+n.offset),duration:n.duration,midi:n.midi})));
-      const newTail=roundBeat(Math.max(0,total+(rippleInput.checked?span:0)-eventsEnd(next)));
       saveHistory();halt();
-      if(!commitEvents(next,newTail,true,first,new Set(Array.from({length:next.length-first},(_,k)=>first+k))))return;
+      if(!commitEvents(next,tail,true,first,new Set(Array.from({length:next.length-first},(_,k)=>first+k))))return;
       pianoPos=(at+span)*60/parsed.bpm;updatePianoTransport(); // repeated pastes follow on
       notify(`Pasted ${pianoClipboard.notes.length} note${pianoClipboard.notes.length>1?'s':''}`);
+    }
+    function trimPianoEnd(){
+      const {events,tail,parsed}=voiceEvents();if(!parsed)return;
+      if(tail<.0001){notify('No silence at the end of this channel');return;}
+      saveHistory();halt();
+      if(commitEvents(events,0))notify(`Removed ${(tail*60/parsed.bpm).toFixed(2)} s of silence from the end`);
     }
     function selectAllPianoNotes(){
       const {events}=voiceEvents();if(!events.length)return;
@@ -1802,6 +1828,7 @@
     document.getElementById('copyNotes').addEventListener('click',()=>copyPianoNotes());
     document.getElementById('cutNotes').addEventListener('click',()=>copyPianoNotes(true));
     document.getElementById('pasteNotes').addEventListener('click',pastePianoNotes);
+    document.getElementById('trimEnd').addEventListener('click',trimPianoEnd);
     pianoGrid.addEventListener('dblclick',e=>{if(e.target.closest('.midi-note'))return;const rect=pianoGrid.getBoundingClientRect();addPianoNote((e.clientX-rect.left)/beatPx,pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx));});
     document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
     document.getElementById('deleteNote').addEventListener('click',deletePianoNote);
