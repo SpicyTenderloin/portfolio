@@ -146,6 +146,9 @@
     .piano-toolbar .hint { color:#94a8bb; font-size:12px; }
     .piano-toolbar .hint strong { color:#e6f3f7; }
     .piano-toolbar label { display:flex; gap:9px; align-items:center; color:#b3c1d1; font-size:12px; }
+    .end-pause-group { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .end-pause-custom:not([hidden]) { display:flex; gap:6px; align-items:center; color:#b3c1d1; font-size:12px; }
+    #endPauseCount { width:64px; color:#e6f2f8; background:#111a29; border:1px solid #415166; border-radius:7px; padding:8px; font-variant-numeric:tabular-nums; }
     .piano-toolbar select, .note-inspector select, .note-inspector input { color:#e6f2f8; background:#111a29; border:1px solid #415166; border-radius:7px; padding:8px; }
     .piano-scroll { border:1px solid #33455b; border-radius:10px; overflow:auto; max-height:515px; background:#152031; }
     .piano-header { display:flex; position:sticky; top:0; z-index:8; height:29px; width:max-content; background:#1b293c; }
@@ -373,8 +376,9 @@
           <button class="tiny" id="addNote" type="button" title="Adds an identical note right after the selected one, or a 1/8 note at the end">+ Add note</button>
           <button class="tiny" id="undoEdit" type="button" disabled>↶ Undo</button>
           <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
-          <label title="Silence after each channel's last note, up to the next bar or quarter-bar line">End pause <select id="endPause"><option value="bar">To end of bar</option><option value="quarter">To end of quarter bar</option><option value="none">None</option></select></label>
-          <button class="tiny" id="applyEndPause" type="button" title="Re-apply the end pause to every channel">Apply</button>
+          <span class="end-pause-group"><label title="Silence after each channel's last note: up to the next bar or quarter-bar line, none, or a custom length">End pause <select id="endPause"><option value="bar">To end of bar</option><option value="quarter">To end of quarter bar</option><option value="none">None</option><option value="custom">Custom</option></select></label>
+          <span class="end-pause-custom" id="endPauseCustom" hidden><input id="endPauseCount" type="number" min="0" max="999" step="1" value="1" aria-label="Number of notes in the end pause"> × <select id="endPauseNote" aria-label="Note length of the end pause"><option value="4">whole note</option><option value="2">1/2 note</option><option value="1" selected>1/4 note</option><option value="0.5">1/8 note</option><option value="0.25">1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></span>
+          <button class="tiny" id="applyEndPause" type="button" title="Re-apply the end pause to every channel">Apply</button></span>
         </div>
       </div>
       <div class="piano-transport" role="group" aria-label="Piano-roll playback">
@@ -409,7 +413,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Choose a Key to highlight its notes on the keyboard and grid. End pause sets the silence after each channel's last note: up to the end of the bar, up to the end of the quarter bar, or none; it is kept up to date as you edit, and changing it (or pressing Apply) updates every channel. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Choose a Key to highlight its notes on the keyboard and grid. End pause sets the silence after each channel's last note: up to the end of the bar, up to the end of the quarter bar, none, or a custom length entered as a number of notes (for example 5 × 1/4 note); it is kept up to date as you edit, and changing it (or pressing Apply) updates every channel. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -496,7 +500,8 @@
     const PIANO_BEAT_PX = [12,480], PIANO_ROW_PX = [8,40];
     const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
     const beatSnap = document.getElementById('snapGrid');
-    const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale'), endPauseInput = document.getElementById('endPause');
+    const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale'), endPauseInput = document.getElementById('endPause'), endPauseCountInput = document.getElementById('endPauseCount'), endPauseNoteInput = document.getElementById('endPauseNote');
+    const END_PAUSE_MODES = ['bar','quarter','none','custom'], END_PAUSE_NOTES = [4,2,1,.5,.25,.125,.0625];
     // Bluejay's playable range: pitch is stored as Temp3 = round(1e6/(f*24.72) - 16.15) and must be 1..255,
     // which allows D#3 (MIDI 51) to D7 (MIDI 98). From C6 up the integer steps detune notes noticeably.
     const BLUEJAY_MIN_MIDI = 51, BLUEJAY_MAX_MIDI = 98, DETUNE_FROM_MIDI = 84;
@@ -539,7 +544,7 @@
     let refPlayhead=0,scrubSource=null,scrubStartedAt=0,scrubFrom=0,scrubRaf=0; // whole-file play/pause transport
     let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
-    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',...savedSettings};
+    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',endPauseCount:1,endPauseNote:1,...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
     if(settings.pianoZoom){beatPx=clamp(Number(settings.pianoZoom.x)||92,...PIANO_BEAT_PX);rowPx=clamp(Math.round(Number(settings.pianoZoom.y))||20,...PIANO_ROW_PX);}
     if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
@@ -548,7 +553,10 @@
     metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
     stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
     keyRootInput.value=/^(\d|1[01])$/.test(String(settings.keyRoot))?String(settings.keyRoot):'';keyScaleInput.value=scaleSteps[settings.keyScale]?settings.keyScale:'major';
-    endPauseInput.value=['bar','quarter','none'].includes(settings.endPause)?settings.endPause:'bar';
+    endPauseInput.value=END_PAUSE_MODES.includes(settings.endPause)?settings.endPause:'bar';
+    endPauseCountInput.value=String(endPauseCount(settings.endPauseCount));
+    if(END_PAUSE_NOTES.includes(settings.endPauseNote))endPauseNoteInput.value=String(settings.endPauseNote);
+    document.getElementById('endPauseCustom').hidden=endPauseInput.value!=='custom';
     let editMotor = 0, selectedNote = 0, pianoSelection = new Set([0]), pianoClipboard = null, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
     const editHistory = [],redoHistory=[];
     let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
@@ -630,7 +638,7 @@
     function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
     function saveNames() { try { localStorage.setItem(namesKey, JSON.stringify(tracks.map(t=>t.name))); } catch (_) {} }
     function saveSettings(){
-      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value});
+      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value,endPauseCount:endPauseCount(endPauseCountInput.value),endPauseNote:Number(endPauseNoteInput.value)});
       try{localStorage.setItem(settingsKey,JSON.stringify(settings));}catch(_){}
     }
     function barBeats(){const [n,d]=timeSignatureInput.value.split('/').map(Number);return n*4/d;}
@@ -756,7 +764,7 @@
         const trailing=p.notes.slice(lastSound),trailSeconds=trailing.reduce((a,n)=>a+n.seconds,0),trailSlots=trailing.reduce((a,n)=>a+n.slots,0);
         const sixtyFourths=p.notes.filter(n=>n.beats<.1).length;
         const soundEnd=roundBeat(p.notes.slice(0,lastSound).reduce((a,n)=>a+n.beats,0)),haveBeats=roundBeat(trailing.reduce((a,n)=>a+n.beats,0)),wantBeats=lastSound?endPauseFor(soundEnd):0;
-        const pauseName=endPauseInput.value==='quarter'?'quarter bar':'bar';
+        const pauseName=endPauseInput.value==='custom'?`(${endPauseLabel()})`:`to the end of the ${endPauseInput.value==='quarter'?'quarter bar':'bar'}`;
         return `<div class="validation-item" style="--track-color:${t.color}">
           <div class="heading" title="${escapeHTML(t.name)}">ESC ${i+1} · ${escapeHTML(t.name)}</div>
           <div class="metric ${p.slots>55?'warn':'pass'}" title="Long notes and rests take more than one slot">${p.slots}/${BLUEJAY_SLOTS} slots · ${p.count} notes/rests${p.slots>55?' · near limit':''}</div>
@@ -764,7 +772,7 @@
           <div class="metric pass">Notes ${span} (${min}–${max} Hz) · within D#3 to D7</div>
           <div class="metric ${high?'warn':''}">${high?`${high} note${high>1?'s':''} at C6 or above may sound up to 1/3 semitone off`:'No high notes to detune'}</div>
           <div class="metric ${difference>.05?'warn':''}">${difference>.005?`${difference.toFixed(2)} s shorter than longest`:'Matches longest duration'}</div>
-          ${lastSound&&Math.abs(haveBeats-wantBeats)>.001?`<div class="metric warn">Ends with ${trailSeconds.toFixed(2)} s of silence after the last note; End pause (${endPauseInput.selectedOptions[0].textContent.toLowerCase()}) would make it ${(wantBeats*60/p.bpm).toFixed(2)} s. Press Apply next to End pause in the piano roll</div>`:trailing.length&&lastSound?`<div class="metric">Pauses ${trailSeconds.toFixed(2)} s to the end of the ${pauseName} (${trailSlots} slot${trailSlots>1?'s':''})</div>`:''}
+          ${lastSound&&Math.abs(haveBeats-wantBeats)>.001?`<div class="metric warn">Ends with ${trailSeconds.toFixed(2)} s of silence after the last note; End pause (${endPauseLabel()}) would make it ${(wantBeats*60/p.bpm).toFixed(2)} s. Press Apply next to End pause in the piano roll</div>`:trailing.length&&lastSound?`<div class="metric">Pauses ${trailSeconds.toFixed(2)} s ${pauseName} (${trailSlots} slot${trailSlots>1?'s':''})</div>`:''}
           ${sixtyFourths?`<div class="metric warn">${sixtyFourths} 64th note${sixtyFourths>1?'s/rests play':'/rest plays'} fine but ESC Configurator drops ${sixtyFourths>1?'them':'it'} when it reads the melody back off the ESC</div>`:''}
         </div>`;
       });
@@ -1466,7 +1474,7 @@
         if(!d)throw Error('Gap is smaller than RTTTL timing resolution');
         result.push(tokenFor(d.beats,null));remainder=roundBeat(remainder-d.beats);
       }
-      if(guard>=100)throw Error('Gap is too long to encode');
+      if(guard>=100)throw Error(`That rest is too long to fit in Bluejay's ${BLUEJAY_SLOTS} slots`);
       return result;
     }
     function serializeEvents(events,tail,parsed){
@@ -1698,8 +1706,16 @@
       notify(`Pasted ${pianoClipboard.notes.length} note${pianoClipboard.notes.length>1?'s':''}`);
     }
     // End pause: silence after a channel's last note, up to the next bar or quarter-bar line (none if it already ends on one)
+    // Custom: a fixed pause of N notes of one length (5 × 1/4 note), whatever beat the last note ends on
     function endPauseUnit(){const bar=barBeats();return endPauseInput.value==='bar'?bar:endPauseInput.value==='quarter'?bar/4:0;}
-    function endPauseFor(endBeat){const unit=endPauseUnit();return unit?roundBeat(Math.max(0,Math.ceil(endBeat/unit-1e-6)*unit-endBeat)):0;}
+    function endPauseFor(endBeat){
+      if(endPauseInput.value==='custom')return roundBeat(endPauseCount(endPauseCountInput.value)*Number(endPauseNoteInput.value));
+      const unit=endPauseUnit();return unit?roundBeat(Math.max(0,Math.ceil(endBeat/unit-1e-6)*unit-endBeat)):0;
+    }
+    function endPauseLabel(){
+      if(endPauseInput.value!=='custom')return endPauseInput.selectedOptions[0].textContent.toLowerCase();
+      return `${endPauseCount(endPauseCountInput.value)} × ${endPauseNoteInput.selectedOptions[0].textContent}`;
+    }
     // Rewrites only the rests after the last note, so the rest of the RTTTL keeps its own formatting
     function applyEndPause(i){
       const t=tracks[i],p=t.parsed;if(!p||liveDraft(t))return false;
@@ -1707,17 +1723,22 @@
       if(!last)return false;
       const end=roundBeat(p.notes.slice(0,last).reduce((a,n)=>a+n.beats,0));
       const [name,header,body]=t.value.trim().split(':');
-      const next=`${name}:${header}:${[...body.split(',').map(x=>x.trim()).filter(Boolean).slice(0,last),...gapTokens(endPauseFor(end))].join(',')}`;
-      if(next===t.value.trim())return false;
-      try{parseRTTTL(next);}catch(_){return null;} // too long for Bluejay with the pause: leave it
+      let next;
+      try{ // too long for Bluejay with the pause: leave it
+        next=`${name}:${header}:${[...body.split(',').map(x=>x.trim()).filter(Boolean).slice(0,last),...gapTokens(endPauseFor(end))].join(',')}`;
+        if(next===t.value.trim())return false;
+        parseRTTTL(next);
+      }catch(_){return null;}
       t.value=next;document.getElementById(`rtttl-${i}`).value=next;return true;
     }
     function applyEndPauseAll(quiet=false){
       halt();
       const results=tracks.map((_,i)=>applyEndPause(i)),changed=results.filter(r=>r===true).length,full=results.filter(r=>r===null).length;
       saveEdits();updateParsed();
-      if(!quiet)notify(`End pause applied${changed?` to ${changed} channel${changed>1?'s':''}`:' (nothing to change)'}${full?`; ${full} channel${full>1?'s are':' is'} too full for it`:''}`);
+      const fullText=`${full} channel${full>1?'s':''} would go over Bluejay's ${BLUEJAY_SLOTS} slots with it, so ${full>1?'they were':'it was'} left as ${full>1?'they were':'it was'}`;
+      if(!quiet)notify(full&&!changed?`End pause not applied: ${fullText}`:`End pause applied${changed?` to ${changed} channel${changed>1?'s':''}`:' (nothing to change)'}${full?`; ${fullText}`:''}`);
     }
+    function endPauseCount(value){return clamp(Math.round(Number(value)||0),0,999);}
     function selectAllPianoNotes(){
       const {events}=voiceEvents();if(!events.length)return;
       if(selectedNote<0)selectedNote=0;
@@ -1859,7 +1880,9 @@
     document.getElementById('copyNotes').addEventListener('click',()=>copyPianoNotes());
     document.getElementById('cutNotes').addEventListener('click',()=>copyPianoNotes(true));
     document.getElementById('pasteNotes').addEventListener('click',pastePianoNotes);
-    endPauseInput.addEventListener('change',()=>{saveSettings();applyEndPauseAll();});
+    endPauseInput.addEventListener('change',()=>{document.getElementById('endPauseCustom').hidden=endPauseInput.value!=='custom';saveSettings();applyEndPauseAll();});
+    endPauseCountInput.addEventListener('change',()=>{endPauseCountInput.value=String(endPauseCount(endPauseCountInput.value));saveSettings();applyEndPauseAll();});
+    endPauseNoteInput.addEventListener('change',()=>{saveSettings();applyEndPauseAll();});
     document.getElementById('applyEndPause').addEventListener('click',()=>applyEndPauseAll());
     pianoGrid.addEventListener('dblclick',e=>{if(e.target.closest('.midi-note'))return;const rect=pianoGrid.getBoundingClientRect();addPianoNote((e.clientX-rect.left)/beatPx,pianoMaxPitch-Math.floor((e.clientY-rect.top)/rowPx));});
     document.getElementById('addNote').addEventListener('click',()=>addPianoNote());
@@ -2026,7 +2049,10 @@
           if([1,.5,.25,.125,.0625].includes(s.snap))beatSnap.value=String(s.snap);
           if(typeof s.keyRoot==='string'&&/^(|\d|1[01])$/.test(s.keyRoot))keyRootInput.value=s.keyRoot;
           if(scaleSteps[s.keyScale])keyScaleInput.value=s.keyScale;
-          if(['bar','quarter','none'].includes(s.endPause))endPauseInput.value=s.endPause;
+          if(END_PAUSE_MODES.includes(s.endPause))endPauseInput.value=s.endPause;
+          if(Number.isFinite(s.endPauseCount))endPauseCountInput.value=String(endPauseCount(s.endPauseCount));
+          if(END_PAUSE_NOTES.includes(s.endPauseNote))endPauseNoteInput.value=String(s.endPauseNote);
+          document.getElementById('endPauseCustom').hidden=endPauseInput.value!=='custom';
           metronomeInput.checked=Boolean(s.metronome);rippleInput.checked=Boolean(s.ripple);
         }
         if(project.reference){
