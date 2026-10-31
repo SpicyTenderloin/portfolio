@@ -99,6 +99,7 @@
     .reference-wave.empty { cursor:default; }
     .ref-transport { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:0 0 9px; }
     .ref-transport .tiny:disabled { opacity:.45; cursor:default; }
+    .tiny.unavailable { opacity:.55; }
     .tiny.ref-play { min-width:86px; color:#0d1a22; background:var(--cyan); border-color:var(--cyan); }
     .tiny.ref-play:disabled { background:#273144; color:#bdc9d8; border-color:#3a495a; }
     .ref-time { color:#d8edf2; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; margin:0 6px; }
@@ -344,7 +345,7 @@
       </div>
       <canvas class="reference-wave empty" id="referenceWave" height="116" aria-label="Audio waveform with highlighted selected clip"></canvas>
       <input class="reference-pan" id="refPan" type="range" min="0" max="1000" value="0" disabled aria-label="Scroll the zoomed waveform">
-      <p class="reference-note">Click the waveform to move the playhead (white line), then Play / Pause to find the exact spot and use Set start / Set end. Drag across the waveform to select a new range, or drag either yellow edge to adjust it. Trim to selection keeps only the selected audio so you can whittle a song down to the section you want. Zoom with the buttons, a trackpad pinch or Ctrl + scroll over the waveform; pan with the bar underneath or Shift + scroll. Alignment is the delay before the clip begins relative to the ESC melodies.</p>
+      <p class="reference-note">Click the waveform to move the playhead; drag to select a range or its yellow edges to adjust it. Ctrl + scroll zooms, Shift + scroll pans.</p>
       <div class="detect-box" aria-label="Automatic pitch detection">
         <div class="detect-head">
           <div><div class="panel-title">✧ Automatic pitch detection <span style="color:#89afbd">· Basic Pitch</span></div><p class="reference-note">Analyse the selected clip locally. Suggested notes appear as mint-green outlines on the piano roll; your RTTTL is unchanged until you apply them.</p></div>
@@ -370,10 +371,10 @@
       <div class="piano-toolbar">
         <div class="hint"><strong id="selectedMotorName">Editing ESC 1 · Root</strong> <span id="pianoReadout">· 7 notes</span></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <label>Key <select id="keyRoot" aria-label="Key root note"><option value="">None</option><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></label>
+          <label title="Highlights the notes of this key on the keyboard and grid">Key <select id="keyRoot" aria-label="Key root note"><option value="">None</option><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9">A</option><option value="10">A#</option><option value="11">B</option></select></label>
           <select id="keyScale" aria-label="Scale"><option value="major">Major</option><option value="minor">Minor</option><option value="majpent">Major pentatonic</option><option value="minpent">Minor pentatonic</option></select>
-          <label>Snap <select id="snapGrid"><option value="1">1/4 note</option><option value="0.5">1/8 note</option><option value="0.25" selected>1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></label>
-          <label><input id="rippleEdit" type="checkbox"> Ripple editing</label>
+          <label title="Grid that notes snap to when you drag them">Snap <select id="snapGrid"><option value="1">1/4 note</option><option value="0.5">1/8 note</option><option value="0.25" selected>1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></label>
+          <label title="When on, moving, resizing, adding or deleting a note shifts the notes after it. When off, other notes stay put and overlapping notes get a red outline until you fix them (a motor plays one note at a time)"><input id="rippleEdit" type="checkbox"> Ripple editing</label>
           <button class="tiny" id="addNote" type="button" title="Adds an identical note right after the selected one, or a 1/8 note at the end">+ Add note</button>
           <button class="tiny" id="undoEdit" type="button" title="Undo (Ctrl + Z)" disabled>↶ Undo</button>
           <button class="tiny" id="redoEdit" type="button" title="Redo (Ctrl + Y or Ctrl + Shift + Z)" disabled>↷ Redo</button>
@@ -400,7 +401,7 @@
         </div>
       </div>
       <div class="piano-scroll" id="pianoScroll" aria-label="Scrollable interactive MIDI note grid">
-        <div class="piano-header"><div class="piano-corner">PITCH</div><div class="piano-beats" id="pianoBeats"></div></div>
+        <div class="piano-header"><div class="piano-corner">PITCH</div><div class="piano-beats" id="pianoBeats" title="Click to move the playhead"></div></div>
         <div class="piano-stage"><div class="piano-keys" id="pianoKeys"></div><div class="piano-roll" id="pianoRoll" aria-label="Drag notes vertically for pitch, horizontally for start time, or resize the right edge"></div></div>
       </div>
       <div class="piano-inspector">
@@ -417,7 +418,7 @@
           <label title="Length of each one-semitone step in a slide. 1/64 sounds smoother, but ESC Configurator drops 64ths when it reads a melody back">Steps <select id="slideStep" aria-label="Length of each slide step"><option value="0.125">1/32</option><option value="0.0625">1/64</option></select></label>
         </div>
       </div>
-      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Ctrl + Z undoes and Ctrl + Y (or Ctrl + Shift + Z) redoes. Slide fills in a fast run of one-semitone steps leading into the next note (select one note to slide into the note after it, or two notes): Bluejay can't sweep a pitch, but it plays notes back to back with no gap, so the run sounds like a slide. The steps end where the second note starts, using any gap first and then the end of the first note; the button shows how many slots it will use. Choose a Key to highlight its notes on the keyboard and grid. End pause sets the silence after the song's last note, counted from whichever channel ends latest: up to the end of the bar, up to the end of the quarter bar, none, or a custom length entered as a number of notes (for example 5 × 1/4 note). Every channel gets the rest it needs so all the ESCs finish together. With Arming beeps on (Sound panel), tick Arming beep on the beat to end the melody just early enough that the first beep lands on that bar line, quarter-bar line or beat (None: the next beat; Custom: that length after the last note); this is kept up to date as you edit in the piano roll, and changing it (or pressing Apply) updates every channel. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Drag a note to move it, drag its right edge to resize, double-click to add one. Shift-click selects several; Ctrl + C, X, V and Z work here. Hover any control for details.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -445,7 +446,7 @@
       <div class="validation-grid" id="validationGrid"></div>
       <div class="validation-overall" id="validationNote">This is a format and timing check, not a guarantee of compatibility with every ESC hardware target.</div>
     </section>
-    <div class="tips"><span>ⓘ</span><div>The included short demonstration melody is an approximation, and the three supporting voices are not an official transcription. Imported audio stays local and is never uploaded to this site. Sound synthesis approximates ESC tones; real motors will differ. Disable “Sync Startup Music to Multiple ESCs” when writing distinct melodies, and remove all propellers before bench testing.</div></div>
+    <div class="tips"><span>ⓘ</span><div>Audio stays on your device, and real motors sound different from this preview. Turn off “Sync Startup Music to Multiple ESCs” when flashing different melodies, and remove propellers before testing.</div></div>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="midi.js"></script>
@@ -800,7 +801,7 @@
       });
       document.getElementById('validationGrid').innerHTML=out.join('');
       document.getElementById('validationSummary').textContent=`${valid}/${tracks.length} format-valid · ${nearLimit} near slot limit`;
-      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'RTTTL encoding, Bluejay\'s 62-slot limit (long notes and rests use more than one slot) and Bluejay\'s D#3 to D7 pitch range are checked. Actual motor audibility, ESC firmware behaviour, and safe startup settings must still be verified on hardware with propellers removed.';
+      document.getElementById('validationNote').textContent=(bpms.length>1?'Warning: channels have different BPM values. Their note timing is aligned in seconds, not musical beats. ':'')+'Checks RTTTL, Bluejay\'s 62 slots (long notes and rests use more than one) and its D#3 to D7 range. Test on hardware with propellers removed.';
     }
 
     function updateButtons() {
@@ -1727,18 +1728,22 @@
       else if(picked.length===1){a=events[picked[0]];b=events.filter(e=>e!==a&&e.start>=a.start+a.duration-.0001).sort((x,y)=>x.start-y.start)[0];}
       else return {error:'Select the note to slide from (it slides into the next note), or two notes'};
       if(!b)return {error:'There is no later note to slide into'};
-      const dir=Math.sign(b.midi-a.midi),steps=Math.abs(b.midi-a.midi)-1;
+      const dir=Math.sign(b.midi-a.midi),span=Math.abs(b.midi-a.midi),wanted=span-1;
       if(!dir)return {error:'Both notes are the same pitch'};
-      if(steps<1)return {error:'The notes are a semitone apart, so there is nothing to slide through'};
-      const step=Number(slideStepInput.value),from=roundBeat(b.start-steps*step);
-      if(from<a.start+.0625-.0001)return {error:`Not enough room: ${steps} steps of ${durationLabel(step)} need ${(steps*step).toFixed(3).replace(/\.?0+$/,'')} beats before the second note, and the first note must keep at least a 1/64`};
-      if(events.some(e=>e!==a&&e!==b&&e.start<b.start-.0001&&e.start+e.duration>from+.0001))return {error:'Another note is in the way of the slide'};
+      if(wanted<1)return {error:'The notes are a semitone apart, so there is nothing to slide through'};
+      // Room: from the first note's first 1/64 (or the end of any note in between) to the second note.
+      // If every semitone won't fit, use as many steps as do, spread evenly over the interval.
+      const step=Number(slideStepInput.value);
+      const floor=Math.max(a.start+.0625,...events.filter(e=>e!==a&&e!==b&&e.start<b.start-.0001&&e.start+e.duration>a.start).map(e=>e.start+e.duration));
+      const steps=Math.min(wanted,Math.floor((b.start-floor)/step+1e-6));
+      if(steps<1)return {error:`No room for a slide: the second note starts too soon after the first${step>.07?'. Try 1/64 steps, or':'. Try'} moving the notes apart`};
+      const from=roundBeat(b.start-steps*step);
       const next=[];let target=null;
       for(const e of events){if(e===a)continue;const copy={...e};if(e===b)target=copy;next.push(copy);}
       const keep=roundBeat(Math.min(a.duration,from-a.start));let at=a.start;
       for(const tok of gapTokens(keep)){const beats=durationChoices.find(c=>tokenFor(c.beats,null)===tok).beats;next.push({start:at,duration:beats,midi:a.midi});at=roundBeat(at+beats);}
-      for(let k=1;k<=steps;k++)next.push({start:roundBeat(from+(k-1)*step),duration:step,midi:a.midi+dir*k});
-      return {events:next,target,a,b,steps,step,shortened:keep<a.duration-.0001};
+      for(let k=1;k<=steps;k++)next.push({start:roundBeat(from+(k-1)*step),duration:step,midi:a.midi+dir*Math.round(k*span/(steps+1))});
+      return {events:next,target,a,b,steps,wanted,step,shortened:keep<a.duration-.0001};
     }
     // Slots the slide would add to this channel (both sides with the End pause applied), or why it can't be encoded
     function slideCost(plan,events){
@@ -1750,13 +1755,15 @@
     function updateSlideButton(events){
       const button=document.getElementById('slideNotes'),plan=slidePlan(events),cost=plan.events?slideCost(plan,events):null;
       const problem=plan.error||cost?.error;
-      button.disabled=Boolean(problem);
-      button.textContent=problem?'↗ Slide':`↗ Slide · ${stepsText(plan.steps)}, +${cost.slots} slot${cost.slots===1?'':'s'}`;
-      button.title=problem||`Adds ${stepsText(plan.steps)} of ${durationLabel(plan.step)} from ${pitchLabel(plan.a.midi)} to ${pitchLabel(plan.b.midi)}${plan.shortened?', shortening the first note':''}`;
+      // Stays clickable when a slide isn't possible, so a click can say why
+      button.disabled=!events.length;button.classList.toggle('unavailable',Boolean(problem));
+      button.textContent=problem?'↗ Slide':`↗ Slide · ${plan.steps<plan.wanted?`${plan.steps} of ${plan.wanted} steps`:stepsText(plan.steps)}, +${cost.slots} slot${cost.slots===1?'':'s'}`;
+      button.title=problem||`Adds ${stepsText(plan.steps)} of ${durationLabel(plan.step)} from ${pitchLabel(plan.a.midi)} to ${pitchLabel(plan.b.midi)}${plan.steps<plan.wanted?` (not enough room for all ${plan.wanted} semitones, so the steps are spread evenly)`:''}${plan.shortened?', shortening the first note':''}`;
     }
     function slidePianoNotes(){
       const {events,parsed}=voiceEvents();if(!parsed)return;
       const plan=slidePlan(events);if(plan.error){notify(plan.error);return;}
+      const cost=slideCost(plan,events);if(cost.error){notify(cost.error);return;}
       const before=tracks[editMotor].parsed.slots;
       saveHistory();halt();
       const index=plan.events.indexOf(plan.target);
