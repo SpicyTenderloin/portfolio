@@ -379,6 +379,7 @@
           <button class="tiny" id="redoEdit" type="button" disabled>↷ Redo</button>
           <span class="end-pause-group"><label title="Silence after the song's last note (from whichever channel ends latest): up to the next bar or quarter-bar line, none, or a custom length. Every channel gets the rest it needs so all the ESCs finish together">End pause <select id="endPause"><option value="bar">To end of bar</option><option value="quarter">To end of quarter bar</option><option value="none">None</option><option value="custom">Custom</option></select></label>
           <span class="end-pause-custom" id="endPauseCustom" hidden><input id="endPauseCount" type="number" min="0" max="999" step="1" value="1" aria-label="Number of notes in the end pause"> × <select id="endPauseNote" aria-label="Note length of the end pause"><option value="4">whole note</option><option value="2">1/2 note</option><option value="1" selected>1/4 note</option><option value="0.5">1/8 note</option><option value="0.25">1/16 note</option><option value="0.125">1/32 note</option><option value="0.0625">1/64 note</option></select></span>
+          <label title="Ends the melody just early enough that the first arming beep (chosen under Sound) lands on the next bar line, quarter-bar line or beat, following End pause. Needs Arming beeps turned on"><input id="beepOnBeat" type="checkbox"> Arming beep on the beat</label>
           <button class="tiny" id="applyEndPause" type="button" title="Re-apply the end pause to every channel">Apply</button></span>
         </div>
       </div>
@@ -414,7 +415,7 @@
           <button class="tiny" id="deleteNote" type="button">Delete note</button>
         </div>
       </div>
-      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Choose a Key to highlight its notes on the keyboard and grid. End pause sets the silence after the song's last note, counted from whichever channel ends latest: up to the end of the bar, up to the end of the quarter bar, none, or a custom length entered as a number of notes (for example 5 × 1/4 note). Every channel gets the rest it needs so all the ESCs finish together; this is kept up to date as you edit in the piano roll, and changing it (or pressing Apply) updates every channel. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
+      <p class="piano-help">Click a channel above to switch it on or off; channels that are on are overlaid in their own colour, and the one marked ✎ is the one you're editing (the last one you switched on). Click or drag another channel's note to start editing that channel. Drag a note to move it or change pitch; drag its striped right edge to resize. Without Ripple editing, other notes stay where they are: you can slide a note past its neighbours or stack two notes at the same time, and empty space becomes rests. A motor can only play one note at a time, so overlapping notes get a <span style="color:#ff6b7a">red outline</span> and the RTTTL below keeps the last version without overlaps until you fix them. Enable Ripple editing to shift later notes when adjusting the timing. Lengths are fractions of a whole note (1/4 is one beat). Double-click to insert a note, or use + Add note to put an identical copy of the selected note right after it; select a note and press Delete to remove it. Shift- or Ctrl-click notes to select several (Ctrl + A selects all) and drag any of them to move the group. Ctrl + C / Ctrl + X copy or cut the selection (copying moves the playhead to just after it); click an empty spot or the bar ruler to place the playhead, then Ctrl + V pastes there, into whichever channel you're editing. Choose a Key to highlight its notes on the keyboard and grid. End pause sets the silence after the song's last note, counted from whichever channel ends latest: up to the end of the bar, up to the end of the quarter bar, none, or a custom length entered as a number of notes (for example 5 × 1/4 note). Every channel gets the rest it needs so all the ESCs finish together. With Arming beeps on (Sound panel), tick Arming beep on the beat to end the melody just early enough that the first beep lands on that bar line, quarter-bar line or beat (None: the next beat; Custom: that length after the last note); this is kept up to date as you edit in the piano roll, and changing it (or pressing Apply) updates every channel. Zoom with the Time and Pitch buttons (or Ctrl + mouse wheel for time, Ctrl + Shift + mouse wheel for pitch), Fit to show the whole melody, or Full screen for more room. Play / Pause above the grid plays from the white playhead; click the bar ruler to move it. Clicking a note plays it, and dragging it up or down plays each new pitch; click a key on the left to hear that pitch. <span style="color:#8ef9d8">Dashed mint notes</span> are automatic pitch suggestions (not yet applied); click one to hear it. The RTTTL below stays synchronised.</p>
     </section>
 
     <section class="panel midi-panel" aria-label="MIDI import and export">
@@ -501,7 +502,7 @@
     const PIANO_BEAT_PX = [12,480], PIANO_ROW_PX = [8,40];
     const durationChoices = [1,2,4,8,16,32,64].flatMap(d=>[{beats:4/d,token:String(d)},{beats:6/d,token:`${d}.`}]).sort((a,b)=>b.beats-a.beats);
     const beatSnap = document.getElementById('snapGrid');
-    const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale'), endPauseInput = document.getElementById('endPause'), endPauseCountInput = document.getElementById('endPauseCount'), endPauseNoteInput = document.getElementById('endPauseNote');
+    const keyRootInput = document.getElementById('keyRoot'), keyScaleInput = document.getElementById('keyScale'), endPauseInput = document.getElementById('endPause'), endPauseCountInput = document.getElementById('endPauseCount'), endPauseNoteInput = document.getElementById('endPauseNote'), beepOnBeatInput = document.getElementById('beepOnBeat');
     const END_PAUSE_MODES = ['bar','quarter','none','custom'], END_PAUSE_NOTES = [4,2,1,.5,.25,.125,.0625];
     // Bluejay's playable range: pitch is stored as Temp3 = round(1e6/(f*24.72) - 16.15) and must be 1..255,
     // which allows D#3 (MIDI 51) to D7 (MIDI 98). From C6 up the integer steps detune notes noticeably.
@@ -559,7 +560,7 @@
     let refPlayhead=0,scrubSource=null,scrubStartedAt=0,scrubFrom=0,scrubRaf=0; // whole-file play/pause transport
     let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
-    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',endPauseCount:1,endPauseNote:1,armBeeps:'off',...savedSettings};
+    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',endPauseCount:1,endPauseNote:1,armBeeps:'off',beepOnBeat:false,...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
     if(settings.pianoZoom){beatPx=clamp(Number(settings.pianoZoom.x)||92,...PIANO_BEAT_PX);rowPx=clamp(Math.round(Number(settings.pianoZoom.y))||20,...PIANO_ROW_PX);}
     if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
@@ -567,6 +568,7 @@
     motorCountInput.value=String(tracks.length);
     metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
     armBeepsInput.value=ARM_BEEPS[settings.armBeeps]?settings.armBeeps:'off';
+    beepOnBeatInput.checked=Boolean(settings.beepOnBeat);beepOnBeatInput.disabled=armBeepsInput.value==='off';
     stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
     keyRootInput.value=/^(\d|1[01])$/.test(String(settings.keyRoot))?String(settings.keyRoot):'';keyScaleInput.value=scaleSteps[settings.keyScale]?settings.keyScale:'major';
     endPauseInput.value=END_PAUSE_MODES.includes(settings.endPause)?settings.endPause:'bar';
@@ -654,7 +656,7 @@
     function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
     function saveNames() { try { localStorage.setItem(namesKey, JSON.stringify(tracks.map(t=>t.name))); } catch (_) {} }
     function saveSettings(){
-      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,armBeeps:armBeepsInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value,endPauseCount:endPauseCount(endPauseCountInput.value),endPauseNote:Number(endPauseNoteInput.value)});
+      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,armBeeps:armBeepsInput.value,beepOnBeat:beepOnBeatInput.checked,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value,endPauseCount:endPauseCount(endPauseCountInput.value),endPauseNote:Number(endPauseNoteInput.value)});
       try{localStorage.setItem(settingsKey,JSON.stringify(settings));}catch(_){}
     }
     function barBeats(){const [n,d]=timeSignatureInput.value.split('/').map(Number);return n*4/d;}
@@ -788,7 +790,7 @@
           <div class="metric pass">Notes ${span} (${min}–${max} Hz) · within D#3 to D7</div>
           <div class="metric ${high?'warn':''}">${high?`${high} note${high>1?'s':''} at C6 or above may sound up to 1/3 semitone off`:'No high notes to detune'}</div>
           <div class="metric ${difference>.05?'warn':''}">${difference>.005?`${difference.toFixed(2)} s shorter than longest`:'Matches longest duration'}</div>
-          ${lastSound&&Math.abs(haveBeats-wantBeats)>.001?`<div class="metric warn">${trailing.length?`Ends with ${trailSeconds.toFixed(2)} s of silence after the last note`:'Ends right on its last note'}; to end with the other channels at ${songEnd.toFixed(2)} s (End pause: ${endPauseLabel()}) it needs ${(wantBeats*60/p.bpm).toFixed(2)} s. Press Apply next to End pause in the piano roll</div>`:trailing.length&&lastSound?`<div class="metric">Pauses ${trailSeconds.toFixed(2)} s, ending with the other channels at ${songEnd.toFixed(2)} s (${trailSlots} slot${trailSlots>1?'s':''})</div>`:''}
+          ${lastSound&&Math.abs(haveBeats-wantBeats)>.001?`<div class="metric warn">${trailing.length?`Ends with ${trailSeconds.toFixed(2)} s of silence after the last note`:'Ends right on its last note'}; to end with the other channels at ${songEnd.toFixed(2)} s (End pause: ${endPauseLabel()}) it needs ${(wantBeats*60/p.bpm).toFixed(2)} s. Press Apply next to End pause in the piano roll</div>`:trailing.length&&lastSound?`<div class="metric">Pauses ${trailSeconds.toFixed(2)} s, ending with the other channels at ${songEnd.toFixed(2)} s${beepLead()?`, so the ${ARM_BEEPS[armBeepsInput.value].name} arming beep lands on the beat at ${(songEnd+beepLead()).toFixed(2)} s`:''} (${trailSlots} slot${trailSlots>1?'s':''})</div>`:''}
           ${sixtyFourths?`<div class="metric warn">${sixtyFourths} 64th note${sixtyFourths>1?'s/rests play':'/rest plays'} fine but ESC Configurator drops ${sixtyFourths>1?'them':'it'} when it reads the melody back off the ESC</div>`:''}
         </div>`;
       });
@@ -1749,9 +1751,20 @@
         const sec=own*60/(t.parsed?.bpm||bpm);last=last===null?sec:Math.max(last,sec);
       });
       if(last===null)return null;
-      if(endPauseInput.value==='custom')return last+endPauseCount(endPauseCountInput.value)*Number(endPauseNoteInput.value)*60/bpm;
-      const unit=endPauseUnit();return unit?Math.ceil(last*bpm/60/unit-1e-6)*unit*60/bpm:last;
+      const custom=endPauseInput.value==='custom'?endPauseCount(endPauseCountInput.value)*Number(endPauseNoteInput.value):null,lead=beepLead();
+      if(!lead){
+        if(custom!==null)return last+custom*60/bpm;
+        const unit=endPauseUnit();return unit?Math.ceil(last*bpm/60/unit-1e-6)*unit*60/bpm:last;
+      }
+      // Arming beep on the beat: the melody ends `lead` seconds before the line the first beep should land on (the next
+      // bar or quarter-bar line, the next beat for None, or the custom length after the last note, if the beep can make it)
+      const beat=4/Number(timeSignatureInput.value.split('/')[1]),earliest=(last+lead)*bpm/60;
+      let beep=custom!==null?last*bpm/60+custom:0;
+      if(beep<earliest-1e-6){const unit=custom!==null?beat:endPauseUnit()||beat;beep=Math.ceil(earliest/unit-1e-6)*unit;}
+      return Math.round((beep-lead*bpm/60)*16)/16*60/bpm; // whole 1/64 notes, so the rests still read back correctly
     }
+    // Seconds from the end of the melody to the first arming beep, when the beep should land on the beat
+    function beepLead(){return beepOnBeatInput.checked?armBeeps()[0]?.at||0:0;}
     // The rest channel i needs after a last note ending at endBeat
     function endPauseTail(i,endBeat){
       const target=endPauseTarget({index:i,endBeat}),bpm=tracks[i].parsed?.bpm||Number(bpmInput.value)||125;
@@ -1973,7 +1986,11 @@
       input.addEventListener('change',()=>{saveSettings();updateStereo();});
     }
     beatSnap.addEventListener('change',()=>{saveSettings();});
-    armBeepsInput.addEventListener('change',()=>{saveSettings();updateParsed(false);});
+    armBeepsInput.addEventListener('change',()=>{
+      beepOnBeatInput.disabled=armBeepsInput.value==='off';saveSettings();
+      if(beepOnBeatInput.checked)applyEndPauseAll();else updateParsed(false); // the beep's delay decides the end pause
+    });
+    beepOnBeatInput.addEventListener('change',()=>{saveSettings();applyEndPauseAll();});
     for(const input of [keyRootInput,keyScaleInput])input.addEventListener('change',()=>{saveSettings();renderPiano();});
     let pianoActive=false;
     document.addEventListener('pointerdown',e=>{pianoActive=Boolean(e.target.closest('#pianoPanel'));},true);
@@ -2098,6 +2115,8 @@
           if(['4/4','3/4','6/8','2/4'].includes(s.signature))timeSignatureInput.value=s.signature;
           if(['square','sine','motor'].includes(s.mode))soundModeInput.value=s.mode;
           if(ARM_BEEPS[s.armBeeps]||s.armBeeps==='off')armBeepsInput.value=s.armBeeps;
+          if(typeof s.beepOnBeat==='boolean')beepOnBeatInput.checked=s.beepOnBeat;
+          beepOnBeatInput.disabled=armBeepsInput.value==='off';
           if(Number.isFinite(s.stereo))stereoWidthInput.value=String(clamp(s.stereo,0,100));
           if([1,.5,.25,.125,.0625].includes(s.snap))beatSnap.value=String(s.snap);
           if(typeof s.keyRoot==='string'&&/^(|\d|1[01])$/.test(s.keyRoot))keyRootInput.value=s.keyRoot;
