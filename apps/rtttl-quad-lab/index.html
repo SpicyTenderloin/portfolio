@@ -73,12 +73,12 @@
     .swatch { height:8px; width:8px; border-radius:50%; flex:none; }
     .timeline-wrap { flex:1; min-width:0; position:relative; border-radius:7px; overflow:hidden; }
     #timeline { display:block; width:100%; height:180px; }
-    .ruler { display:flex; justify-content:space-between; margin:7px 1px 0 170px; color:#7c91a6; font-size:10px; font-variant-numeric:tabular-nums; }
+    .ruler { position:relative; height:14px; overflow:hidden; margin:7px 1px 0 170px; color:#7c91a6; font-size:10px; font-variant-numeric:tabular-nums; }
+    .ruler span { position:absolute; top:0; padding-left:4px; white-space:nowrap; }
     .guide-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin:-4px 0 14px; font-size:12px; color:#b6c8d8; }
     .guide-controls .guide-toggle { display:flex; align-items:center; gap:7px; cursor:pointer; }
     .guide-controls input[type="checkbox"] { accent-color:#ffd36b; width:15px; height:15px; }
     .guide-controls input[type="number"] { width:80px; background:#0e1929; color:#f1f6fb; border:1px solid #4b6076; border-radius:7px; padding:7px 8px; font-variant-numeric:tabular-nums; }
-    .guide-info { color:#e7c17c; font-size:11px; font-variant-numeric:tabular-nums; }
     .guide-marker { position:absolute; top:0; bottom:0; border-left:2px dashed #ffd36b; z-index:2; pointer-events:none; filter:drop-shadow(0 0 3px #ffd36b55); }
     .guide-marker span { position:absolute; top:3px; left:4px; border-radius:4px; background:#ffd36b; color:#253041; padding:2px 5px; font-size:10px; font-weight:800; white-space:nowrap; }
     .studio-controls { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-top:16px; padding:17px 20px; }
@@ -238,7 +238,7 @@
     .toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,15px); z-index:20; background:#def7ef; border:1px solid #b1ebdc; color:#153b3b; font-size:13px; font-weight:700; border-radius:10px; padding:11px 16px; opacity:0; pointer-events:none; transition:opacity .15s,transform .15s; box-shadow:0 15px 40px #0005; }
     .toast.visible { opacity:1; transform:translate(-50%,0); }
     @media(max-width:900px) { .tracks { grid-template-columns:1fr; } .validation-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .intro { align-items:start; flex-wrap:wrap; } .song-pill { display:none; } .examples { align-items:flex-start; } .examples-panel { left:0; right:auto; } .examples-loaded { text-align:left; } .transport-amount { margin-left:0; width:100%; justify-content:space-between; } }
-    @media(max-width:620px) { .shell { padding:20px 14px 35px; } .top { margin-bottom:37px; } .top-note { font-size:10px; } .intro { margin-bottom:24px; } .subtitle { font-size:13px; } .transport { padding:15px; gap:16px; } .transport-actions { width:100%; } .primary,.secondary { flex:1; justify-content:center; } .transport-amount { gap:10px; } .setting { gap:7px; } input[type="range"] { width:70px; } .time-readout { padding-left:10px; font-size:12px; } .overview { padding:17px 12px; } .timeline-labels { width:92px; } .timeline-label { font-size:10px; gap:5px; } .timeline { gap:8px; } .ruler { margin-left:100px; } .guide-controls { justify-content:flex-start; } .guide-info { width:100%; } .track { padding:16px; } .track-top { flex-wrap:wrap; } .track-buttons { margin-left:auto; } .piano-panel { padding:16px 11px; } .piano-intro { gap:10px; } .motor-tab { padding:9px 11px; max-width:150px; } .piano-help { font-size:10px; } .studio-controls { padding:15px; } .reference-panel,.midi-panel,.validation-panel { padding:16px 13px; } .validation-grid,.midi-mapping { grid-template-columns:1fr; } }
+    @media(max-width:620px) { .shell { padding:20px 14px 35px; } .top { margin-bottom:37px; } .top-note { font-size:10px; } .intro { margin-bottom:24px; } .subtitle { font-size:13px; } .transport { padding:15px; gap:16px; } .transport-actions { width:100%; } .primary,.secondary { flex:1; justify-content:center; } .transport-amount { gap:10px; } .setting { gap:7px; } input[type="range"] { width:70px; } .time-readout { padding-left:10px; font-size:12px; } .overview { padding:17px 12px; } .timeline-labels { width:92px; } .timeline-label { font-size:10px; gap:5px; } .timeline { gap:8px; } .ruler { margin-left:100px; } .guide-controls { justify-content:flex-start; } .track { padding:16px; } .track-top { flex-wrap:wrap; } .track-buttons { margin-left:auto; } .piano-panel { padding:16px 11px; } .piano-intro { gap:10px; } .motor-tab { padding:9px 11px; max-width:150px; } .piano-help { font-size:10px; } .studio-controls { padding:15px; } .reference-panel,.midi-panel,.validation-panel { padding:16px 13px; } .validation-grid,.midi-mapping { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -302,10 +302,9 @@
       <div class="guide-controls">
         <label class="guide-toggle"><input id="showTimeGuide" type="checkbox"> Show target-time bar</label>
         <label for="targetSeconds">At <input id="targetSeconds" type="number" min="0.05" max="600" step="0.05" value="2.50"> seconds</label>
-        <span class="guide-info" id="guideInfo" aria-live="polite"></span>
       </div>
       <div class="timeline"><div class="timeline-labels" id="timelineLabels"></div><div class="timeline-wrap" style="cursor:pointer" title="Click a lane to edit its notes"><canvas id="timeline" role="img" aria-label="Motor note lanes with a synchronized playback head; click a lane to open its note editor"></canvas></div></div>
-      <div class="ruler" id="timelineRuler"><span>0:00</span><span>25%</span><span>50%</span><span>75%</span><span>END</span></div>
+      <div class="ruler" id="timelineRuler" aria-hidden="true"></div>
     </section>
 
     <section class="panel reference-panel" aria-label="Reference audio track">
@@ -487,7 +486,6 @@
     const labels = document.getElementById('timelineLabels');
     const showTimeGuide = document.getElementById('showTimeGuide');
     const targetSeconds = document.getElementById('targetSeconds');
-    const guideInfo = document.getElementById('guideInfo');
     const timelineRuler = document.getElementById('timelineRuler');
     showTimeGuide.checked=savedGuide?Boolean(savedGuide.enabled):true;
     targetSeconds.value=String(Number.isFinite(savedGuide?.seconds)&&savedGuide.seconds>0?savedGuide.seconds:4);
@@ -711,12 +709,6 @@
       notify(`${requested} motor channels ready`);
     }
 
-    function updateGuideInfo(){
-      if(!showTimeGuide.checked){guideInfo.textContent='';return;}
-      const remaining=guideSeconds()-Math.max(...tracks.map(t=>t.parsed?.length||0));
-      guideInfo.textContent=`${guideSeconds().toFixed(2)}s target · ${Math.abs(remaining).toFixed(2)}s ${remaining>=0?'remaining':'over target'}`;
-    }
-
     function updateParsed(renderEditor=true) {
       let maxLength=0; let valid=0;
       tracks.forEach((t,i)=>{
@@ -739,7 +731,6 @@
       });
       length=maxLength;
       info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds`;
-      updateGuideInfo();
       const overlapping=tracks.some(t=>t.parsed&&liveDraft(t));
       playButton.disabled=valid!==tracks.length||overlapping;
       if(valid!==tracks.length)playButton.title='Correct the invalid RTTTL string first'; else if(overlapping)playButton.title='Fix the overlapping notes in the piano roll first'; else playButton.removeAttribute('title');
@@ -1313,12 +1304,19 @@
       const g=timeline.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
       const W=rect.width;g.clearRect(0,0,W,H);
       const total=Math.max(...tracks.map(t=>t.parsed?.length||0),showTimeGuide.checked?guideSeconds()*1.06:0,.1);
-      timelineRuler.innerHTML=Array.from({length:5},(_,i)=>`<span>${(total*i/4).toFixed(2)}s</span>`).join('');
+      // Grid lines are beats (faint) and bars (bright), from the global BPM and time signature
+      const beatSec=60/(Number(bpmInput.value)||125),bar=barBeats(),beatW=beatSec/total*W,barW=beatW*bar;
+      const bars=Math.ceil(total/(beatSec*bar)-1e-6),labelEvery=Math.max(1,Math.ceil(44/barW));
+      timelineRuler.innerHTML=Array.from({length:bars},(_,b)=>b%labelEvery||(b&&b*barW>W-36)?'':`<span style="left:${(b*barW/W*100).toFixed(3)}%" title="${(b*bar*beatSec).toFixed(2)} s">Bar ${b+1}</span>`).join('');
       for(let i=0;i<tracks.length;i++){
         const y=i*rowH;
         g.fillStyle=i%2===0?'#121d2d':'#172130';g.fillRect(0,y,W,rowH-3);
-        g.strokeStyle='#283547';g.lineWidth=1;
-        for(let j=0;j<=8;j++){const x=W*j/8;g.beginPath();g.moveTo(x,y);g.lineTo(x,y+rowH-3);g.stroke();}
+        g.lineWidth=1;
+        for(let beat=0;beat*beatW<=W;beat++){
+          const isBar=beat%bar===0;if(!isBar&&beatW<6)continue;
+          const x=Math.round(beat*beatW)+.5;
+          g.strokeStyle=isBar?'#5d7892':'#223044';g.beginPath();g.moveTo(x,y);g.lineTo(x,y+rowH-3);g.stroke();
+        }
         const notes=tracks[i].parsed?.notes||[];const pitches=notes.filter(n=>!n.rest).map(n=>n.midi);
         const min=Math.min(...pitches,48),max=Math.max(...pitches,84);
         for(const n of notes){if(n.rest)continue;
@@ -1896,7 +1894,7 @@
       });
       saveEdits();saveSettings();updateParsed();notify(`All valid channels set to ${bpm} BPM`);
     });
-    timeSignatureInput.addEventListener('change',()=>{saveSettings();renderPiano();});
+    timeSignatureInput.addEventListener('change',()=>{saveSettings();renderPiano();drawTimeline();});
     for(const input of [metronomeInput,soundModeInput,rippleInput,stereoWidthInput]){
       input.addEventListener('change',()=>{saveSettings();updateStereo();});
     }
@@ -1986,7 +1984,7 @@
     document.getElementById('pianoPlay').addEventListener('click',pianoPlayPause);
     document.getElementById('pianoRewind').addEventListener('click',()=>seekPiano(0));
     pianoBeats.addEventListener('click',e=>{const bpm=tracks[editMotor]?.parsed?.bpm;if(!bpm)return;const rect=pianoBeats.getBoundingClientRect();seekPiano((e.clientX-rect.left)/beatPx*60/bpm);});
-    function updateTimeGuide(){saveGuide();updateGuideInfo();drawTimeline();renderPiano();}
+    function updateTimeGuide(){saveGuide();drawTimeline();renderPiano();}
     showTimeGuide.addEventListener('change',updateTimeGuide);
     targetSeconds.addEventListener('input',updateTimeGuide);
     targetSeconds.addEventListener('blur',()=>{targetSeconds.value=guideSeconds().toFixed(2);updateTimeGuide();});
