@@ -295,6 +295,7 @@
       </div>
       <div class="studio-group">
         <span class="panel-title">Sound</span>
+        <label title="Plays the beeps each ESC makes after its startup melody when it detects the signal and arms. Playback only: not part of the RTTTL">Arming beeps <select id="armBeeps" aria-label="ESC firmware whose arming beeps play after each melody"><option value="off">Off</option><option value="bluejay">Bluejay</option><option value="blheli32">BLHeli_32</option><option value="am32">AM32</option></select></label>
         <label>Timbre <select id="soundMode" aria-label="Synthesizer waveform"><option value="square">Square</option><option value="sine">Sine</option><option value="motor">Motor-like</option></select></label>
         <label>Stereo <input id="stereoWidth" type="range" min="0" max="100" step="5" value="65" aria-label="Stereo separation"></label>
       </div>
@@ -518,6 +519,20 @@
     const timeSignatureInput=document.getElementById('timeSignature');
     const metronomeInput=document.getElementById('metronome');
     const soundModeInput=document.getElementById('soundMode');
+    const armBeepsInput=document.getElementById('armBeeps');
+    // What each firmware plays after its startup melody: a beep when it detects the throttle signal and one when it arms.
+    // Playback only, never written to the RTTTL. Times are seconds after the melody ends.
+    // Bluejay (Bluejay.asm / Fx.asm): wait100ms, DShot detection (~100-200 ms), beep_f1_short, ~10 x 32 ms of zero throttle, beep_f2_short;
+    //   pitches from its pulse timing, 1e6 / (24.72 * Temp3 + 399.3) Hz, the same formula as melody notes.
+    // AM32 (main.c / sounds.c): arms after 1 s of zero throttle, then playInputTune: 24 kHz / (prescaler + 1) for 80, 70, 40, 100 ms each.
+    // BLHeli_32 is closed source: its manual shows a long beep on the lowest of its four tones, then one on the highest; pitches and times are estimates.
+    const ARM_BEEPS={
+      bluejay:{name:'Bluejay',beeps:[{at:.25,hz:492.4,dur:.061},{at:.491,hz:661.5,dur:.067}]},
+      blheli32:{name:'BLHeli_32',beeps:[{at:.3,hz:492,dur:.4},{at:1,hz:983,dur:.4}]},
+      am32:{name:'AM32',beeps:[{at:1.1,hz:296.3,dur:.1},{at:1.2,hz:338,dur:.1},{at:1.3,hz:585.4,dur:.1}]}
+    };
+    function armBeeps(){return ARM_BEEPS[armBeepsInput.value]?.beeps||[];}
+    function armBeepsEnd(){return Math.max(0,...armBeeps().map(b=>b.at+b.dur));}
     const stereoWidthInput=document.getElementById('stereoWidth');
     const rippleInput=document.getElementById('rippleEdit');
     const referenceWave=document.getElementById('referenceWave');
@@ -544,13 +559,14 @@
     let refPlayhead=0,scrubSource=null,scrubStartedAt=0,scrubFrom=0,scrubRaf=0; // whole-file play/pause transport
     let trimHistory=[],trimOrigin=0; // earlier buffers for Undo trim; trimOrigin = start of the current audio within the original file
     let pitchRaw=null,pitchSelection=null,suggestionNotes=[],pitchBusy=false,pitchScriptPromise=null;
-    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',endPauseCount:1,endPauseNote:1,...savedSettings};
+    const settings={bpm:125,signature:'4/4',metronome:false,mode:'motor',stereo:65,ripple:false,snap:.125,endPause:'bar',endPauseCount:1,endPauseNote:1,armBeeps:'off',...savedSettings};
     if(!['4/4','3/4','6/8','2/4'].includes(settings.signature))settings.signature='4/4';
     if(settings.pianoZoom){beatPx=clamp(Number(settings.pianoZoom.x)||92,...PIANO_BEAT_PX);rowPx=clamp(Math.round(Number(settings.pianoZoom.y))||20,...PIANO_ROW_PX);}
     if(!['square','sine','motor'].includes(settings.mode))settings.mode='square';
     bpmInput.value=String(settings.bpm);timeSignatureInput.value=settings.signature;
     motorCountInput.value=String(tracks.length);
     metronomeInput.checked=Boolean(settings.metronome);soundModeInput.value=settings.mode;
+    armBeepsInput.value=ARM_BEEPS[settings.armBeeps]?settings.armBeeps:'off';
     stereoWidthInput.value=String(settings.stereo);rippleInput.checked=Boolean(settings.ripple);beatSnap.value=String(settings.snap);
     keyRootInput.value=/^(\d|1[01])$/.test(String(settings.keyRoot))?String(settings.keyRoot):'';keyScaleInput.value=scaleSteps[settings.keyScale]?settings.keyScale:'major';
     endPauseInput.value=END_PAUSE_MODES.includes(settings.endPause)?settings.endPause:'bar';
@@ -559,7 +575,7 @@
     document.getElementById('endPauseCustom').hidden=endPauseInput.value!=='custom';
     let editMotor = 0, selectedNote = 0, pianoSelection = new Set([0]), pianoClipboard = null, pianoMinPitch = 72, pianoMaxPitch = 95, dragState = null;
     const editHistory = [],redoHistory=[];
-    let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
+    let ctx = null, compressor = null, masterGain = null, channelGains = [], sources = [], startTime = null, length = 0, playEnd = 0, audition = null, speedAtStart = 1, raf = 0, toastTimeout = 0;
 
     // Bluejay stores a melody in 62 slots (128 bytes). As in bluejay-rtttl-parse, a note takes one slot per
     // 255 wave cycles at its pitch and a rest one slot per 255 ms, so long notes and rests use several.
@@ -638,7 +654,7 @@
     function saveEdits() { try { localStorage.setItem(storageKey, JSON.stringify(tracks.map(t=>t.value))); } catch (_) {} }
     function saveNames() { try { localStorage.setItem(namesKey, JSON.stringify(tracks.map(t=>t.name))); } catch (_) {} }
     function saveSettings(){
-      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value,endPauseCount:endPauseCount(endPauseCountInput.value),endPauseNote:Number(endPauseNoteInput.value)});
+      Object.assign(settings,{bpm:Number(bpmInput.value),signature:timeSignatureInput.value,metronome:metronomeInput.checked,mode:soundModeInput.value,armBeeps:armBeepsInput.value,stereo:Number(stereoWidthInput.value),ripple:rippleInput.checked,snap:Number(beatSnap.value),keyRoot:keyRootInput.value,keyScale:keyScaleInput.value,endPause:endPauseInput.value,endPauseCount:endPauseCount(endPauseCountInput.value),endPauseNote:Number(endPauseNoteInput.value)});
       try{localStorage.setItem(settingsKey,JSON.stringify(settings));}catch(_){}
     }
     function barBeats(){const [n,d]=timeSignatureInput.value.split('/').map(Number);return n*4/d;}
@@ -738,7 +754,7 @@
         }
       });
       length=maxLength;
-      info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds`;
+      info.textContent=`${valid} valid channels · ${maxLength.toFixed(1)} seconds${ARM_BEEPS[armBeepsInput.value]?` · then ${ARM_BEEPS[armBeepsInput.value].name} arming beeps (playback only)`:''}`;
       const overlapping=tracks.some(t=>t.parsed&&liveDraft(t));
       playButton.disabled=valid!==tracks.length||overlapping;
       if(valid!==tracks.length)playButton.title='Correct the invalid RTTTL string first'; else if(overlapping)playButton.title='Fix the overlapping notes in the piano roll first'; else playButton.removeAttribute('title');
@@ -868,7 +884,7 @@
       pauseScrub();
       cancelAnimationFrame(raf); raf=0;
       if(ctx)for(const source of sources){try{source.stop(ctx.currentTime);}catch(_){} }
-      sources=[]; startTime=null; audition=null;
+      sources=[]; startTime=null; audition=null; playEnd=0;
       refSource=null;referencePreview=false;
       playButton.innerHTML='<span aria-hidden="true">▶</span><span>Play all motors</span>';
       stopButton.disabled=true;
@@ -890,29 +906,34 @@
       scheduleMetronome();
       for(const i of activeTracks){
         const voice=tracks[i].parsed;
-        for(const note of voice.notes){
-          if(note.rest)continue;
-          let start=startTime+note.start/speedAtStart;
-          let dur=note.seconds/speedAtStart;
-          if(start+dur<=scheduleFloor+.01)continue;
-          if(start<scheduleFloor){dur-=scheduleFloor-start;start=scheduleFloor;}
-          const oscillator=ctx.createOscillator();
-          if(soundModeInput.value==='motor')oscillator.setPeriodicWave(motorWave);
-          else oscillator.type=soundModeInput.value==='sine'?'sine':'square';
-          oscillator.frequency.value=note.hz;
-          const noteGain=ctx.createGain(); noteGain.gain.setValueAtTime(.0001,start);
-          const peak=.16;
-          noteGain.gain.linearRampToValueAtTime(peak,start+Math.min(.012,dur*.12));
-          noteGain.gain.setValueAtTime(peak,start+Math.max(.015,dur-.028));
-          noteGain.gain.exponentialRampToValueAtTime(.0001,start+dur-.003);
-          oscillator.connect(noteGain); noteGain.connect(channelGains[i]);
-          oscillator.start(start); oscillator.stop(start+dur+.005);
-          sources.push(oscillator);
-        }
+        for(const note of voice.notes)if(!note.rest)scheduleTone(i,note.start,note.seconds,note.hz);
+        // Each ESC beeps after its own melody (and End pause) finishes
+        for(const beep of armBeeps())scheduleTone(i,voice.length+beep.at,beep.dur,beep.hz);
       }
+      playEnd=Math.max(...activeTracks.map(i=>tracks[i].parsed.length+armBeepsEnd()));
       stopButton.disabled=false;
       playButton.innerHTML='<span aria-hidden="true">↻</span><span>Restart all</span>';
       tick();
+    }
+
+    // at and seconds are song time; playback speed and a part-way start are applied here
+    function scheduleTone(i,at,seconds,hz){
+      let start=startTime+at/speedAtStart;
+      let dur=seconds/speedAtStart;
+      if(start+dur<=scheduleFloor+.01)return;
+      if(start<scheduleFloor){dur-=scheduleFloor-start;start=scheduleFloor;}
+      const oscillator=ctx.createOscillator();
+      if(soundModeInput.value==='motor')oscillator.setPeriodicWave(motorWave);
+      else oscillator.type=soundModeInput.value==='sine'?'sine':'square';
+      oscillator.frequency.value=hz;
+      const noteGain=ctx.createGain(); noteGain.gain.setValueAtTime(.0001,start);
+      const peak=.16;
+      noteGain.gain.linearRampToValueAtTime(peak,start+Math.min(.012,dur*.12));
+      noteGain.gain.setValueAtTime(peak,start+Math.max(.015,dur-.028));
+      noteGain.gain.exponentialRampToValueAtTime(.0001,start+dur-.003);
+      oscillator.connect(noteGain); noteGain.connect(channelGains[i]);
+      oscillator.start(start); oscillator.stop(start+dur+.005);
+      sources.push(oscillator);
     }
 
     async function playReferenceOnly(){
@@ -955,7 +976,7 @@
     }
     function elapsed() {return startTime===null || !ctx ? 0 : Math.max(0,(ctx.currentTime-startTime)*speedAtStart);}
     function renderClock(t){clock.innerHTML=`${formatTime(t)} <span>/ ${formatTime(length)}</span>`;}
-    function tick(){const e=elapsed();renderClock(Math.min(e,length));drawTimeline();drawReferenceWave();updatePianoTransport();if(e>length+.08){pianoPos=0;halt();return;}raf=requestAnimationFrame(tick);}
+    function tick(){const e=elapsed();renderClock(Math.min(e,length));drawTimeline();drawReferenceWave();updatePianoTransport();if(e>Math.max(length,playEnd)+.08){pianoPos=0;halt();return;}raf=requestAnimationFrame(tick);}
 
     function syncReferenceInputs(){
       const previousStart=refStart,previousDuration=refDuration;
@@ -1311,7 +1332,7 @@
       if(timeline.width!==w||timeline.height!==h){timeline.width=w;timeline.height=h;}
       const g=timeline.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
       const W=rect.width;g.clearRect(0,0,W,H);
-      const total=Math.max(...tracks.map(t=>t.parsed?.length||0),showTimeGuide.checked?guideSeconds()*1.06:0,.1);
+      const beeps=armBeeps(),total=Math.max(...tracks.map(t=>t.parsed?t.parsed.length+(beeps.length?armBeepsEnd()+.1:0):0),showTimeGuide.checked?guideSeconds()*1.06:0,.1);
       // Grid lines are beats (faint) and bars (bright), from the global BPM and time signature
       const beatSec=60/(Number(bpmInput.value)||125),bar=barBeats(),beatW=beatSec/total*W,barW=beatW*bar;
       const bars=Math.ceil(total/(beatSec*bar)-1e-6),labelEvery=Math.max(1,Math.ceil(44/barW));
@@ -1334,6 +1355,13 @@
           g.globalAlpha=currentLevel(i)===0 && startTime!==null?.23:1;
           g.fillStyle=tracks[i].color;g.beginPath();g.roundRect(x+1,boxY,width,8,2);g.fill();g.globalAlpha=1;
         }
+        // Arming beeps: outlined, as they're only played, not part of the melody
+        if(tracks[i].parsed)for(const b of beeps){
+          const x=((tracks[i].parsed.length+b.at)/total)*W,width=Math.max((b.dur/total)*W-2,3);
+          const pitch=clamp((69+12*Math.log2(b.hz/440)-min)/Math.max(1,max-min),0,1);
+          g.save();g.strokeStyle=tracks[i].color;g.lineWidth=1.4;g.setLineDash([3,2]);g.globalAlpha=.85;
+          g.beginPath();g.roundRect(x+1.5,y+31.5-pitch*20,width,7,2);g.stroke();g.restore();
+        }
       }
       if(showTimeGuide.checked){
         const x=(guideSeconds()/total)*W;
@@ -1342,7 +1370,7 @@
         g.font='bold 11px system-ui';const tw=g.measureText(label).width+12;
         const lx=Math.max(2,Math.min(x+5,W-tw-2));g.fillStyle='#ffd36b';g.fillRect(lx,2,tw,17);g.fillStyle='#253041';g.fillText(label,lx+6,14);
       }
-      if(startTime!==null){const x=(Math.min(elapsed(),length)/total)*W;g.strokeStyle='#fafafa';g.lineWidth=1.6;g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(x,4,3.4,0,Math.PI*2);g.fill();}
+      if(startTime!==null){const x=(Math.min(elapsed(),Math.max(length,playEnd))/total)*W;g.strokeStyle='#fafafa';g.lineWidth=1.6;g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(x,4,3.4,0,Math.PI*2);g.fill();}
     }
 
     function midiToRtttl(voice,division,bpm,motor){
@@ -1922,6 +1950,7 @@
       input.addEventListener('change',()=>{saveSettings();updateStereo();});
     }
     beatSnap.addEventListener('change',()=>{saveSettings();});
+    armBeepsInput.addEventListener('change',()=>{saveSettings();updateParsed(false);});
     for(const input of [keyRootInput,keyScaleInput])input.addEventListener('change',()=>{saveSettings();renderPiano();});
     let pianoActive=false;
     document.addEventListener('pointerdown',e=>{pianoActive=Boolean(e.target.closest('#pianoPanel'));},true);
@@ -2045,6 +2074,7 @@
           if(Number.isFinite(s.bpm)&&s.bpm>=20&&s.bpm<=900)bpmInput.value=String(s.bpm);
           if(['4/4','3/4','6/8','2/4'].includes(s.signature))timeSignatureInput.value=s.signature;
           if(['square','sine','motor'].includes(s.mode))soundModeInput.value=s.mode;
+          if(ARM_BEEPS[s.armBeeps]||s.armBeeps==='off')armBeepsInput.value=s.armBeeps;
           if(Number.isFinite(s.stereo))stereoWidthInput.value=String(clamp(s.stereo,0,100));
           if([1,.5,.25,.125,.0625].includes(s.snap))beatSnap.value=String(s.snap);
           if(typeof s.keyRoot==='string'&&/^(|\d|1[01])$/.test(s.keyRoot))keyRootInput.value=s.keyRoot;
