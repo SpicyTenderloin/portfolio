@@ -14,11 +14,15 @@ skills:
 
 ## Project overview
 
-Bluejay ESC firmware can play a startup tune through each motor, and because every ESC takes its own melody, a quad's four motors can play four separate parts at once. The format is RTTTL (the old Nokia ringtone language), each ESC is monophonic, and each melody is capped at about 62 notes and rests. The existing tools preview one RTTTL string at a time, so there was no way to hear a four-motor arrangement before flashing it.
+Bluejay ESC firmware can play a startup melody through each motor. Because every ESC has its own melody, a quad can play four independent parts simultaneously. These melodies use RTTTL, the old Nokia ringtone format, with each ESC limited to a monophonic sequence of roughly 62 notes and rests.
 
-RTTTL Quad Lab fills that gap: a self-contained studio that plays 4 to 12 motor channels in sync, with a piano-roll editor, a one-click library of Bluejay's example songs, MIDI import and export, reference-audio alignment, in-browser pitch detection, a preview of the ESCs' arming beeps, and a Bluejay compatibility check. It started as a way to arrange the "Owner of a Lonely Heart" hook for my quad and grew into a general tool. It is plain HTML and JavaScript with no server, so the app below is the real thing, running in your browser.
+Existing tools can load and preview RTTTL melodies, but only one ESC at a time. There was also no intuitive way to compose, arrange, and preview a complete multi-motor tune before flashing it to the quad, making custom arrangements difficult to create.
 
-I set the requirements and directed the design through iterative testing and review, with ChatGPT as the coding assistant for the first version and Claude Code since development moved into this site's repository.
+RTTTL Quad Lab fills that gap. It is a self-contained browser-based studio for arranging 4 to 12 motor channels in sync, with a piano-roll editor, Bluejay example-song library, MIDI import and export, reference-audio alignment, in-browser pitch detection, ESC arming-beep preview, and Bluejay compatibility checking.
+
+The project began as a way to arrange the hook from “Owner of a Lonely Heart” for my quad and grew into a general-purpose RTTTL composition tool. It is built entirely in HTML and JavaScript with no server required, so the app below is the complete application running directly in the browser.
+
+I defined the requirements and directed the design through rapid iterative testing and review with Claude, developing the tool over a couple of days.
 
 <div class="app-embed">
   <iframe src="{{ "/apps/rtttl-quad-lab/" | relative_url }}" title="RTTTL Quad Lab, live app" allow="fullscreen" allowfullscreen></iframe>
