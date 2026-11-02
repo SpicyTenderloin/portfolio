@@ -70,10 +70,6 @@ The preview can then play each firmware's arming beeps after the song, for playb
   <figcaption>Each motor's RTTTL string, kept in sync with the piano roll, and the preflight check for every ESC.</figcaption>
 </figure>
 
-## Faking a slide on a fixed-tone ESC
-
-A guitar riff often slides between notes, but Bluejay can only play fixed tones. It does play them back to back with no gap, though, so a fast run of short notes one semitone apart sounds close to a slide. The Slide tool builds that run in the space before the next note, using 1/32 or 1/64 steps. When there is not room for every semitone it spreads fewer steps evenly across the interval (A3 to B4 in three quarters of a beat becomes a whole-tone run), and the button shows the slot cost before anything changes. 1/64 steps sound smoother, but ESC Configurator drops 64th notes when it reads a melody back off an ESC, so the preflight check flags them.
-
 ## From a recording to RTTTL
 
 To speed up transcription, the app can load an MP3 or WAV, select a clip of up to 20 seconds on its waveform, and run Spotify's open-source Basic Pitch model on it, entirely in the browser. Detected notes appear as dashed suggestions over the piano roll rather than edits, so existing work is never overwritten until the suggestions are explicitly applied to a chosen motor (with undo). Sensitivity, pitch range and minimum note length re-filter the stored result without re-running the model. The model weights are embedded in a script file so the app also works when opened offline from a local file. Detection is most reliable on an isolated voice or instrument; a full mix produces extra notes from the accompaniment, so it is a starting point for manual editing, not a finished transcription. To make that workable on a whole song, the waveform view zooms down to individual cycles, the selection edges can be dragged, and the audio can be trimmed to the selection (with undo) to whittle a track down to the section being arranged.
