@@ -74,7 +74,3 @@ The preview can then play each firmware's arming beeps after the song, for playb
 ## From a recording to RTTTL
 
 To speed up transcription, the app can load an MP3 or WAV, select a clip of up to 20 seconds on its waveform, and run Spotify's open-source Basic Pitch model on it, entirely in the browser. Detected notes appear as dashed suggestions over the piano roll rather than edits, so existing work is never overwritten until the suggestions are explicitly applied to a chosen motor (with undo). Sensitivity, pitch range and minimum note length re-filter the stored result without re-running the model. The model weights are embedded in a script file so the app also works when opened offline from a local file. Detection is most reliable on an isolated voice or instrument; a full mix produces extra notes from the accompaniment, so it is a starting point for manual editing, not a finished transcription. To make that workable on a whole song, the waveform view zooms down to individual cycles, the selection edges can be dragged, and the audio can be trimmed to the selection (with undo) to whittle a track down to the section being arranged.
-
-## Next phase
-
-Flash the arrangement to the quad's ESCs and compare the real motors against the browser preview, then keep developing the app here, starting with splitting the single HTML file into separate modules for the parser, audio engine and editor.
