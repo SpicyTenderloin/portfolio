@@ -1,3 +1,11 @@
+- title: "RF Engineering Capstone Researcher"
+  organization: "RFDesign Pty Ltd, Brisbane"
+  logo: "/assets/img/logos/rfdesign.png"
+  start: "2026"
+  end: "Present"
+  bullets:
+    - "Industry-facilitated engineering research project with RFDesign, developing and validating an RF power amplifier for the RFD X-series telemetry modem platform."
+
 - title: "Undergraduate Avionics Engineer"
   organization: "Praxis Aerospace"
   logo: "/assets/img/logos/praxis-aerospace.png"
