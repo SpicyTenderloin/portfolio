@@ -5,6 +5,8 @@
   end: "Present"
   bullets:
     - "Industry-facilitated engineering research project with RFDesign, developing and validating an RF power amplifier for the RFD X-series telemetry modem platform."
+    - "Researching how to choose an amplifier's output matching network so it stays efficient across its whole operating band and power range, rather than at a single design point."
+    - "Work spans requirements and commercial benchmark testing, transistor selection, nonlinear load-pull simulation and matching-network design, leading to a prototype build and bench validation in 2027."
 
 - title: "Undergraduate Avionics Engineer"
   organization: "Praxis Aerospace"
