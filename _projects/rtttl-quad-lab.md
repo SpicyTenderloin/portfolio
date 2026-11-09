@@ -2,7 +2,7 @@
 title: RTTTL Quad Lab
 description: A browser-based multi-motor melody studio for composing and previewing Bluejay ESC startup tunes. Runs live on its project page.
 category: personal
-status: "In progress"
+status: "Completed"
 thumbnail: /assets/img/rtttl-quad-lab/app-overview.png
 skills:
   - JavaScript
@@ -10,6 +10,7 @@ skills:
   - MIDI
   - ESC Configuration
   - FPV
+  - AI-Assisted Workflow
 ---
 
 ## Project overview
